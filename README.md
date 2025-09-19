@@ -24,10 +24,8 @@ The plugin is provided by -  [laa-spring-boot-common](https://github.com/ministr
 more information regarding setup and usage.
 
 ### Project Structure
-Includes the following subprojects:
-
-- `laa-data-claims-reporting-api` - example OpenAPI specification used for generating API stub interfaces and documentation.
-- `laa-data-claims-reporting-service` - example REST API service with CRUD operations interfacing a JPA repository with an in-memory database.
+Includes the following subproject:
+- `laa-data-claims-reporting-service` - This service creates csv reports using data from the claims report database
 
 ## Build And Run Application
 
@@ -42,15 +40,6 @@ Includes the following subprojects:
 
 ### Run application via Docker
 `docker compose up`
-
-## Application Endpoints
-
-### API Documentation
-
-#### Swagger UI
-- http://localhost:8080/swagger-ui/index.html
-#### API docs (JSON)
-- http://localhost:8080/v3/api-docs
 
 ### Actuator Endpoints
 The following actuator endpoints have been configured:
