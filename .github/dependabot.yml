@@ -5,11 +5,12 @@
 
 version: 2
 
-spring-boot-common-github-packages:
-  type: maven-repository
-  url: https://maven.pkg.github.com/ministryofjustice/laa-spring-boot-common
-  username: ${{ secrets.TOKEN_USER }}
-  password: ${{ secrets.REPO_TOKEN }}
+registries:
+  spring-boot-common-github-packages:
+    type: maven-repository
+    url: https://maven.pkg.github.com/ministryofjustice/laa-spring-boot-common
+    username: ${{ secrets.TOKEN_USER }}
+    password: ${{ secrets.REPO_TOKEN }}
 
 updates:
   - package-ecosystem: "gradle"
