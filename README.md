@@ -24,92 +24,8 @@ The plugin is provided by -  [laa-spring-boot-common](https://github.com/ministr
 more information regarding setup and usage.
 
 ### Project Structure
-Includes the following subprojects:
-
-- `spring-boot-microservice-api` - example OpenAPI specification used for generating API stub interfaces and documentation.
-- `spring-boot-microservice-service` - example REST API service with CRUD operations interfacing a JPA repository with an in-memory database.
-
-## Setup Instructions
-Once you've created your repository using this template, perform the following steps:
-
-### Update README
-Edit this `README.md` file to document your project accurately. Take the time to create a clear, engaging, and informative`README.md` file. Include information such as what your project does, how to install and run it, how to contribute, and any other pertinent details.
-
-### Update Repository Description
-Change the description that appears at the top of your repository's main page to provide an overview of your project.
-
-### Grant Team Permissions
-Assign permissions to the appropriate Ministry of Justice teams. Ensure at least one team is granted Admin permissions. Whenever possible, assign permissions to teams rather than individual users.
-
-### Add Branch Protection rules
-Ensure branch protection is set up on the `main` branch.
-
-### Update CODEOWNERS
-(Optional) Modify the `CODEOWNERS` file to specify the teams or users authorized to approve pull requests.
-
-### Configure Dependabot
-Change all `uk.gov.laa.springboot.microservice.*` package references to `uk.gov.laa.{application-package-name}.*`.
-
-Uncomment the `registries` section and follow the instructions in the comments.
-
-### Add Repository To Snyk
-Ensure that your repository has been added to the [Legal Aid Agency Snyk](https://app.snyk.io/org/legal-aid-agency) organisation.
-
-Also add `SNYK_TOKEN` as a repository secret.
-
-### Update Project Files
-<details>
-
-<summary>Click here for more details on which files to update.</summary>
-
-#### 1. Rename subproject directories
-Ensure to rename `spring-boot-microservice-api` and `spring-boot-microservice-service` directories to your application name:
-`{application-name}-api` and `{application-name}-service`.
-
-Update `settings.gradle` as follows:
-```
-rootProject.name = '{repository-name}'
-
-include '{application-name}-api'
-include '{application-name}-service'
-```
-
-Update `build.gradle` in the project root directory as follows:
-```
-subprojects {
-    group = 'uk.gov.justice.laa.{application-name}'
-}
-```
-
-#### 2. Update api subproject
-Update the following files found in the `{application-name}-api` directory:
-
-- `open-api-specification.yml` - replace the contents of this file with the API specification for your application.
-- `build.gradle` - replace all references to `spring-boot-microservice-api` with `{service-name}-api`.
-
-#### 3. Update service subproject
-
-Rename the package name/directory - `uk.gov.justice.laa.springboot.microservice` to `uk.gov.justice.laa.{application-package-name}`
-under `src/integrationTest/java`, `src/main/java`, `src/test/java`.
-
-Update the following properties in `src/main/resources/application.yml` with your application details:
-`spring.application.name`, `info.app.name`, `info.app.description`
-
-#### 4. Update Dockerfile
-Rename the `laa-spring-boot-microservice` directory and jar file name to  `laa-{application-name}`.
-
-#### 5. Update GitHub workflow
-The following workflows have been provided:
-
-* Build and test PR - `build-test-pr.yml`
-* Build and deploy after PR merged - `pr-merge-main.yml` 
-
-In the above workflow files, change all occurrences of the `spring-boot-microservice-service/build/` build path to `{application-name}-service/build/`.
-
-</details>
-
-### Database scripts
-The *.sql scripts in  `src/main/resources` have been included to provide an example database for demonstration purposes only and should be removed for your application.
+Includes the following subproject:
+- `laa-data-claims-reporting-service` - This service creates csv reports using data from the claims report database
 
 ## Build And Run Application
 
@@ -124,15 +40,6 @@ The *.sql scripts in  `src/main/resources` have been included to provide an exam
 
 ### Run application via Docker
 `docker compose up`
-
-## Application Endpoints
-
-### API Documentation
-
-#### Swagger UI
-- http://localhost:8080/swagger-ui/index.html
-#### API docs (JSON)
-- http://localhost:8080/v3/api-docs
 
 ### Actuator Endpoints
 The following actuator endpoints have been configured:
