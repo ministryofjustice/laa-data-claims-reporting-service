@@ -1,0 +1,20 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: {{ include "data-claims-reporting.fullname" . }}
+  namespace: {{ .Values.namespace }}
+spec:
+  schedule: "*/1 * * * *" # Runs every 1 mins
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          containers:
+            - name: {{ .Chart.Name }}
+              image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+              imagePullPolicy: IfNotPresent
+              command: ["java", "-jar", "/opt/laa-spring-boot-microservice/app.jar"]
+              #              args: ["java -cp /laa-data-claims-reporting-service /src/main/java/uk/gov/justice/laa/dstew/claimsreports/SpringBootMicroserviceApplication.java"]  # Adjust for your runtime
+              resources:
+                  {{ toYaml .Values.resources | nindent 14 }}
+          restartPolicy: OnFailure

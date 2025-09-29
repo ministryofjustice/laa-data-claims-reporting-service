@@ -15,6 +15,7 @@ public class SpringBootMicroserviceApplication {
    * @param args the application arguments.
    */
   public static void main(String[] args) {
-    SpringApplication.run(SpringBootMicroserviceApplication.class, args);
+    //    SpringApplication.run(SpringBootMicroserviceApplication.class, args);
+    System.out.println("Hello world");
   }
 }
