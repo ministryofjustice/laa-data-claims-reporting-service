@@ -4,7 +4,7 @@ metadata:
   name: {{ include "data-claims-reporting.fullname" . }}
   namespace: {{ .Values.namespace }}
 spec:
-  schedule: "*/1 * * * *" # Runs every 1 mins
+  schedule: "*/5 * * * *" # Runs every 5 mins
   jobTemplate:
     spec:
       template:

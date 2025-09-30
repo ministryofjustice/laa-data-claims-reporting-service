@@ -1,11 +1,9 @@
-# Default values for my-chart.
-# This is a YAML-formatted file.
-# Declare variables to be passed into your templates.
+# Default values for uat helm chart.
 
 replicaCount: 1
 
 image:
-  #  Values will be overwritten byCloud Platform config
+  #  Values will be overwritten by Cloud Platform config
   repository: null
   tag: null
 

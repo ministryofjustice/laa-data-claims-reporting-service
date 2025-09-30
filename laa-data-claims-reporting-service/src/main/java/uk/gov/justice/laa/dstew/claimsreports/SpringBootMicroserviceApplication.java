@@ -16,6 +16,8 @@ public class SpringBootMicroserviceApplication {
    */
   public static void main(String[] args) {
     //    SpringApplication.run(SpringBootMicroserviceApplication.class, args);
+    //    Hello world print out is to allow confirmation of successful deployment in uat.
+    //    This will be removed and replaced with the running application in subsequent tickets.
     System.out.println("Hello world");
   }
 }
