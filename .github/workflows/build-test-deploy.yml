@@ -6,6 +6,7 @@ on:
   push:
     branches:
       - main
+      - DSTEW-533-deployment-workflow
 
 # Only allow one run of this workflow, per branch, at a time
 concurrency:
