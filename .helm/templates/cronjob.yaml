@@ -14,7 +14,6 @@ spec:
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               imagePullPolicy: IfNotPresent
               command: ["java", "-jar", "/opt/laa-spring-boot-microservice/app.jar"]
-              #              args: ["java -cp /laa-data-claims-reporting-service /src/main/java/uk/gov/justice/laa/dstew/claimsreports/SpringBootMicroserviceApplication.java"]  # Adjust for your runtime
               resources:
                   {{ toYaml .Values.resources | nindent 14 }}
           restartPolicy: OnFailure
