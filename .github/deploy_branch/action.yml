@@ -1,0 +1,89 @@
+name: "Deploy branch"
+description: 'Deploy docker image of branch to namespace'
+inputs:
+  ecr-repository:
+    description: "ECR repository"
+    required: true
+  ecr-region:
+    description: "ECR region"
+    required: true
+  ecr-role-to-assume:
+    description: "ECR role to assume"
+    required: true
+  kube-cert:
+    description: "Kubernetes cluster authentication certificate"
+    required: true
+  kube-token:
+    description: "Kubernetes cluster authentication token"
+    required: true
+  kube-cluster:
+    description: "Kubernetes cluster name"
+    required: true
+  kube-namespace:
+    description: "Kubernetes cluster namespace"
+    required: true
+  app-environment:
+    description: "environment to which the app is being deployed [uat, staging, production]"
+    required: true
+
+outputs:
+  branch-name:
+    description: "Extracted branch name"
+    value: ${{ steps.extract_release_name.outputs.branch-name }}
+  release-name:
+    description: "Extracted release name"
+    value: ${{ steps.extract_release_name.outputs.release-name }}
+
+runs:
+  using: "composite"
+  steps:
+
+    - name: Extract release name
+      id: extract_release_name
+      uses: ./.github/actions/get_release_name
+
+    - name: Authenticate to the cluster
+      uses: ministryofjustice/laa-reusable-github-actions/.github/actions/authenticate_to_cluster@2aa2676c3cd9876ec7037ee8b3d729d0306cb7c6
+      with:
+        kube-cert: ${{ inputs.kube-cert }}
+        kube-token: ${{ inputs.kube-token }}
+        kube-cluster: ${{ inputs.kube-cluster }}
+        kube-namespace: ${{ inputs.kube-namespace }}
+
+    - name: Assume role in Cloud Platform
+      uses: aws-actions/configure-aws-credentials@v4
+      with:
+        role-to-assume: ${{ inputs.ecr-role-to-assume }}
+        aws-region: ${{ inputs.ecr-region }}
+
+    - name: Docker login to ECR
+      id: login-ecr
+      uses: aws-actions/amazon-ecr-login@v2
+      with:
+        mask-password: 'true'
+
+    - name: Helm deployment of branch
+      shell: bash
+      env:
+        ECR_REPOSITORY: ${{ inputs.ecr-repository }}
+        ECR_REGION: ${{ inputs.ecr-region }}
+        ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
+        GIT_SHA: ${{ github.sha }}
+        KUBE_NAMESPACE: ${{ inputs.kube-namespace }}
+        VALUES_FILE: .helm/values/${{ inputs.app-environment }}.yaml
+        RELEASE_NAME: ${{ steps.extract_release_name.outputs.release-name }}
+      run: |
+        ingress_name="$RELEASE_NAME-data-claims-api"
+        release_host="$RELEASE_NAME-$KUBE_NAMESPACE.cloud-platform.service.justice.gov.uk"
+        identifier="$ingress_name-$KUBE_NAMESPACE-green"
+        LAA_IPS=$(curl -s https://raw.githubusercontent.com/ministryofjustice/laa-ip-allowlist/main/cidrs.txt | tr -d ' ' | tr '\n' ',' | sed 's/,/\\,/g' | sed 's/\\,$//')
+
+        helm upgrade my-app .helm --values .helm/values/uat.yaml  \
+          --namespace ${KUBE_NAMESPACE} \
+          --set image.repository="${ECR_REGISTRY}/${ECR_REPOSITORY}" \
+          --set image.tag="${GIT_SHA}" \
+          --set spring.profile="$SPRING_PROFILE" \
+          --set aws.region="${ECR_REGION}" \
+          --values ${VALUES_FILE} \
+          --install \
+          --wait --timeout=10m
