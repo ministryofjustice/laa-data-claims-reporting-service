@@ -67,6 +67,12 @@ jobs:
           name: service-jar
           path: laa-data-claims-reporting-service/build/libs
 
+      - name: Check download
+        run: |
+          cd laa-data-claims-reporting-service/build/libs
+          pwd
+          ls -la
+
         # ---------- AWS auth (OIDC) ----------
       - name: Configure AWS creds
         uses: aws-actions/configure-aws-credentials@v4.3.1
@@ -79,7 +85,6 @@ jobs:
         id: login-ecr
       - name: Build and push a Docker image for claims-reporting
         run: |
-          ls
           DOCKER_BUILDKIT=0 docker build --no-cache -t $REGISTRY/$REPOSITORY:$IMAGE_TAG ./laa-data-claims-reporting-service
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         env:
