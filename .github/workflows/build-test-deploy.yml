@@ -37,7 +37,6 @@ jobs:
         run: ./gradlew jacocoTestCoverageVerification
 
 #        Add run of integration tests when these are added to the repo
-
       - name: Upload service JAR artifact
         uses: actions/upload-artifact@v4
         with:
@@ -80,6 +79,7 @@ jobs:
         id: login-ecr
       - name: Build and push a Docker image for claims-reporting
         run: |
+          ls
           docker build --no-cache -t $REGISTRY/$REPOSITORY:$IMAGE_TAG ./laa-data-claims-reporting-service
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         env:
