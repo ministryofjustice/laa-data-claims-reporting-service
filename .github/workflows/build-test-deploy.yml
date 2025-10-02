@@ -85,6 +85,9 @@ jobs:
         id: login-ecr
       - name: Build and push a Docker image for claims-reporting
         run: |
+          echo "DIRECTORY"
+          pwd
+          echo "DOCKER STUFF"
           DOCKER_BUILDKIT=0 docker build --no-cache -t $REGISTRY/$REPOSITORY:$IMAGE_TAG ./laa-data-claims-reporting-service
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         env:

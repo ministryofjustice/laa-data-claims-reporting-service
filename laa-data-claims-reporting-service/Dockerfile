@@ -2,12 +2,12 @@
 FROM amazoncorretto:21-alpine
 
 # Set up working directory in the container
-RUN mkdir -p /opt/laa-data-reporting-service/laa-data-claims-reporting-service/
-WORKDIR /opt/laa-data-reporting-service/laa-data-claims-reporting-service/
+RUN mkdir -p /opt/laa-data-reporting-service/claims-reporting/
+WORKDIR /opt/laa-data-reporting-service/claims-reporting/
 
 # Copy the JAR file into the container
-RUN (cd /laa-data-claims-reporting-service/build/libs && ls)
-COPY laa-data-claims-reporting-service/build/libs/laa-data-claims-reporting-service-1.0.0.jar app.jar
+RUN (cd build/libs && ls)
+COPY build/libs/laa-data-claims-reporting-service-1.0.0.jar app.jar
 
 # Create a group and non-root user
 RUN addgroup -S appgroup && adduser -u 1001 -S appuser -G appgroup
