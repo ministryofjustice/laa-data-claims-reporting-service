@@ -42,7 +42,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: service-jar
-          path: /opt/laa-spring-boot-microservice/app.jar
+          path: laa-data-claims-reporting-service/build/libs/*.jar
           retention-days: 1
 
 #      Add checkstyle report, test report, jacoco coverage if needed
@@ -66,7 +66,7 @@ jobs:
         with:
 #        Can't hard code this, need an alternative
           name: service-jar
-          path: laa-data-claims-reporting-service/build/libs/*.jar
+          path: laa-data-claims-reporting-service/build/libs
 
         # ---------- AWS auth (OIDC) ----------
       - name: Configure AWS creds
