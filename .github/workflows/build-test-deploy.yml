@@ -64,7 +64,7 @@ jobs:
       - name: Download JAR artifact
         uses: actions/download-artifact@v5
         with:
-          name: service-jar
+          name: laa-data-claims-reporting-service-1.0.0.jar
           path: laa-data-claims-reporting-service/build/libs/
 
         # ---------- AWS auth (OIDC) ----------
