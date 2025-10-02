@@ -6,8 +6,8 @@ RUN mkdir -p /opt/laa-data-claims-api/laa-data-claims-reporting-service/
 WORKDIR /opt/laa-data-claims-api/laa-data-claims-reporting-service/
 
 # Copy the JAR file into the container
-CMD cd laa-data-claims-reporting-service/build/libs/
-CMD ls
+RUN cd laa-data-claims-reporting-service/build/libs/
+RUN ls
 COPY laa-data-claims-reporting-service/build/libs/laa-data-claims-reporting-service-1.0.0.jar app.jar
 
 # Create a group and non-root user
