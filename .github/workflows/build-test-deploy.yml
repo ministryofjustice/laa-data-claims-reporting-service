@@ -80,7 +80,7 @@ jobs:
       - name: Build and push a Docker image for claims-reporting
         run: |
           ls
-          docker build --no-cache -t $REGISTRY/$REPOSITORY:$IMAGE_TAG ./laa-data-claims-reporting-service
+          DOCKER_BUILDKIT=0 docker build --no-cache -t $REGISTRY/$REPOSITORY:$IMAGE_TAG ./laa-data-claims-reporting-service
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
