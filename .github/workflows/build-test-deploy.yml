@@ -65,7 +65,7 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: service-jar
-          path: claims-data/service/build/libs/
+          path: laa-data-claims-reporting-service/build/libs/
 
         # ---------- AWS auth (OIDC) ----------
       - name: Configure AWS creds
