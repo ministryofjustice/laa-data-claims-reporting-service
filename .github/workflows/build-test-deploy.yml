@@ -65,11 +65,11 @@ jobs:
         with:
 #        Can't hard code this, need an alternative
           name: service-jar
-          path: laa-data-claims-reporting-service/build/libs
+          path: laa-data-claims-reporting-service/build/libs/
 
       - name: Check download
         run: |
-          cd laa-data-claims-reporting-service/build/libs
+          cd laa-data-claims-reporting-service/build/libs/
           pwd
           ls -la
 
