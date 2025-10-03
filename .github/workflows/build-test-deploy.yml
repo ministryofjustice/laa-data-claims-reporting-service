@@ -41,7 +41,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: service-jar
-          path: laa-data-claims-reporting-service/build/libs/*.jar
+          path: claims-reporting/build/libs/*.jar
           retention-days: 1
 
 #      Add checkstyle report, test report, jacoco coverage if needed
@@ -65,11 +65,11 @@ jobs:
         with:
 #        Can't hard code this, need an alternative
           name: service-jar
-          path: laa-data-claims-reporting-service/build/libs/
+          path: claims-reporting/build/libs/
 
       - name: Check download
         run: |
-          cd laa-data-claims-reporting-service/build/libs/
+          cd claims-reporting/build/libs/
           pwd
           ls -la
 
