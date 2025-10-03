@@ -2,8 +2,8 @@
 FROM amazoncorretto:21-alpine
 
 # Set up working directory in the container
-RUN mkdir -p /opt/laa-spring-boot-microservice/
-WORKDIR /opt/laa-spring-boot-microservice/
+RUN mkdir -p /opt/laa-data-reporting-service/claims-reporting/
+WORKDIR /opt/laa-data-reporting-service/claims-reporting/
 
 # Copy the JAR file into the container
 COPY laa-data-claims-reporting-service/build/libs/laa-data-claims-reporting-service-1.0.0.jar app.jar
