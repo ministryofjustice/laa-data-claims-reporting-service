@@ -38,6 +38,9 @@ runs:
   using: "composite"
   steps:
 
+    - name: Checkout Github Repository
+      uses: actions/checkout@v4
+
     - name: Extract release name
       id: extract_release_name
       uses: ./.github/actions/get_release_name
