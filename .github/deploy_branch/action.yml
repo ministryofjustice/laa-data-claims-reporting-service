@@ -81,7 +81,7 @@ runs:
         identifier="$ingress_name-$KUBE_NAMESPACE-green"
         LAA_IPS=$(curl -s https://raw.githubusercontent.com/ministryofjustice/laa-ip-allowlist/main/cidrs.txt | tr -d ' ' | tr '\n' ',' | sed 's/,/\\,/g' | sed 's/\\,$//')
 
-        helm upgrade my-app .helm/data-claims-reporting-service --values .helm/data-claims-reporting-service/values/uat.yaml  \
+        helm upgrade my-app .helm/data-claims-reporting-service  \
           --namespace ${KUBE_NAMESPACE} \
           --set image.repository="${ECR_REGISTRY}/${ECR_REPOSITORY}" \
           --set image.tag="${GIT_SHA}" \
