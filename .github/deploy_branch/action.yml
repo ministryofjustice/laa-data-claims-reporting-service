@@ -73,7 +73,7 @@ runs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         GIT_SHA: ${{ github.sha }}
         KUBE_NAMESPACE: ${{ inputs.kube-namespace }}
-        VALUES_FILE: .helm/values/${{ inputs.app-environment }}.yaml
+        VALUES_FILE: .helm/data-claims-reporting-service/values/${{ inputs.app-environment }}.yaml
         RELEASE_NAME: ${{ steps.extract_release_name.outputs.release-name }}
       run: |
         ingress_name="$RELEASE_NAME-data-claims-api"
@@ -81,7 +81,7 @@ runs:
         identifier="$ingress_name-$KUBE_NAMESPACE-green"
         LAA_IPS=$(curl -s https://raw.githubusercontent.com/ministryofjustice/laa-ip-allowlist/main/cidrs.txt | tr -d ' ' | tr '\n' ',' | sed 's/,/\\,/g' | sed 's/\\,$//')
 
-        helm upgrade my-app .helm --values .helm/values/uat.yaml  \
+        helm upgrade my-app .helm --values .helm/data-claims-reporting-service/values/uat.yaml  \
           --namespace ${KUBE_NAMESPACE} \
           --set image.repository="${ECR_REGISTRY}/${ECR_REPOSITORY}" \
           --set image.tag="${GIT_SHA}" \
