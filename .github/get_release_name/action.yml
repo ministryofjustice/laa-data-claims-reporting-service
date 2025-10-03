@@ -12,6 +12,8 @@ outputs:
 runs:
   using: "composite"
   steps:
+    - name: Checkout Github Repository
+      uses: actions/checkout@v4
 
     - name: Extract branch name
       id: extract_branch
