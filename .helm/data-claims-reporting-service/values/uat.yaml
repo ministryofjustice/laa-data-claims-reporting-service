@@ -7,10 +7,9 @@ image:
   repository: null
   tag: null
 
-#serviceAccount:
-#  create: true
-#  name: "laa-data-claims-reporting-service-uat-sa"
-#  automount: true
+serviceAccount:
+  name: "laa-data-claims-reporting-service-uat-sa"
+  automount: true
 
 service:
   type: ClusterIP
