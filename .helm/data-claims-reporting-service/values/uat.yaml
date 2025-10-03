@@ -8,7 +8,9 @@ image:
   tag: null
 
 serviceAccount:
+  create: true
   name: "data-claims-reporting"
+  automount: true
 
 service:
   type: ClusterIP
@@ -21,3 +23,9 @@ resources:
   requests:
     cpu: 10m
     memory: 100Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
