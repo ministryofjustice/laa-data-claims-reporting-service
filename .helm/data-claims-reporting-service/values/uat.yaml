@@ -8,9 +8,9 @@ image:
   tag: null
 
 serviceAccount:
-  create: true
+#  create: true
   name: "laa-data-claims-reporting-service-uat-sa"
-  automount: true
+#  automount: true
 
 service:
   type: ClusterIP
