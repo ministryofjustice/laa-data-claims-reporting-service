@@ -9,7 +9,7 @@ image:
 
 serviceAccount:
   create: true
-  name: "data-claims-reporting"
+  name: "laa-data-claims-reporting-service-uat-sa"
   automount: true
 
 service:
