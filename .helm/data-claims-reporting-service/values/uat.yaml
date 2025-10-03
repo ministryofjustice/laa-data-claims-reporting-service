@@ -7,9 +7,9 @@ image:
   repository: null
   tag: null
 
-serviceAccount:
-  create: true
-  name: "laa-data-claims-reporting-service-uat-sa"
+#serviceAccount:
+#  create: true
+#  name: "laa-data-claims-reporting-service-uat-sa"
 #  automount: true
 
 service:
