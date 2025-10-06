@@ -135,7 +135,6 @@ jobs:
       - name: Download JAR artifact
         uses: actions/download-artifact@v5
         with:
-#        Can't hard code this, need an alternative
           name: service-jar
           path: laa-data-claims-reporting-service/build/libs/
 
