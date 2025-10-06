@@ -1,31 +1,28 @@
-# laa-spring-boot-microservice-template
-[![Ministry of Justice Repository Compliance Badge](https://github-community.service.justice.gov.uk/repository-standards/api/laa-spring-boot-microservice-template/badge)](https://github-community.service.justice.gov.uk/repository-standards/laa-spring-boot-microservice-template)
+# laa-data-claims-reporting-service
+[![Ministry of Justice Repository Compliance Badge](https://github-community.service.justice.gov.uk/repository-standards/api/laa-data-claims-reporting-service/badge)](https://github-community.service.justice.gov.uk/repository-standards/laa-data-claims-reporting-service)
 
-### ⚠️ WORK IN PROGRESS ⚠️
-This template is still under development and features may be added or subject to change.
+This is a Java based Spring Boot application hosted on [MOJ Cloud Platform](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/concepts/what-is-the-cloud-platform.html).
 
 ## Overview
 
-Template GitHub repository used for Spring Boot Java microservice projects.
+Java Spring Boot based application that generates reports from the claims database and stores them in GLAD S3 Bucket.
 
-The project uses the `laa-spring-boot-gradle-plugin` Gradle plugin which provides
-sensible defaults for the following plugins:
-
-- [Checkstyle](https://docs.gradle.org/current/userguide/checkstyle_plugin.html)
-- [Dependency Management](https://plugins.gradle.org/plugin/io.spring.dependency-management)
-- [Jacoco](https://docs.gradle.org/current/userguide/jacoco_plugin.html)
-- [Java](https://docs.gradle.org/current/userguide/java_plugin.html)
-- [Maven Publish](https://docs.gradle.org/current/userguide/publishing_maven.html)
-- [Spring Boot](https://plugins.gradle.org/plugin/org.springframework.boot)
-- [Test Logger](https://github.com/radarsh/gradle-test-logger-plugin)
-- [Versions](https://github.com/ben-manes/gradle-versions-plugin)
-
-The plugin is provided by -  [laa-spring-boot-common](https://github.com/ministryofjustice/laa-spring-boot-common), where you can find
-more information regarding setup and usage.
+The project was created from [this Github Template](https://github.com/ministryofjustice/laa-spring-boot-microservice-template)
 
 ### Project Structure
-Includes the following subproject:
-- `laa-data-claims-reporting-service` - This service creates csv reports using data from the claims report database
+Includes the following subprojects:
+
+- `laa-data-claims-reporting-service/laa-data-claims-reporting-service` - Generates reports from replica of claims database
+
+## Add GitHub Token
+1.	Generate a Github PAT (Personal Access Token) to access the required plugin, via https://github.com/settings/tokens
+2.	Specify the Note field, e.g. “Token to allow access to LAA Gradle plugin”
+3.  If you haven’t got a gradle.properties file create one under `~/.gradle/gradle.properties`
+4.  Add the following properties to `~/.gradle/gradle.properties` and replace the placeholder values as follows:
+  - `project.ext.gitPackageUser` = YOUR_GITHUB_USERNAME
+  - `project.ext.gitPackageKey` = PAT_CREATED_ABOVE
+
+5.	Go back to Github to authorize MOJ for SSO
 
 ## Build And Run Application
 
@@ -33,30 +30,14 @@ Includes the following subproject:
 `./gradlew clean build`
 
 ### Run integration tests
+
 `./gradlew integrationTest`
 
-### Run application
-`./gradlew bootRun`
-
-### Run application via Docker
-`docker compose up`
-
-### Actuator Endpoints
-The following actuator endpoints have been configured:
-- http://localhost:8080/actuator
-- http://localhost:8080/actuator/health
 
 ## Additional Information
+### Helm
+- Updates to helm template must include a change to the `Chart.yaml` version number.
+- The Helm version must be bumped to trigger a redeploy, because Helm uses that version to determine whether a release has changed.
 
-### Libraries Used
-- [Spring Boot Actuator](https://docs.spring.io/spring-boot/reference/actuator/index.html) - used to provide various endpoints to help monitor the application, such as view application health and information.
-- [Spring Boot Web](https://docs.spring.io/spring-boot/reference/web/index.html) - used to provide features for building the REST API implementation.
-- [Spring Data JPA](https://docs.spring.io/spring-data/jpa/reference/jpa.html) - used to simplify database access and interaction, by providing an abstraction over persistence technologies, to help reduce boilerplate code.
-- [Springdoc OpenAPI](https://springdoc.org/) - used to generate OpenAPI documentation. It automatically generates Swagger UI, JSON documentation based on your Spring REST APIs.
-- [Lombok](https://projectlombok.org/) - used to help to reduce boilerplate Java code by automatically generating common
-  methods like getters, setters, constructors etc. at compile-time using annotations.
-- [MapStruct](https://mapstruct.org/) - used for object mapping, specifically for converting between different Java object types, such as Data Transfer Objects (DTOs)
-  and Entity objects. It generates mapping code at compile code.
-- [H2](https://www.h2database.com/html/main.html) - used to provide an example database and should not be used in production.
-
-
+### CronJob
+- The application runs via a CronJob. This job is currently scheduled to run once per day, at 9am.
