@@ -3,6 +3,6 @@ plugins {
 }
 
 application {
-    mainClass = 'uk.gov.justice.laa.dstew.claimsreports.SpringBootMicroserviceApplication'
+    mainClass = 'uk.gov.justice.laa.dstew.claimsreports.ClaimsReportingServiceApplication'
 }
 
