@@ -33,6 +33,22 @@ Includes the following subprojects:
 
 `./gradlew integrationTest`
 
+### Run locally using Minikube
+```
+brew install minikube
+minikube start
+docker build -t my-app:latest .
+minikube image load my-app:latest
+kubectl get all
+kubectl logs <pod-name>
+```
+
+### Updating Helm
+When making updates to Helm, it is possible to lint your changes to ensure no errors
+```
+helm lint .helm/data-claims-reporting-service/Chart.yaml
+helm install my-app ./.helm/data-claims-reporting-service -f .helm/data-claims-reporting-service/values/local.yaml
+```
 
 ## Additional Information
 ### Helm
