@@ -22,7 +22,7 @@ jobs:
 
       - name: Cleanup uat
         id: cleanup_uat
-        uses: ./.github/actions/cleanup_branch
+        uses: ./.github/cleanup_branch
         with:
           kube-cert: ${{ secrets.KUBE_CERT }}
           kube-token: ${{ secrets.KUBE_TOKEN }}
