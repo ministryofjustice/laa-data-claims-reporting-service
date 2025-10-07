@@ -17,7 +17,6 @@ runs:
       id: get_pr_branch
       shell: bash
       run: |
-        echo "event name"
         if [[ "${{ github.event_name }}" == "push" ]]; then
           echo "head ref"
           echo "${{ github.event.pull_request.head.ref }}"
