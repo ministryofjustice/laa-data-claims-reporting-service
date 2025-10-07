@@ -23,6 +23,10 @@ runs:
           echo "branch_name=${{ github.event.ref }}" >> $GITHUB_OUTPUT
         fi
 
+    - name: Debug release name
+      run:
+      echo "Release name: ${{ steps.get_pr_branch.outputs.branch_name }}"
+
     - name: Extract release name from branch name
       id: extract_release
       shell: bash
