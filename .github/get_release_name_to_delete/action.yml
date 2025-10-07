@@ -20,7 +20,7 @@ runs:
         if [[ "${{ github.event_name }}" == "push" ]]; then
           echo "head ref"
           echo "${{ github.event.pull_request.head.ref }}"
-          echo "branch_name=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
+          echo "branch_name=${{ github.event.push.head.ref }}" >> $GITHUB_OUTPUT
         elif [[ "${{ github.event_name }}" == "delete" ]]; then
           echo "event ref"
           echo "${{ github.event.ref }}"
