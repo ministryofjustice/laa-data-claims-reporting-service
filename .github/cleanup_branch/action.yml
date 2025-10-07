@@ -13,9 +13,6 @@ inputs:
   kube-namespace:
     description: "Kubernetes cluster namespace"
     required: true
-  app-environment:
-    description: "environment to which the app is being deployed [staging, production, etc]"
-    required: true
 
 runs:
   using: "composite"
@@ -36,7 +33,3 @@ runs:
     - name: Delete preview release
       shell: bash
       run: helm uninstall ${{ steps.extract_release_name_to_delete.outputs.release-name-to-delete }} --namespace ${{ inputs.kube-namespace }}
-
-    - name: Delete preview release's pvc (persistent volume claim)
-      shell: bash
-      run: kubectl delete pvc -l app.kubernetes.io/instance="${{ steps.extract_release_name_to_delete.outputs.release-name-to-delete }}-postgresql" --namespace ${{ inputs.kube-namespace }}
