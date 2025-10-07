@@ -17,13 +17,15 @@ runs:
       id: get_pr_branch
       shell: bash
       run: |
+        echo "event name"
+        echo "${{ github.event_name }}"
         if [[ "${{ github.event_name }}" == "pull_request" ]]; then
           echo "head ref"
-          echo ${{ github.event.pull_request.head.ref }}
+          echo "${{ github.event.pull_request.head.ref }}"
           echo "branch_name=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
         elif [[ "${{ github.event_name }}" == "delete" ]]; then
           echo "event ref"
-          echo ${{ github.event.ref }}
+          echo "${{ github.event.ref }}:
           echo "branch_name=${{ github.event.ref }}" >> $GITHUB_OUTPUT
         fi
 
