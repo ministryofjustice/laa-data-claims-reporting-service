@@ -24,8 +24,9 @@ runs:
         fi
 
     - name: Debug release name
-      run:
-      echo "Release name: ${{ steps.get_pr_branch.outputs.branch_name }}"
+      shell: bash
+      run: |
+        echo "Release name: ${{ steps.get_pr_branch.outputs.branch_name }}"
 
     - name: Extract release name from branch name
       id: extract_release
