@@ -18,8 +18,7 @@ runs:
       shell: bash
       run: |
         echo "event name"
-        echo "${{ github.event_name }}"
-        if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+        if [[ "${{ github.event_name }}" == "push" ]]; then
           echo "head ref"
           echo "${{ github.event.pull_request.head.ref }}"
           echo "branch_name=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
