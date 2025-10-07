@@ -26,6 +26,7 @@ runs:
         fi
         echo "branch_name=$branch" >> $GITHUB_OUTPUT
         echo "branch_name being exported: $branch"
+
     - name: Extract release name from branch name
       id: extract_release
       shell: bash

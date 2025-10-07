@@ -4,6 +4,9 @@ on:
   workflow_dispatch:
   pull_request:
     types: [closed]
+  push:
+    branches:
+      - DSTEW-553-delete-*
 jobs:
 
   cleanup-uat:
