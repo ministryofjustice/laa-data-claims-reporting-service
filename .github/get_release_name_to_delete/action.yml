@@ -18,8 +18,12 @@ runs:
       shell: bash
       run: |
         if [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          echo "head ref"
+          echo ${{ github.event.pull_request.head.ref }}
           echo "branch_name=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
         elif [[ "${{ github.event_name }}" == "delete" ]]; then
+          echo "event ref"
+          echo ${{ github.event.ref }}
           echo "branch_name=${{ github.event.ref }}" >> $GITHUB_OUTPUT
         fi
 
