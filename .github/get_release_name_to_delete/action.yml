@@ -7,7 +7,7 @@ outputs:
     value: ${{ steps.extract_branch.outputs.branch_name }}
   release-name-to-delete:
     description: "Extracted merged release name"
-    value: ${{ steps.extract_release.outputs.release_name }}
+    value: ${{ steps.extract_release.outputs.release-name-to-delete }}
 
 runs:
   using: "composite"
