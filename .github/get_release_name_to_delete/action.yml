@@ -18,19 +18,10 @@ runs:
       shell: bash
       run: |
         if [[ "${{ github.event_name }}" == "pull_request" ]]; then
-          echo "head ref"
-          echo "${{ github.event.pull_request.head.ref }}"
           echo "branch_name=${{ github.event.pull_request.head.ref }}" >> $GITHUB_OUTPUT
         elif [[ "${{ github.event_name }}" == "push" ]]; then
-          echo "event ref"
-          echo "${{ github.event.ref }}"
           echo "branch_name=${{ github.event.ref }}" >> $GITHUB_OUTPUT
         fi
-
-    - name: Debug release name
-      shell: bash
-      run: |
-        echo "Release name: ${{ steps.get_pr_branch.outputs.branch_name }}"
 
     - name: Extract release name from branch name
       id: extract_release
