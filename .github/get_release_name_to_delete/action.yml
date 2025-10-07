@@ -7,7 +7,7 @@ outputs:
     value: ${{ steps.extract_branch.outputs.branch_name }}
   release-name-to-delete:
     description: "Extracted merged release name"
-    value: ${{ steps.extract_release.outputs.release-name-to-delete }}
+    value: ${{ steps.extract_release.outputs.release-name }}
 
 runs:
   using: "composite"
@@ -27,7 +27,7 @@ runs:
       id: extract_release
       shell: bash
       run: |
-        branch_name="${{ steps.extract_branch.outputs.branch_name }}"
+        branch_name="${{ steps.get_pr_branch.outputs.branch_name }}"
         truncated_branch=$(echo "$branch_name" | tr '[:upper:]' '[:lower:]' | tr -s ' _/[]().' '-' | cut -c1-15 | sed 's/-$//')
-        echo "release-name-to-delete=${truncated_branch}" >> $GITHUB_OUTPUT
-        echo "release-name-to-delete being exported: ${truncated_branch}"
+        echo "release-name=${truncated_branch}" >> $GITHUB_OUTPUT
+        echo "release-name being exported: ${truncated_branch}"
