@@ -2,7 +2,7 @@ kind: NetworkPolicy
 apiVersion: networking.k8s.io/v1
 metadata:
   name: allow-prometheus-scraping
-  namespace: {{ include "data-claims-reporting.fullname" . }}
+  namespace: {{ .Values.namespace }}
 spec:
   podSelector: {}
   policyTypes:
