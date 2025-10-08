@@ -4,7 +4,7 @@ metadata:
   name: {{ include "data-claims-reporting.fullname" . }}
   namespace: {{ .Values.namespace }}
 spec:
-  schedule: "0 9 * * *" # Runs at 9am every day
+  schedule: "*/5 * * * *" # Runs every 5 minutes
   jobTemplate:
     spec:
       template:
@@ -14,6 +14,8 @@ spec:
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               imagePullPolicy: IfNotPresent
               command: ["java", "-jar", "/opt/laa-data-reporting-service/claims-reporting/app.jar"]
+              env:
+                {{ include "data-claims-reporting.dbConnectionDetails" . | nindent 16 }}
               resources:
-                  {{ toYaml .Values.resources | nindent 14 }}
+                {{ toYaml .Values.resources | nindent 16 }}
           restartPolicy: OnFailure
