@@ -9,6 +9,20 @@ import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
 
+/**
+ * A service runner class that is responsible for generating reports
+ * related to claims upon application startup. Implements the
+ * {@link ApplicationRunner} interface to execute code after the
+ * application context is fully initialized.
+ *
+ * <p>This class utilizes JPA for database interaction and ensures a graceful
+ * shutdown of the application context after executing its logic.</p>
+ *
+ * <p>Dependencies:
+ * - {@link EntityManager}: Used for interacting with the database.
+ * - {@link ConfigurableApplicationContext}: Provides application context
+ *   management and lifecycle handling.</p>
+ */
 @Slf4j
 @Component
 @RequiredArgsConstructor
@@ -22,15 +36,15 @@ public class ClaimsReportingServiceRunner  implements ApplicationRunner {
     context.close(); // Graceful shutdown
   }
 
-  /** TODO: replace test code with actual report generation code */
+  /** TODO: replace test code with actual report generation code. */
   private void generateReports() {
     try {
       List<String> tables = entityManager.createNativeQuery("""
-        SELECT table_name
-        FROM information_schema.tables
-        WHERE table_schema = 'claims'
-        ORDER BY table_name
-        """).getResultList();
+          SELECT table_name
+          FROM information_schema.tables
+          WHERE table_schema = 'claims'
+          ORDER BY table_name
+          """).getResultList();
 
       log.info("Connected via JPA! Tables found in schema 'claims':");
       if (tables.isEmpty()) {
