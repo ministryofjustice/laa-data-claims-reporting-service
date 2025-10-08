@@ -1,4 +1,5 @@
 {{- $namespace := .Release.Namespace }}
+{{- $releaseName := .Release.Name }}
 {{- $jobName := include "data-claims-reporting.name" . }}
 
 1. ✅ CronJob Deployed
@@ -6,7 +7,8 @@
 Your application has been deployed as a Kubernetes CronJob in the `{{ $namespace }}` namespace.
 
 To check the status of the job:
-kubectl get cronjob {{ $jobName }} --namespace {{ $namespace }}
+kubectl get cronjob {{ $releaseName }}-{{ $jobName }} --namespace {{ $namespace }}
 
 To view logs from the latest job run:
-kubectl logs --namespace {{ $namespace }} $(kubectl get pods --namespace {{ $namespace }} -l job-name={{ $jobName }} -o jsonpath="{.items[0].metadata.name}")
+kubectl logs --namespace {{ $namespace }} $( kubectl get pods --namespace {{ $namespace }} --sort-by=.metadata.creationTimestamp --no-headers |
+   grep '^{{ $releaseName }}-' | tail -n 1 | awk '{print $1}' )
