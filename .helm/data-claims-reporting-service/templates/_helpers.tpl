@@ -60,3 +60,10 @@ Create the name of the service account to use
 {{- default "default" .Values.serviceAccount.name }}
 {{- end }}
 {{- end }}
+
+{{/*
+Return the app label for selector matching
+*/}}
+{{- define "data-claims-reporting.appLabel" -}}
+app.kubernetes.io/name: {{ .Values.nameOverride | default .Chart.Name }}
+{{- end }}

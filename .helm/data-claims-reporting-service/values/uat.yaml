@@ -28,3 +28,11 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
+
+serviceMonitor:
+  enabled: true
+  release: prometheus
+  port: metrics
+  path: /metrics
+  interval: 30s
+
