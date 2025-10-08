@@ -1,5 +1,5 @@
 {{/*
-  Define environment variables that can be "included" in deployment.yaml
+  Define environment variables that can be "included" in cronjob.yaml, deployment.yaml etc
 */}}
 {{- define "data-claims-reporting.dbConnectionDetails" }}
 {{/*
