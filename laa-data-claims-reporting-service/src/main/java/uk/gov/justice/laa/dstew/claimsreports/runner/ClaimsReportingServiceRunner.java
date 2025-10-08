@@ -33,7 +33,6 @@ public class ClaimsReportingServiceRunner  implements ApplicationRunner {
   @Override
   public void run(ApplicationArguments args) {
     generateReports();
-    context.close(); // Graceful shutdown
   }
 
   /** TODO: replace test code with actual report generation code. */
