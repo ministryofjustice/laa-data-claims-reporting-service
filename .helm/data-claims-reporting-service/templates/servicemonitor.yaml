@@ -1,0 +1,15 @@
+{{- define "laa-data-claims-reporting-service.service-monitor" -}}
+apiVersion: monitoring.coreos.com/v1
+kind: ServiceMonitor
+metadata:
+  name: {{ .Release.Name }}-{{ .Chart.Name }}-service-monitor
+  namespace: {{ .Release.Namespace }}
+spec:
+  selector:
+    matchLabels:
+      app: prometheus-pushgateway
+  endpoints:
+      - port: {{ .Chart.Name }}-metrics
+        interval: 15s
+        path: /metrics
+  {{- end -}}
