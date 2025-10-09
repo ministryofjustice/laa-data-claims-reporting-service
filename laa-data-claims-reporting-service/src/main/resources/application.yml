@@ -12,6 +12,11 @@ spring:
     schemas: claims
     create-schemas: true
     enabled: true
+    placeholders:
+      reporting_username: "reporting_user"
+      reporting_password: "reporting_password"
+      replication_source_db_url: "replication_source_db_url"
+      replication_source_db_name: "replication_source_db_name"
 
   #do not auto create db schema, use .sql scripts
   jpa:
