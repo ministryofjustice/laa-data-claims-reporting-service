@@ -30,9 +30,14 @@ management:
   endpoints:
     web:
       exposure:
-        include: health
+        include: health, prometheus
 
   # show detailed health status
   endpoint:
     health:
       show-details: always
+    prometheus:
+      enabled: true
+    server:
+      port: 8080
+
