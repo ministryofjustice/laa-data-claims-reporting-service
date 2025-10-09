@@ -27,22 +27,22 @@ Extract DB environment variables from rds-postgresql-instance-output secret
       key: rds_instance_address
 - name: SPRING_DATASOURCE_URL
   value: "jdbc:postgresql://$(DB_HOST):5432/$(DB_NAME)"
-- name: REPORTING_USERNAME
+- name: SPRING_FLYWAY_PLACEHOLDERS_REPORTING_USERNAME
   valueFrom:
     secretKeyRef:
       name: laa-data-claims-reporting-service-secrets
       key: reporting-username
-- name: REPORTING_PASSWORD
+- name: SPRING_FLYWAY_PLACEHOLDERS_REPORTING_PASSWORD
   valueFrom:
     secretKeyRef:
       name: laa-data-claims-reporting-service-secrets
       key: reporting-password
-- name: REPLICATION_SOURCE_DB_URL
+- name: SPRING_FLYWAY_PLACEHOLDERS_REPLICATION_SOURCE_DB_URL
   valueFrom:
     secretKeyRef:
       name: laa-data-claims-reporting-service-secrets
       key: replication-source-db-url
-- name: REPLICATION_SOURCE_DB_NAME
+- name: SPRING_FLYWAY_PLACEHOLDERS_REPLICATION_SOURCE_DB_NAME
   valueFrom:
     secretKeyRef:
       name: laa-data-claims-reporting-service-secrets

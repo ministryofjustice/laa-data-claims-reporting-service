@@ -23,6 +23,12 @@ spring:
     hibernate:
       ddl-auto: none
 
+logging:
+  level:
+    org.flywaydb: WARN
+    org.flywaydb.core.internal.sqlscript: ERROR
+    org.flywaydb.core.internal.command.DbMigrate: ERROR
+
 # used by actuator info endpoint
 info:
   app:
