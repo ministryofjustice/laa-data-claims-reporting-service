@@ -1,5 +1,5 @@
-name: "Deploy branch"
-description: 'Deploy docker image of branch to namespace'
+name: "Deploy"
+description: 'Deploy docker image to namespace'
 inputs:
   ecr-repository:
     description: "ECR repository"
@@ -23,27 +23,12 @@ inputs:
     description: "Kubernetes cluster namespace"
     required: true
   app-environment:
-    description: "environment to which the app is being deployed [uat, staging, production]"
+    description: "environment to which the app is being deployed [staging, production, etc]"
     required: true
-
-outputs:
-  branch-name:
-    description: "Extracted branch name"
-    value: ${{ steps.extract_release_name.outputs.branch-name }}
-  release-name:
-    description: "Extracted release name"
-    value: ${{ steps.extract_release_name.outputs.release-name }}
 
 runs:
   using: "composite"
   steps:
-
-    - name: Checkout Github Repository
-      uses: actions/checkout@v4
-
-    - name: Extract release name
-      id: extract_release_name
-      uses: ./.github/get_release_name
 
     - name: Authenticate to the cluster
       uses: ministryofjustice/laa-reusable-github-actions/.github/actions/authenticate_to_cluster@2aa2676c3cd9876ec7037ee8b3d729d0306cb7c6
@@ -65,7 +50,7 @@ runs:
       with:
         mask-password: 'true'
 
-    - name: Helm deployment of branch
+    - name: Helm deployment
       shell: bash
       env:
         ECR_REPOSITORY: ${{ inputs.ecr-repository }}
@@ -73,15 +58,9 @@ runs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         GIT_SHA: ${{ github.sha }}
         KUBE_NAMESPACE: ${{ inputs.kube-namespace }}
-        VALUES_FILE: .helm/data-claims-reporting-service/values/${{ inputs.app-environment }}.yaml
-        RELEASE_NAME: ${{ steps.extract_release_name.outputs.release-name }}
+        VALUES_FILE: .helm/data-claims-api/values/${{ inputs.app-environment }}.yaml
       run: |
-        ingress_name="$RELEASE_NAME-data-claims-reporting"
-        release_host="$RELEASE_NAME-$KUBE_NAMESPACE.cloud-platform.service.justice.gov.uk"
-        identifier="$ingress_name-$KUBE_NAMESPACE-green"
-        LAA_IPS=$(curl -s https://raw.githubusercontent.com/ministryofjustice/laa-ip-allowlist/main/cidrs.txt | tr -d ' ' | tr '\n' ',' | sed 's/,/\\,/g' | sed 's/\\,$//')
-
-        helm upgrade ${RELEASE_NAME} .helm/data-claims-reporting-service  \
+        helm upgrade laa-data-claims-api .helm/data-claims-api \
           --namespace ${KUBE_NAMESPACE} \
           --set image.repository="${ECR_REGISTRY}/${ECR_REPOSITORY}" \
           --set image.tag="${GIT_SHA}" \
