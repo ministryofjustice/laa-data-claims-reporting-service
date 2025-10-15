@@ -58,9 +58,9 @@ runs:
         ECR_REGISTRY: ${{ steps.login-ecr.outputs.registry }}
         GIT_SHA: ${{ github.sha }}
         KUBE_NAMESPACE: ${{ inputs.kube-namespace }}
-        VALUES_FILE: .helm/data-claims-api/values/${{ inputs.app-environment }}.yaml
+        VALUES_FILE: .helm/data-claims-reporting-service/values/${{ inputs.app-environment }}.yaml
       run: |
-        helm upgrade laa-data-claims-api .helm/data-claims-api \
+        helm upgrade laa-data-claims-reporting-service .helm/data-claims-reporting-service \
           --namespace ${KUBE_NAMESPACE} \
           --set image.repository="${ECR_REGISTRY}/${ECR_REPOSITORY}" \
           --set image.tag="${GIT_SHA}" \
