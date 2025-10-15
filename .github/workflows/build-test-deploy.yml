@@ -222,7 +222,7 @@ jobs:
           app-environment: staging
 
   deploy-production:
-    if: github.ref == 'refs/heads/main'
+    if: github.ref == 'refs/heads/main' || github.head_ref == 'DSTEW-515-deploy-staging-prod'
     runs-on: ubuntu-latest
     needs: deploy-staging
     environment: production
