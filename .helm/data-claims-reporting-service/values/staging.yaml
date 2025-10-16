@@ -1,0 +1,30 @@
+# Default values for staging helm chart.
+
+replicaCount: 1
+
+image:
+  #  Values will be overwritten by Cloud Platform config
+  repository: null
+  tag: null
+
+serviceAccount:
+  name: "laa-data-claims-reporting-service-staging-sa"
+  automount: true
+
+service:
+  type: ClusterIP
+  port: 8080
+
+resources:
+  limits:
+    cpu: 1000m
+    memory: 1000Mi
+  requests:
+    cpu: 10m
+    memory: 100Mi
+
+autoscaling:
+  enabled: false
+  minReplicas: 1
+  maxReplicas: 100
+  targetCPUUtilizationPercentage: 80
