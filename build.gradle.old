@@ -1,0 +1,10 @@
+plugins {
+    id 'application'
+}
+
+application {
+    mainClass = 'uk.gov.justice.laa.dstew.claimsreports.ClaimsReportingServiceApplication.java'
+}
+
+
+

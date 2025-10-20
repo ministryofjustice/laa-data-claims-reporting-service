@@ -1,5 +1,0 @@
-GRANT USAGE ON SCHEMA claims TO reporting_user;
-
-GRANT SELECT ON ALL TABLES IN SCHEMA claims TO reporting_user;
-
-ALTER DEFAULT PRIVILEGES IN SCHEMA claims GRANT SELECT ON TABLES TO reporting_user;
