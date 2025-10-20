@@ -12,6 +12,7 @@ spring:
     schemas: claims
     create-schemas: true
     enabled: true
+    locations: classpath:db/migration/schema,classpath:db/migration/replication
     placeholders:
       reporting_username: "reporting_user"
       reporting_password: "reporting_password"

@@ -1,64 +1,76 @@
 package uk.gov.justice.laa.dstew.claimsreports.runner;
 
-import jakarta.persistence.EntityManager;
-import jakarta.persistence.Query;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.springframework.boot.ApplicationArguments;
-import org.springframework.context.ConfigurableApplicationContext;
+import static org.assertj.core.api.Assertions.assertThatCode;
+import static org.mockito.Mockito.*;
 
 import java.util.List;
 
-import static org.mockito.Mockito.*;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.mockito.Mock;
+import org.mockito.MockitoAnnotations;
+import org.springframework.boot.ApplicationArguments;
+
+import uk.gov.justice.laa.dstew.claimsreports.service.AbstractReportService;
 
 class ClaimsReportingServiceRunnerTest {
 
-  private EntityManager entityManager;
-  private ConfigurableApplicationContext context;
+  @Mock
+  private AbstractReportService<?, ?> reportService1;
+
+  @Mock
+  private AbstractReportService<?, ?> reportService2;
+
+  @Mock
+  private ApplicationArguments applicationArguments;
+
   private ClaimsReportingServiceRunner runner;
-  private Query query;
 
   @BeforeEach
   void setUp() {
-    entityManager = mock(EntityManager.class);
-    context = mock(ConfigurableApplicationContext.class);
-    query = mock(Query.class);
+    MockitoAnnotations.openMocks(this);
 
-    runner = new ClaimsReportingServiceRunner(entityManager, context);
+    // Inject a list of mocked report services
+    runner = new ClaimsReportingServiceRunner(List.of(reportService1, reportService2));
   }
 
   @Test
-  void shouldQueryTablesAndCloseContext() {
-    // given
-    when(entityManager.createNativeQuery(anyString())).thenReturn(query);
-    when(query.getResultList()).thenReturn(List.of("table_a", "table_b"));
+  void shouldInvokeGenerateReportsOnAllServices() {
+    // Call the run method
+    runner.run(applicationArguments);
 
-    // when
-    runner.run(mock(ApplicationArguments.class));
+    // Verify that refreshMaterializedView and generateReport were called on each service
+    verify(reportService1).refreshMaterializedView();
+    verify(reportService1).generateReport();
 
-    // then
-    verify(entityManager).createNativeQuery(contains("information_schema.tables"));
-    verify(query).getResultList();
-    verify(context).close();
+    verify(reportService2).refreshMaterializedView();
+    verify(reportService2).generateReport();
   }
 
   @Test
-  void shouldHandleEmptyResultSetGracefully() {
-    when(entityManager.createNativeQuery(anyString())).thenReturn(query);
-    when(query.getResultList()).thenReturn(List.of());
+  void shouldHandleEmptyServiceList() {
+    // Create runner with empty list
+    ClaimsReportingServiceRunner emptyRunner = new ClaimsReportingServiceRunner(List.of());
 
-    runner.run(mock(ApplicationArguments.class));
-
-    verify(query).getResultList();
-    verify(context).close();
+    // Should not throw any exceptions
+    assertThatCode(() -> emptyRunner.run(applicationArguments))
+        .doesNotThrowAnyException();
   }
 
   @Test
-  void shouldHandleDatabaseErrorGracefully() {
-    when(entityManager.createNativeQuery(anyString())).thenThrow(new RuntimeException("DB error"));
+  void shouldContinueWhenOneServiceFails() {
+    // Make the first service throw an exception when refreshing
+    doThrow(new RuntimeException("Refresh failed")).when(reportService1).refreshMaterializedView();
 
-    runner.run(mock(ApplicationArguments.class));
+    // Call run (should continue to second service)
+    runner.run(applicationArguments);
 
-    verify(context).close(); // even after error, context should be closed
+    // First service was called
+    verify(reportService1).refreshMaterializedView();
+    verify(reportService1, never()).generateReport(); // generateReport skipped because refresh failed
+
+    // Second service should still run
+    verify(reportService2).refreshMaterializedView();
+    verify(reportService2).generateReport();
   }
 }
