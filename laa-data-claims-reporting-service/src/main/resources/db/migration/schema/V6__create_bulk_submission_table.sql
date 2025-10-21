@@ -8,5 +8,6 @@ CREATE TABLE bulk_submission (
                                  updated_by_user_id      TEXT,
                                  updated_on              TIMESTAMPTZ,
                                  authorised_offices      TEXT,
-                                 CONSTRAINT pk_bulk_submission PRIMARY KEY (id)
+                                 CONSTRAINT pk_bulk_submission PRIMARY KEY (id),
+                                 CONSTRAINT chk_bulk_submission_status CHECK (status IN ('READY_FOR_PARSING', 'PARSING_COMPLETED', 'PARSING_FAILED', 'VALIDATION_FAILED', 'REPLACED'))
 );
