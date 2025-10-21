@@ -41,7 +41,7 @@ import uk.gov.justice.laa.dstew.claimsreports.service.Report000Service;
 public class ClaimsReportingServiceRunnerIntegrationTest {
 
   @ServiceConnection
-  static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:16");
+  static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17");
 
   @Autowired
   private Report000Repository repository;
