@@ -48,3 +48,7 @@ management:
   endpoint:
     health:
       show-details: always
+
+csv-creation:
+  buffer-flush-freq: 5000
+  data-chunk-size: 1000
