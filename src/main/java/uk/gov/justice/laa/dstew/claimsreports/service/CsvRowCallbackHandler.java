@@ -35,7 +35,7 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
       throw new CsvCreationException("Metadata invalid");
     }
 
-    var flushSize = ((appConfig.getBufferFlushSize() != 0) ? appConfig.getBufferFlushSize() : 1000);
+    var flushSize = ((appConfig.getBufferFlushFrequency() != 0) ? appConfig.getBufferFlushFrequency() : 1000);
 
     try {
       ResultSetMetaData meta = resultSet.getMetaData();

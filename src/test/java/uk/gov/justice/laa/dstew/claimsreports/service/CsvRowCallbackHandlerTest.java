@@ -52,7 +52,7 @@ public class CsvRowCallbackHandlerTest {
 
   @Test
   void buildsOutputWithSingleRow() throws SQLException {
-    when(appConfig.getBufferFlushSize()).thenReturn(1);
+    when(appConfig.getBufferFlushFrequency()).thenReturn(1);
     when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
     when(resultSet.getRow()).thenReturn(1);
     when(resultSet.getString(anyInt())).thenReturn("data");
@@ -64,7 +64,7 @@ public class CsvRowCallbackHandlerTest {
 
   @Test
   void willNotFlushBufferIfDataSizeIsSmallerThanBufferFlushValue() throws SQLException {
-    when(appConfig.getBufferFlushSize()).thenReturn(500);
+    when(appConfig.getBufferFlushFrequency()).thenReturn(500);
     when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
     when(resultSet.getRow()).thenReturn(1);
     when(resultSet.getString(anyInt())).thenReturn("data");
@@ -76,7 +76,7 @@ public class CsvRowCallbackHandlerTest {
 
   @Test
   void willNotFlushOnOddRowsWhenFlushSizeIsTwo() throws SQLException, IOException {
-    when(appConfig.getBufferFlushSize()).thenReturn(2);
+    when(appConfig.getBufferFlushFrequency()).thenReturn(2);
     BufferedWriter spyWriter = spy(writer);
     CsvRowCallbackHandler csvRowCallbackHandler = new CsvRowCallbackHandler(spyWriter, line, appConfig);
     when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
@@ -87,7 +87,7 @@ public class CsvRowCallbackHandlerTest {
 
   @Test
   void willFlushOnEvenRowsWhenFlushSizeIsTwo() throws SQLException, IOException {
-    when(appConfig.getBufferFlushSize()).thenReturn(2);
+    when(appConfig.getBufferFlushFrequency()).thenReturn(2);
     BufferedWriter spyWriter = spy(writer);
     CsvRowCallbackHandler csvRowCallbackHandler = new CsvRowCallbackHandler(spyWriter, line, appConfig);
     when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
@@ -98,7 +98,7 @@ public class CsvRowCallbackHandlerTest {
 
   @Test
   void willNotThrowIfFlushSizeIsZero() throws SQLException, IOException {
-    when(appConfig.getBufferFlushSize()).thenReturn(0);
+    when(appConfig.getBufferFlushFrequency()).thenReturn(0);
     when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
     when(resultSet.getRow()).thenReturn(1);
     when(resultSet.getString(anyInt())).thenReturn("data");

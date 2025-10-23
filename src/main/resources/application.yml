@@ -49,6 +49,6 @@ management:
     health:
       show-details: always
 
-claims-report:
-  buffer-flush: 5000
+csv-creation:
+  buffer-flush-freq: 5000
   data-chunk-size: 1000
