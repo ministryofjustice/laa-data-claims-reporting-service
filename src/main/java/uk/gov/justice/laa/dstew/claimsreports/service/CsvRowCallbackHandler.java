@@ -6,6 +6,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
@@ -16,15 +17,15 @@ import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
  * Final buffer flush will need to be done by method that utilises this handler, to ensure there are no remaining rows left in the buffer.
  */
 class CsvRowCallbackHandler implements RowCallbackHandler {
-  protected AppConfig appConfig;
   private final BufferedWriter writer;
   private final StringBuilder line;
+  private final int bufferFlushFrequency;
 
   @Autowired
-  public CsvRowCallbackHandler(BufferedWriter writer, StringBuilder line, AppConfig appConfig) {
-    this.appConfig = appConfig;
+  public CsvRowCallbackHandler(BufferedWriter writer, StringBuilder line, int bufferFlushFreq) {
     this.writer = writer;
     this.line = line;
+    this.bufferFlushFrequency = bufferFlushFreq;
   }
 
   @Override
@@ -64,7 +65,7 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
 
       // Regular flush of buffer reduces memory usage when
       // processing large files.
-      if (resultSet.getRow() % appConfig.getBufferFlushFrequency() == 0) {
+      if (resultSet.getRow() % bufferFlushFrequency == 0) {
         writer.flush();
       }
 
