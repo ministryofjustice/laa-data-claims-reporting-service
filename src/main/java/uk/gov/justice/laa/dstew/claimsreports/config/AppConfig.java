@@ -40,12 +40,18 @@ public class AppConfig {
     return new JdbcTemplate(dataSource);
   }
 
+  /**
+   * Defines how frequently the file buffer will be flushed for performant file creation.
+   */
   @Getter
-  @Value("${claims-report.buffer-flush}")
-  private int bufferFlushSize;
+  @Value("${csv-creation.buffer-flush-freq}")
+  private int bufferFlushFrequency;
 
+  /**
+   * Defines how data chunks retrieved from DB will be for performant file creation.
+   */
   @Getter
-  @Value("${claims-report.data-chunk-szie}")
+  @Value("${csv-creation.data-chunk-szie}")
   private int dataChunkSize;
 
 }

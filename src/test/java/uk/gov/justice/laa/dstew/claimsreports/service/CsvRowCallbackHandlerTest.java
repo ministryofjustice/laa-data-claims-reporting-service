@@ -52,7 +52,7 @@ public class CsvRowCallbackHandlerTest {
 
   @Test
   void buildsOutputWithSingleRow() throws SQLException {
-    when(appConfig.getBufferFlushSize()).thenReturn(1);
+    when(appConfig.getBufferFlushFrequency()).thenReturn(1);
     when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
     when(resultSet.getRow()).thenReturn(1);
     when(resultSet.getString(anyInt())).thenReturn("data");
@@ -64,19 +64,21 @@ public class CsvRowCallbackHandlerTest {
 
   @Test
   void willNotFlushBufferIfDataSizeIsSmallerThanBufferFlushValue() throws SQLException {
-    when(appConfig.getBufferFlushSize()).thenReturn(500);
+    when(appConfig.getBufferFlushFrequency()).thenReturn(500);
     when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
     when(resultSet.getRow()).thenReturn(1);
     when(resultSet.getString(anyInt())).thenReturn("data");
     when(resultSetMetaData.getColumnCount()).thenReturn(10);
     when(resultSetMetaData.getColumnName(anyInt())).thenReturn("col_heading");
     csvRowCallbackHandler.processRow(resultSet);
+    // This is expected behaviour. The final flush will be done after all rows have been constructed, in the CsvCreationService
     Assertions.assertTrue(stringWriter.toString().isEmpty());
   }
 
   @Test
   void willNotFlushOnOddRowsWhenFlushSizeIsTwo() throws SQLException, IOException {
-    when(appConfig.getBufferFlushSize()).thenReturn(2);
+    // Confirms that buffer will not be fully flushed if no. of rows % flush frequent != 0
+    when(appConfig.getBufferFlushFrequency()).thenReturn(2);
     BufferedWriter spyWriter = spy(writer);
     CsvRowCallbackHandler csvRowCallbackHandler = new CsvRowCallbackHandler(spyWriter, line, appConfig);
     when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
@@ -87,7 +89,8 @@ public class CsvRowCallbackHandlerTest {
 
   @Test
   void willFlushOnEvenRowsWhenFlushSizeIsTwo() throws SQLException, IOException {
-    when(appConfig.getBufferFlushSize()).thenReturn(2);
+    // Confirms that buffer will be fully flushed if no. of rows % flush frequent == 0
+    when(appConfig.getBufferFlushFrequency()).thenReturn(2);
     BufferedWriter spyWriter = spy(writer);
     CsvRowCallbackHandler csvRowCallbackHandler = new CsvRowCallbackHandler(spyWriter, line, appConfig);
     when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
@@ -98,7 +101,8 @@ public class CsvRowCallbackHandlerTest {
 
   @Test
   void willNotThrowIfFlushSizeIsZero() throws SQLException, IOException {
-    when(appConfig.getBufferFlushSize()).thenReturn(0);
+    // Confirms default will be used if config fails to load or has invalid value
+    when(appConfig.getBufferFlushFrequency()).thenReturn(0);
     when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
     when(resultSet.getRow()).thenReturn(1);
     when(resultSet.getString(anyInt())).thenReturn("data");
@@ -119,7 +123,7 @@ public class CsvRowCallbackHandlerTest {
   }
 
   @Test
-  void willThrowIfErrorWithWriter() throws SQLException, IOException {
+  void willThrowCsvCreationExceptionIfWriterThrows() throws SQLException, IOException {
     BufferedWriter spyWriter = spy(writer);
     CsvRowCallbackHandler csvRowCallbackHandler = new CsvRowCallbackHandler(spyWriter, line, appConfig);
     when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
