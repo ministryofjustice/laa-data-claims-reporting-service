@@ -11,7 +11,8 @@ import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 
 /**
- * Some docs.
+ * This class defines how each row of data will be appended to the new CSV file, as well as how frequently the output buffer
+ * will be flushed to ensure CSV creation remains performant and does not hold too much data in memory during processing.
  */
 class CsvRowCallbackHandler implements RowCallbackHandler {
   protected AppConfig appConfig;
@@ -35,6 +36,8 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
       throw new CsvCreationException("Metadata invalid");
     }
 
+    // Ensure if config is not loaded correctly, or has an invalid value,
+    // the processing will continue using a default flush value
     var flushSize = ((appConfig.getBufferFlushFrequency() != 0) ? appConfig.getBufferFlushFrequency() : 1000);
 
     try {
@@ -68,7 +71,6 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
       if (resultSet.getRow() % flushSize == 0) {
         writer.flush();
       }
-
 
     } catch (IOException ex) {
       throw new CsvCreationException("Failure to write data row to new csv file: "
