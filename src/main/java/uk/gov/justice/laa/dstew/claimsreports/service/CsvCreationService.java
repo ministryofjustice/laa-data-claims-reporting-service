@@ -24,11 +24,12 @@ public class CsvCreationService {
   protected AppConfig appConfig;
 
   /**
-   * Stuff.
+   * Service to create CSV files from data provided by defined SQL query.
    *
-   * @param template stuff
-   * @param dataSource things
-   * @param appConfig other things
+   *
+   * @param template JdbcTemplate
+   * @param dataSource Datasource
+   * @param appConfig AppConfig
    */
   public CsvCreationService(JdbcTemplate template, DataSource dataSource, AppConfig appConfig) {
     this.jdbcTemplate = template;
@@ -37,10 +38,12 @@ public class CsvCreationService {
   }
 
   /**
-   * Db call with streams.
+   * Builds CSV from data retrieved from SQL query
+   * Returns data in chunks, size defined in application config, to ensure
+   * good performance for large datasets.
    *
-   * @param sqlQuery the query
-   * @param writer buffer for row content to be output into csv file
+   * @param sqlQuery query for retrieving dataset
+   * @param writer writes string buffer into csv file
    */
   public void buildCsvFromData(String sqlQuery, BufferedWriter writer) {
     if (sqlQuery == null || sqlQuery.trim().isEmpty()) {
