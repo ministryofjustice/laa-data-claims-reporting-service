@@ -51,16 +51,12 @@ public class CsvCreationService {
       throw new CsvCreationException("BufferedWriter is null");
     }
 
-    // Ensure we always get data in small batches to
-    // protect against poor performance if appConfig value fails to load
-    var dataChunkSize = ((appConfig.getDataChunkSize() != 0) ? appConfig.getDataChunkSize() : 1000);
-
     try (writer) {
       StringBuilder line = new StringBuilder();
 
       jdbcTemplate.query(
           (Connection con) -> {
-            return buildPreparedStatement(sqlQuery, con, dataChunkSize);
+            return buildPreparedStatement(sqlQuery, con, appConfig.getDataChunkSize());
           },
           new CsvRowCallbackHandler(writer, line, appConfig)
       );

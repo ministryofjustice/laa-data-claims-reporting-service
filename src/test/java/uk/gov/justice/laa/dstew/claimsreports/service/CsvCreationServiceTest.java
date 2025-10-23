@@ -6,12 +6,10 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import static org.mockito.ArgumentMatchers.eq;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import static org.mockito.Mockito.doAnswer;
 import static org.mockito.Mockito.doThrow;
-import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
@@ -25,7 +23,6 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
-import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @ExtendWith(MockitoExtension.class)
@@ -121,23 +118,4 @@ public class CsvCreationServiceTest {
 
     assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData("SELECT * FROM ANY_REPORT.DATA", bufferedWriter));
   }
-
-  @Test
-  void willNotThrowIfChunkSizeIsZero() throws SQLException, IOException {
-    when(appConfig.getDataChunkSize()).thenReturn(0);
-    when(connection.prepareStatement(any(),
-        eq(ResultSet.TYPE_FORWARD_ONLY), eq(ResultSet.CONCUR_READ_ONLY))).thenReturn(statement);
-
-    doAnswer(invocation -> {
-      PreparedStatementCreator creator = invocation.getArgument(0);
-
-      // This will call the lambda, which calls the private buildPreparedStatement method,
-      // allowing verification of calls inside that method
-      creator.createPreparedStatement(connection);
-
-      return statement;
-    }).when(jdbcTemplate).query(any(PreparedStatementCreator.class), any(CsvRowCallbackHandler.class));
-
-    csvCreationService.buildCsvFromData("SELECT * FROM ANY_REPORT.DATA", bufferedWriter);
-    verify(statement, times(1)).setFetchSize(1000);
-  }}
+}
