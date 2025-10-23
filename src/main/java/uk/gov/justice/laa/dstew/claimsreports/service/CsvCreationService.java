@@ -58,7 +58,7 @@ public class CsvCreationService {
           (Connection con) -> {
             return buildPreparedStatement(sqlQuery, con, appConfig.getDataChunkSize());
           },
-          new CsvRowCallbackHandler(writer, line, appConfig)
+          new CsvRowCallbackHandler(writer, line, appConfig.getBufferFlushFrequency())
       );
 
       writer.flush();

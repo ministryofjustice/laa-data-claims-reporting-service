@@ -1,9 +1,12 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
-import lombok.RequiredArgsConstructor;
+import javax.sql.DataSource;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
 import uk.gov.justice.laa.dstew.claimsreports.repository.RefreshableMaterializedView;
 
 /**
@@ -19,10 +22,13 @@ import uk.gov.justice.laa.dstew.claimsreports.repository.RefreshableMaterialized
  */
 @Slf4j
 @Transactional
-@RequiredArgsConstructor
+@AllArgsConstructor
 public abstract class AbstractReportService<T, R extends JpaRepository<T, ?> & RefreshableMaterializedView> {
 
   protected final R repository;
+  protected final JdbcTemplate jdbcTemplate;
+  protected final DataSource dataSource;
+  protected AppConfig appConfig;
 
   /**
    * Refreshes the associated materialized view by invoking the repository's refresh method.

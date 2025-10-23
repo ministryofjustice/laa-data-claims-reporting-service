@@ -1,8 +1,15 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import java.io.BufferedWriter;
+import java.io.FileWriter;
+import java.io.IOException;
+import javax.sql.DataSource;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
 import uk.gov.justice.laa.dstew.claimsreports.entity.Report000Entity;
+import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 import uk.gov.justice.laa.dstew.claimsreports.repository.Report000Repository;
 
 /**
@@ -17,12 +24,22 @@ import uk.gov.justice.laa.dstew.claimsreports.repository.Report000Repository;
 @Service
 public class Report000Service extends AbstractReportService<Report000Entity, Report000Repository> {
 
-  public Report000Service(Report000Repository repository) {
-    super(repository);
+  public Report000Service(Report000Repository repository, JdbcTemplate jdbcTemplate, DataSource dataSource, AppConfig appConfig) {
+    super(repository, jdbcTemplate, dataSource, appConfig);
   }
 
   @Override
   public void generateReport() {
+    var creationService = new CsvCreationService(jdbcTemplate, dataSource, appConfig);
+    try {
+      creationService.buildCsvFromData("SELECT * FROM claims.mvw_report_000", new BufferedWriter(new FileWriter("report000.csv")));
+    } catch (CsvCreationException e) {
+      log.info("Failure to create Report000");
+      throw e;
+    } catch (IOException e) {
+      throw new CsvCreationException("Failure to create Report000: " + e.getMessage());
+    }
+
     log.info("Generating report from {}", getClass().getSimpleName());
   }
 
