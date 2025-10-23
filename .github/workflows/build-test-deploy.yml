@@ -41,7 +41,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: service-jar
-          path: laa-data-claims-reporting-service/build/libs/*.jar
+          path: build/libs/*.jar
           retention-days: 1
 
       - name: Upload checkstyle report
@@ -49,7 +49,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: checkstyle-report
-          path: laa-data-claims-reporting-service/build/reports/checkstyle
+          path: build/reports/checkstyle
           retention-days: 14
 
       - name: Upload test report
@@ -57,7 +57,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: test-report
-          path: laa-data-claims-reporting-service/build/reports/tests
+          path: build/reports/tests
           retention-days: 14
 
       - name: Upload jacoco coverage report
@@ -65,7 +65,7 @@ jobs:
         uses: actions/upload-artifact@v4
         with:
           name: jacoco-coverage-report
-          path: laa-data-claims-reporting-service/build/reports/jacoco
+          path: build/reports/jacoco
           retention-days: 14
 
 #      Add checkstyle report, test report, jacoco coverage if needed
@@ -135,7 +135,7 @@ jobs:
         uses: actions/download-artifact@v5
         with:
           name: service-jar
-          path: laa-data-claims-reporting-service/build/libs/
+          path: build/libs/
 
         # ---------- AWS auth (OIDC) ----------
       - name: Configure AWS creds
