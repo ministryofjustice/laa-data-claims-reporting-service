@@ -4,6 +4,8 @@ services:
       context: .
     ports:
       - "8080:8080"
+    environment:
+      DB_HOST: data-claims-reporting-service-local-postgres
   postgres:
     image: postgres:17
     container_name: data-claims-reporting-service-local-postgres
