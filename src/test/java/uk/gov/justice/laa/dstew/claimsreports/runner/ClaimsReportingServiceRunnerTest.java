@@ -6,10 +6,9 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.context.ConfigurableApplicationContext;
-
 import java.util.List;
-
 import static org.mockito.Mockito.*;
+import uk.gov.justice.laa.dstew.claimsreports.service.CsvCreationService;
 
 class ClaimsReportingServiceRunnerTest {
 
@@ -17,14 +16,16 @@ class ClaimsReportingServiceRunnerTest {
   private ConfigurableApplicationContext context;
   private ClaimsReportingServiceRunner runner;
   private Query query;
+  private CsvCreationService service;
 
   @BeforeEach
   void setUp() {
     entityManager = mock(EntityManager.class);
     context = mock(ConfigurableApplicationContext.class);
     query = mock(Query.class);
+    service = mock(CsvCreationService.class);
 
-    runner = new ClaimsReportingServiceRunner(entityManager, context);
+    runner = new ClaimsReportingServiceRunner(entityManager, context, service);
   }
 
   @Test

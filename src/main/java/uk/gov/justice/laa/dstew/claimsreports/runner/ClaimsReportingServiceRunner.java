@@ -1,6 +1,8 @@
 package uk.gov.justice.laa.dstew.claimsreports.runner;
 
 import jakarta.persistence.EntityManager;
+import java.io.BufferedWriter;
+import java.io.FileWriter;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,6 +10,7 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.context.ConfigurableApplicationContext;
 import org.springframework.stereotype.Component;
+import uk.gov.justice.laa.dstew.claimsreports.service.CsvCreationService;
 
 /**
  * A service runner class that is responsible for generating reports
@@ -29,6 +32,7 @@ import org.springframework.stereotype.Component;
 public class ClaimsReportingServiceRunner  implements ApplicationRunner {
   private final EntityManager entityManager;
   private final ConfigurableApplicationContext context;
+  private final CsvCreationService creationService;
 
   @Override
   public void run(ApplicationArguments args) {
@@ -51,6 +55,12 @@ public class ClaimsReportingServiceRunner  implements ApplicationRunner {
       } else {
         tables.forEach(t -> log.info("  - {}", t));
       }
+
+      creationService.buildCsvFromData(
+          "SELECT * FROM claims.test_table", new BufferedWriter(
+              new FileWriter("test_report.csv")));
+
+
 
     } catch (Exception e) {
       log.error("Database connectivity or query failed: {}", e.getMessage());
