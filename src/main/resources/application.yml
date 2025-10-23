@@ -5,7 +5,7 @@ spring:
   # Default connection details for local dev, overridden in other envs
   datasource:
     driver-class-name: org.postgresql.Driver
-    url: jdbc:postgresql://localhost:5432/laa_claims_reporting_service_dev
+    url: jdbc:postgresql://data-claims-reporting-service-local-postgres:5432/laa_claims_reporting_service_dev
     username: user
     password: dev
   flyway:
