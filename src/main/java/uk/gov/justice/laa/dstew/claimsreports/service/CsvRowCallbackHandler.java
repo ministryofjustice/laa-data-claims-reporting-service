@@ -37,17 +37,12 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
       throw new CsvCreationException("Metadata invalid");
     }
 
-    // Ensure if config is not loaded correctly, or has an invalid value,
-    // the processing will continue using a default flush value
-    var flushSize = ((appConfig.getBufferFlushFrequency() != 0) ? appConfig.getBufferFlushFrequency() : 1000);
-
     try {
       ResultSetMetaData meta = resultSet.getMetaData();
       int columnCount = meta.getColumnCount();
 
       // Write header once
       if (resultSet.getRow() == 1) {
-        System.out.println("FLUSH: " + flushSize);
 
         for (int i = 1; i <= columnCount; i++) {
           buildRow(line, meta.getColumnName(i), i, columnCount);
@@ -69,7 +64,7 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
 
       // Regular flush of buffer reduces memory usage when
       // processing large files.
-      if (resultSet.getRow() % flushSize == 0) {
+      if (resultSet.getRow() % appConfig.getBufferFlushFrequency() == 0) {
         writer.flush();
       }
 

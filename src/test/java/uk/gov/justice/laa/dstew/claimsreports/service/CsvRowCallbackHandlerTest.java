@@ -100,18 +100,6 @@ public class CsvRowCallbackHandlerTest {
   }
 
   @Test
-  void willNotThrowIfFlushSizeIsZero() throws SQLException, IOException {
-    // Confirms default will be used if config fails to load or has invalid value
-    when(appConfig.getBufferFlushFrequency()).thenReturn(0);
-    when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
-    when(resultSet.getRow()).thenReturn(1);
-    when(resultSet.getString(anyInt())).thenReturn("data");
-    when(resultSetMetaData.getColumnCount()).thenReturn(10);
-    when(resultSetMetaData.getColumnName(anyInt())).thenReturn("col_heading");
-    assertDoesNotThrow(() -> csvRowCallbackHandler.processRow(resultSet));
-  }
-
-  @Test
   void willThrowIfResultSetIsNull() throws SQLException, IOException {
     assertThrows(CsvCreationException.class, () -> csvRowCallbackHandler.processRow(null));
   }
