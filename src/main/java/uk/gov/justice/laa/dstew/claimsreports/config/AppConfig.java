@@ -41,19 +41,12 @@ public class AppConfig {
   }
 
   /**
-   * Defines how frequently the file buffer will be flushed for performant file creation.
-   */
-  @Getter
-  @Value("${csv-creation.buffer-flush-freq:1000}")
-  private int bufferFlushFrequency;
-
-  /**
    * Defines how data chunks retrieved from DB will be for performant file creation.
    * Default ensures this value is never 0, which would cause an arithmetic error when used in creation of
    * CSV files.
    */
   @Getter
-  @Value("${csv-creation.buffer-flush-freq:1000}")
+  @Value("${csv-creation.data-chunk-size:1000}")
   private int dataChunkSize;
 
 }
