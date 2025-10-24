@@ -31,9 +31,9 @@ public class Report000Service extends AbstractReportService<Report000Entity, Rep
   @Override
   public void generateReport() {
     log.info("Generating report from {}", getClass().getSimpleName());
-    var creationService = new CsvCreationService(jdbcTemplate, dataSource, appConfig);
+    var csvCreationService = new CsvCreationService(jdbcTemplate, dataSource, appConfig);
     try {
-      creationService.buildCsvFromData("SELECT * FROM claims.mvw_report_000", new BufferedWriter(new FileWriter("/tmp/report000.csv")));
+      csvCreationService.buildCsvFromData("SELECT * FROM claims.mvw_report_000", new BufferedWriter(new FileWriter("/tmp/report000.csv")));
     } catch (CsvCreationException e) {
       log.info("Failure to create Report000");
       throw e;

@@ -7,6 +7,7 @@ import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.sql.DataSource;
+import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -18,24 +19,11 @@ import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
  */
 @Service
 @Slf4j
+@AllArgsConstructor
 public class CsvCreationService {
   private final JdbcTemplate jdbcTemplate;
   private final DataSource dataSource;
   protected AppConfig appConfig;
-
-  /**
-   * Service to create CSV files from data provided by defined SQL query.
-   *
-   *
-   * @param template JdbcTemplate
-   * @param dataSource Datasource
-   * @param appConfig AppConfig
-   */
-  public CsvCreationService(JdbcTemplate template, DataSource dataSource, AppConfig appConfig) {
-    this.jdbcTemplate = template;
-    this.dataSource = dataSource;
-    this.appConfig = appConfig;
-  }
 
   /**
    * Builds CSV from data retrieved from SQL query
