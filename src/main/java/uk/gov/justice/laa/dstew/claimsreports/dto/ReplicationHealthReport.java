@@ -1,12 +1,17 @@
 package uk.gov.justice.laa.dstew.claimsreports.dto;
 
+import java.time.LocalDate;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import lombok.Getter;
 import lombok.Setter;
 import lombok.ToString;
 
-import java.time.LocalDate;
-import java.util.*;
-
+/**
+ * Represents a report detailing the health of the replication process for a specific date.
+ * This class maintains information regarding the overall health status and any issues
+ * identified with specific database tables during replication.
+ */
 @Getter
 @Setter
 @ToString
@@ -24,6 +29,14 @@ public class ReplicationHealthReport {
     failedChecks.put(table, reason);
   }
 
+  /**
+   * Provides a summary of the replication health status. If the replication process is
+   * healthy, a message confirming the health is returned. Otherwise, details of the issues
+   * are listed, including the affected tables and reasons for the failures.
+   *
+   * @return A message indicating either that the replication is healthy or a detailed list
+   *         of tables with replication issues and the corresponding reasons.
+   */
   public String summary() {
     if (healthy) {
       return String.format("Replication is healthy for %s ", summaryDate);
