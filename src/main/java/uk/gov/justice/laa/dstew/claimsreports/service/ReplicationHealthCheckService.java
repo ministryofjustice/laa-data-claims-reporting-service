@@ -47,7 +47,7 @@ public class ReplicationHealthCheckService {
     final Timestamp startOfDay = Timestamp.valueOf(summaryDate.atStartOfDay());
     final Timestamp endOfDay = Timestamp.valueOf(summaryDate.plusDays(1).atStartOfDay());
 
-    log.info("🔍 Checking replication health for {}", summaryDate);
+    log.info("Checking replication health for {}", summaryDate);
 
     List<String> publicationTables = getPublishedTables();
     Map<String, ReplicationSummary> summaries = getReplicationSummaries(summaryDate);
