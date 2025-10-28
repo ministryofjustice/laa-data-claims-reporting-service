@@ -12,6 +12,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.boot.ApplicationArguments;
 
 import uk.gov.justice.laa.dstew.claimsreports.service.AbstractReportService;
+import uk.gov.justice.laa.dstew.claimsreports.service.ReplicationHealthCheckService;
 
 class ClaimsReportingServiceRunnerTest {
 
@@ -20,6 +21,9 @@ class ClaimsReportingServiceRunnerTest {
 
   @Mock
   private AbstractReportService<?, ?> reportService2;
+
+  @Mock
+  private ReplicationHealthCheckService replicationHealthCheckService;
 
   @Mock
   private ApplicationArguments applicationArguments;
@@ -31,7 +35,7 @@ class ClaimsReportingServiceRunnerTest {
     MockitoAnnotations.openMocks(this);
 
     // Inject a list of mocked report services
-    runner = new ClaimsReportingServiceRunner(List.of(reportService1, reportService2));
+    runner = new ClaimsReportingServiceRunner(replicationHealthCheckService, List.of(reportService1, reportService2));
   }
 
   @Test
@@ -50,7 +54,7 @@ class ClaimsReportingServiceRunnerTest {
   @Test
   void shouldHandleEmptyServiceList() {
     // Create runner with empty list
-    ClaimsReportingServiceRunner emptyRunner = new ClaimsReportingServiceRunner(List.of());
+    ClaimsReportingServiceRunner emptyRunner = new ClaimsReportingServiceRunner(null, List.of());
 
     // Should not throw any exceptions
     assertThatCode(() -> emptyRunner.run(applicationArguments))

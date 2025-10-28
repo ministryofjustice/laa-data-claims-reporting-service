@@ -2,17 +2,23 @@ package uk.gov.justice.laa.dstew.claimsreports.runner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.time.LocalDate;
+import java.time.OffsetDateTime;
 import java.util.List;
+import java.util.Map;
+import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.ContextConfiguration;
 import org.testcontainers.junit.jupiter.Testcontainers;
-import org.springframework.boot.testcontainers.service.connection.ServiceConnection;
 import org.testcontainers.containers.PostgreSQLContainer;
+import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
 import uk.gov.justice.laa.dstew.claimsreports.entity.Report000Entity;
 import uk.gov.justice.laa.dstew.claimsreports.repository.Report000Repository;
+import uk.gov.justice.laa.dstew.claimsreports.service.ReplicationHealthCheckService;
 import uk.gov.justice.laa.dstew.claimsreports.service.Report000Service;
 
 /**
@@ -37,10 +43,8 @@ import uk.gov.justice.laa.dstew.claimsreports.service.Report000Service;
 @SpringBootTest
 @ActiveProfiles("test")
 @Testcontainers
-@ContextConfiguration
 public class ClaimsReportingServiceRunnerIntegrationTest {
 
-  @ServiceConnection
   static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17");
 
   @Autowired
@@ -48,6 +52,24 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
 
   @Autowired
   private Report000Service report000Service;
+
+  @Autowired
+  private JdbcTemplate jdbcTemplate;
+
+  @Autowired
+  private ReplicationHealthCheckService replicationHealthCheckService;
+
+  static {
+    postgres.start();
+    System.setProperty("spring.datasource.url", postgres.getJdbcUrl());
+    System.setProperty("spring.datasource.username", postgres.getUsername());
+    System.setProperty("spring.datasource.password", postgres.getPassword());
+  }
+
+  @BeforeEach
+  void cleanReplicationSummaryTable() {
+    jdbcTemplate.update("DELETE FROM claims.replication_summary");
+  }
 
   @Test
   void testViewAndReportGeneration() {
@@ -58,5 +80,74 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
     assertThat(rows.size()).isEqualTo(2);
 
     // Validate CSV output or generated file if applicable
+  }
+
+  @Test
+  void testEnsureReplicationHealthy() {
+    // Arrange
+    LocalDate yesterday = LocalDate.now().minusDays(1);
+    OffsetDateTime now = OffsetDateTime.now();
+
+    Map<String, Pair<Integer, Integer>> tableCounts = Map.of(
+        "claim", Pair.of(2, 1),
+        "client", Pair.of(2, 1),
+        "claim_summary_fee", Pair.of(2, 2)
+    );
+
+    createReplicationSummaryTestData(yesterday, now, tableCounts);
+    // Act
+    ReplicationHealthReport report = replicationHealthCheckService.checkReplicationHealth();
+
+    // Assert
+    assertThat(report).isNotNull();
+    assertThat(report.isHealthy()).isTrue();
+  }
+
+  @Test
+  void testEnsureReplicationUnhealthy() {
+    // Arrange
+    LocalDate yesterday = LocalDate.now().minusDays(1);
+    OffsetDateTime now = OffsetDateTime.now();
+
+    Map<String, Pair<Integer, Integer>> tableCounts = Map.of(
+        "claim", Pair.of(3, 1),
+        "client", Pair.of(2, 2),
+        "claim_summary_fee", Pair.of(1, 2)
+    );
+
+    createReplicationSummaryTestData(yesterday, now, tableCounts);
+    // Act
+    ReplicationHealthReport report = replicationHealthCheckService.checkReplicationHealth();
+
+    // Assert
+    assertThat(report).isNotNull();
+    assertThat(report.isHealthy()).isFalse();
+    Map<String, String> expectedFailures = Map.of(
+        "claim", "Count mismatch — expected (3/1), actual (2/1)",
+        "client", "Count mismatch — expected (2/2), actual (2/1)",
+        "claim_summary_fee", "Count mismatch — expected (1/2), actual (2/2)"
+    );
+
+    assertThat(report.getFailedChecks()).isEqualTo(expectedFailures);  }
+
+
+  private void createReplicationSummaryTestData(
+      LocalDate yesterday,
+      OffsetDateTime now,
+      Map<String, Pair<Integer, Integer>> tableCounts) {
+
+    for (Map.Entry<String, Pair<Integer, Integer>> entry : tableCounts.entrySet()) {
+      String tableName = entry.getKey();
+      Integer recordCount = entry.getValue().getLeft();
+      Integer updatedCount = entry.getValue().getRight();
+
+      jdbcTemplate.update(
+          """
+          INSERT INTO claims.replication_summary 
+          (table_name, summary_date, record_count, updated_count, wal_lsn, created_on)
+          VALUES (?, ?, ?, ?, pg_current_wal_lsn(), ?)
+          """,
+          tableName, yesterday, recordCount, updatedCount, now);
+    }
   }
 }
