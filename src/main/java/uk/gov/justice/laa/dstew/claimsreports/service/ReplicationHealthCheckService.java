@@ -128,14 +128,25 @@ public class ReplicationHealthCheckService {
   }
 
   private void checkCounts(Map<String, ReplicationSummary> summaries,
-      Timestamp start, Timestamp end,
+      Timestamp startOfDay, Timestamp endOfDay,
       ReplicationHealthReport report) {
     for (ReplicationSummary summary : summaries.values()) {
       String countSql = String.format("SELECT count(*) FROM claims.%s WHERE created_on < ?", summary.tableName());
       String updatedSql = String.format("SELECT count(*) FROM claims.%s WHERE updated_on BETWEEN ? AND ?", summary.tableName());
 
-      Long actualRecordCount = jdbcTemplate.queryForObject(countSql, Long.class, end);
-      Long actualUpdatedCount = jdbcTemplate.queryForObject(updatedSql, Long.class, start, end);
+      Long actualRecordCount = jdbcTemplate.query(countSql, rs -> {
+        if (rs.next()) {
+          return rs.getLong(1);
+        }
+        return 0L;
+      }, endOfDay);
+
+      Long actualUpdatedCount = jdbcTemplate.query(updatedSql, rs -> {
+        if (rs.next()) {
+          return rs.getLong(1);
+        }
+        return 0L;
+      }, startOfDay, endOfDay);
 
       if (!Objects.equals(actualRecordCount, summary.recordCount())
           || !Objects.equals(actualUpdatedCount, summary.updatedCount())) {
