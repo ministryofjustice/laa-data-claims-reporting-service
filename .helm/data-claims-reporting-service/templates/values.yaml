@@ -1,0 +1,4 @@
+bucketNames:
+  uat: laa-get-payments-finance-data-dev-report-store
+  staging: laa-get-payments-finance-data-uat-report-store
+  production: laa-get-payments-finance-data-prod-report-store

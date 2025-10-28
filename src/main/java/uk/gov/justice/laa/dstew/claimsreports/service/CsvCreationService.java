@@ -13,6 +13,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
+import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
  * Data access object class to provide interface between application and database layer.
@@ -88,6 +89,11 @@ public class CsvCreationService {
       throw new CsvCreationException("Failed on creation of prepared statement "
           + ex.getNextException());
     }
+  }
+
+  public void uploadFile(String filePath, String fileName) {
+    var s3Client = new S3ClientWrapper(appConfig.getAwsRegion(), appConfig.getBucketName());
+    s3Client.uploadFile(filePath, fileName);
   }
 
 }

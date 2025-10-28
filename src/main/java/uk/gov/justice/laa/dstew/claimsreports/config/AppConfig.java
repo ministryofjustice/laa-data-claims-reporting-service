@@ -56,4 +56,12 @@ public class AppConfig {
   @Value("${csv-creation.data-chunk-size:1000}")
   private int dataChunkSize;
 
+  @Getter
+  @Value("${AWS_REGION}")
+  private String awsRegion;
+
+  @Getter
+  @Value("${S3_REPORT_STORE}")
+  private String bucketName;
+
 }

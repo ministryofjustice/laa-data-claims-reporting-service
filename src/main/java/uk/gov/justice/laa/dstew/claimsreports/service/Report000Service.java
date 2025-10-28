@@ -37,6 +37,9 @@ public class Report000Service extends AbstractReportService {
     var csvCreationService = new CsvCreationService(jdbcTemplate, dataSource, appConfig);
     try {
       csvCreationService.buildCsvFromData("SELECT * FROM claims.mvw_report_000", new BufferedWriter(new FileWriter("/tmp/report000.csv")));
+      csvCreationService.uploadFile("/tmp/report000.csv", "report_000.csv");
+      //TODO time how long takes to upload??
+      //TODO handle that this doesn't work locally until we have setup proper s3 mocks in docker etc
     } catch (CsvCreationException e) {
       log.info("Failure to create Report000");
       throw e;
