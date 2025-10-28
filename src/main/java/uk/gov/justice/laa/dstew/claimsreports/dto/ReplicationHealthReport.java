@@ -4,6 +4,7 @@ import java.time.LocalDate;
 import java.util.LinkedHashMap;
 import java.util.Map;
 import lombok.Getter;
+import lombok.RequiredArgsConstructor;
 import lombok.Setter;
 import lombok.ToString;
 
@@ -15,15 +16,12 @@ import lombok.ToString;
 @Getter
 @Setter
 @ToString
+@RequiredArgsConstructor
 public class ReplicationHealthReport {
 
   private final LocalDate summaryDate;
   private final Map<String, String> failedChecks = new LinkedHashMap<>();
   private boolean healthy;
-
-  public ReplicationHealthReport(LocalDate summaryDate) {
-    this.summaryDate = summaryDate;
-  }
 
   public void addFailure(String table, String reason) {
     failedChecks.put(table, reason);
