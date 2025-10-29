@@ -5,11 +5,11 @@ metadata:
   namespace: {{ .Values.namespace }}
 spec:
   schedule: "*/5 * * * *" # Runs at 9am every day
-  serviceAccount: {{ .Values.serviceAccount.name }}
   jobTemplate:
     spec:
       template:
         spec:
+          serviceAccountName: { { .Values.serviceAccount.name } }
           containers:
             - name: {{ .Chart.Name }}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
