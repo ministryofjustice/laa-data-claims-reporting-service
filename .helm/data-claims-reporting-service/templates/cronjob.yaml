@@ -9,6 +9,8 @@ spec:
     spec:
       template:
         spec:
+          # This gives the pod access to aws envs like the region
+#          serviceAccountName: {{ .Values.serviceAccount.name }}
           containers:
             - name: {{ .Chart.Name }}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
