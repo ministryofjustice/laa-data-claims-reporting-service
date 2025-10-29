@@ -71,7 +71,7 @@ INSERT INTO submission (
 
 -- Claim
 INSERT INTO claim (
-    id, submission_id, status, line_number, matter_type_code, created_by_user_id, created_on
+    id, submission_id, status, line_number, matter_type_code, created_by_user_id, created_on, updated_on
 ) VALUES (
              '33333333-3333-3333-3333-333333333333',
              '22222222-2222-2222-2222-222222222222',
@@ -79,7 +79,8 @@ INSERT INTO claim (
              1,
              'MT001',
              'test_user',
-             NOW()
+             now() - interval '1 day',
+             now() - interval '1 day'
          );
 
 INSERT INTO claim (
@@ -91,14 +92,14 @@ INSERT INTO claim (
              1,
              'MT001',
              'test_user',
-             NOW()
+             now() - interval '1 day'
          );
 
 -- Client
 INSERT INTO client (
     id, claim_id, client_forename, client_surname, client_date_of_birth, unique_client_number, client_postcode,
     gender_code, ethnicity_code, disability_code, is_legally_aided, client_type_code, home_office_client_number,
-    cla_reference_number, cla_exemption_code, created_by_user_id, created_on
+    cla_reference_number, cla_exemption_code, created_by_user_id, created_on, updated_on
 ) VALUES (
              '44444444-4444-4444-4444-444444444444',
              '33333333-3333-3333-3333-333333333333',
@@ -116,7 +117,8 @@ INSERT INTO client (
              'CLA001',
              'EX001',
              'test_user',
-             NOW()
+             now() - interval '1 day',
+             now() - interval '1 day'
          );
 
 INSERT INTO client (
@@ -140,7 +142,7 @@ INSERT INTO client (
              'CLA001',
              'EX001',
              'test_user',
-             NOW()
+             now() - interval '1 day'
          );
 
 -- Claim Case
@@ -155,7 +157,7 @@ INSERT INTO claim_case (
              'REACHED1',
              'SUCCESS',
              'test_user',
-             NOW()
+             now() - interval '1 day'
          );
 
 INSERT INTO claim_case (
@@ -169,28 +171,34 @@ INSERT INTO claim_case (
              'REACHED1',
              'SUCCESS',
              'test_user',
-             NOW()
+             now() - interval '1 day'
          );
 
 -- Claim Summary Fee
 INSERT INTO claim_summary_fee (
     id, claim_id, advice_time, travel_time, waiting_time, net_profit_costs_amount, net_disbursement_amount,
     net_counsel_costs_amount, disbursements_vat_amount, travel_waiting_costs_amount, net_waiting_costs_amount,
-    is_vat_applicable, is_tolerance_applicable, created_by_user_id, created_on
+    is_vat_applicable, is_tolerance_applicable, created_by_user_id, created_on, updated_on
 ) VALUES (
              '66666666-6666-6666-6666-666666666666',
              '33333333-3333-3333-3333-333333333333',
-             60, 30, 15, 1000, 200, 500, 100, 50, 20, TRUE, FALSE, 'test_user', NOW()
+             60, 30, 15, 1000, 200,
+             500, 100, 50, 20,
+             TRUE, FALSE, 'test_user',
+             now() - interval '1 day', now() - interval '1 day'
          );
 
 INSERT INTO claim_summary_fee (
     id, claim_id, advice_time, travel_time, waiting_time, net_profit_costs_amount, net_disbursement_amount,
     net_counsel_costs_amount, disbursements_vat_amount, travel_waiting_costs_amount, net_waiting_costs_amount,
-    is_vat_applicable, is_tolerance_applicable, created_by_user_id, created_on
+    is_vat_applicable, is_tolerance_applicable, created_by_user_id, created_on, updated_on
 ) VALUES (
              '66666666-6666-6666-6666-666666666667',
              '33333333-3333-3333-3333-333333333334',
-             60, 30, 15, 1000, 200, 500, 100, 50, 20, TRUE, FALSE, 'test_user', NOW()
+             60, 30, 15, 1000, 200,
+          500, 100, 50, 20,
+          TRUE, FALSE, 'test_user',
+             now() - interval '2 day', now() - interval '1 day'
          );
 
 -- Calculated Fee Detail (3 rows)
