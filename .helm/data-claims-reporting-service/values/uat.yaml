@@ -8,7 +8,7 @@ image:
   tag: null
 
 serviceAccount:
-  name: "laa-data-claims-reporting-service-uat-sa"
+  name: "laa-data-claims-reporting-service-uat-irsa-sa"
   automount: true
 
 service:
