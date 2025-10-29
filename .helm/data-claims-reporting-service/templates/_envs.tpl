@@ -48,11 +48,3 @@ Extract DB environment variables from rds-postgresql-instance-output secret
       name: laa-data-claims-reporting-service-secrets
       key: replication-source-db-name
 {{- end }}
-
-{{- define "data-claims-reporting.s3-bucket" }}
-    {{/*
-    Use the env to lookup the right bucket name to use
-    */}}
-- name: BUCKET_NAME
-  value: {{ index .Values.bucketNames .Values.env }}
-{{- end }}

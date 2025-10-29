@@ -33,3 +33,6 @@ additionalScrapeConfigs:
   - job_name: 'pushgateway'
     static_configs:
       - targets: ['laa-data-claims-reporting-service-uat-pushgateway-prometheus-pu.laa-data-claims-reporting-service-uat.svc.cluster.local:9091']
+
+s3:
+  bucketName: laa-get-payments-finance-data-dev-report-store
