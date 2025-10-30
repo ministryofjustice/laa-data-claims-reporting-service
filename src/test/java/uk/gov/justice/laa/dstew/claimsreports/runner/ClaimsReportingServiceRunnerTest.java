@@ -20,10 +20,10 @@ import uk.gov.justice.laa.dstew.claimsreports.service.ReplicationHealthCheckServ
 class ClaimsReportingServiceRunnerTest {
 
   @Mock
-  private AbstractReportService<?, ?> reportService1;
+  private AbstractReportService reportService1;
 
   @Mock
-  private AbstractReportService<?, ?> reportService2;
+  private AbstractReportService reportService2;
 
   @Mock
   private ReplicationHealthCheckService replicationHealthCheckService;

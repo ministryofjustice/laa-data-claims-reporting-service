@@ -29,7 +29,7 @@ INSERT INTO bulk_submission (
 
 -- Submission
 INSERT INTO submission (
-    id, bulk_submission_id, office_account_number, submission_period, area_of_law, status, crime_schedule_number,
+    id, bulk_submission_id, office_account_number, submission_period, area_of_law, status, crime_lower_schedule_number,
     previous_submission_id, is_nil_submission, number_of_claims, error_messages, created_by_user_id, created_on, provider_user_id
 ) VALUES (
              '22222222-2222-2222-2222-222222222222',
@@ -50,7 +50,7 @@ INSERT INTO submission (
 
 -- Submission with no claims
 INSERT INTO submission (
-    id, bulk_submission_id, office_account_number, submission_period, area_of_law, status, crime_schedule_number,
+    id, bulk_submission_id, office_account_number, submission_period, area_of_law, status, crime_lower_schedule_number,
     previous_submission_id, is_nil_submission, number_of_claims, error_messages, created_by_user_id, created_on, provider_user_id
 ) VALUES (
              '22222222-2222-2222-2222-222222222223',

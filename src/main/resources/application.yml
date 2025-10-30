@@ -1,7 +1,10 @@
 spring:
   application:
     name: LAA Claims Data Reporting Application
-
+  autoconfigure:
+    exclude:
+      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
+      - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
   # Default connection details for local dev, overridden in other envs
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -18,11 +21,6 @@ spring:
       reporting_password: "reporting_password"
       replication_source_db_url: "replication_source_db_url"
       replication_source_db_name: "replication_source_db_name"
-
-  #do not auto create db schema, use .sql scripts
-  jpa:
-    hibernate:
-      ddl-auto: none
 
 logging:
   level:

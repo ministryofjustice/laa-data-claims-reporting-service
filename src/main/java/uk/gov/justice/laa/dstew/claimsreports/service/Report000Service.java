@@ -8,24 +8,27 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
-import uk.gov.justice.laa.dstew.claimsreports.entity.Report000Entity;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
-import uk.gov.justice.laa.dstew.claimsreports.repository.Report000Repository;
 
 /**
- * Report000Service is responsible for generating and managing reports specific to
- * the Report000Entity. This service extends the AbstractReportService and provides
+ * Report000Service is responsible for generating and managing report_000.
+ * This service extends the AbstractReportService and provides
  * an implementation for the report generation process.
  * Responsibilities:
- * - Implements report generation logic for Report000Entity data.
+ * - Implements report generation logic for Report000 data.
  * - Utilizes the inherited functionality to refresh materialized views as needed.
  */
 @Slf4j
 @Service
-public class Report000Service extends AbstractReportService<Report000Entity, Report000Repository> {
+public class Report000Service extends AbstractReportService {
 
-  public Report000Service(Report000Repository repository, JdbcTemplate jdbcTemplate, DataSource dataSource, AppConfig appConfig) {
-    super(repository, jdbcTemplate, dataSource, appConfig);
+  public Report000Service(JdbcTemplate jdbcTemplate, DataSource dataSource, AppConfig appConfig) {
+    super(jdbcTemplate, dataSource, appConfig);
+  }
+
+  @Override
+  protected String getMaterializedViewName() {
+    return "claims.mvw_report_000";
   }
 
   @Override
