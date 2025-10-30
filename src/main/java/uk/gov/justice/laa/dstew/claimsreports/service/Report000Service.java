@@ -1,6 +1,7 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import javax.sql.DataSource;
@@ -9,6 +10,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
+import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
 
 /**
  * Report000Service is responsible for generating and managing report_000.
@@ -22,8 +24,8 @@ import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 @Service
 public class Report000Service extends AbstractReportService {
 
-  public Report000Service(JdbcTemplate jdbcTemplate, DataSource dataSource, AppConfig appConfig) {
-    super(jdbcTemplate, dataSource, appConfig);
+  public Report000Service(JdbcTemplate jdbcTemplate, DataSource dataSource, AppConfig appConfig, FileUploader fileUploader) {
+    super(jdbcTemplate, dataSource, appConfig, fileUploader);
   }
 
   @Override
@@ -34,19 +36,32 @@ public class Report000Service extends AbstractReportService {
   @Override
   public void generateReport() {
     log.info("Generating report from {}", getClass().getSimpleName());
-    var csvCreationService = new CsvCreationService(jdbcTemplate, dataSource, appConfig);
+    CsvCreationService csvCreationService = new CsvCreationService(jdbcTemplate, dataSource, appConfig);
+
     try {
-      csvCreationService.buildCsvFromData("SELECT * FROM claims.mvw_report_000", new BufferedWriter(new FileWriter("/tmp/report000.csv")));
-      csvCreationService.uploadFile("/tmp/report000.csv", "report_000.csv");
-      //TODO time how long takes to upload??
-      //TODO handle that this doesn't work locally until we have setup proper s3 mocks in docker etc
-    } catch (CsvCreationException e) {
-      log.info("Failure to create Report000");
-      throw e;
+      File tempFile = new File("/tmp/report_000.csv");
+      log.info("Created temp file {}", tempFile.getPath());
+
+      try {
+        csvCreationService.buildCsvFromData("SELECT * FROM claims.mvw_report_000", new BufferedWriter(new FileWriter(tempFile)));
+        fileUploader.uploadFile(tempFile, "report_000.csv");
+        //TODO time how long takes to upload??
+      } catch (CsvCreationException e) {
+        log.info("Failure to create Report000");
+        throw e;
+      } finally {
+        if (tempFile.exists()) {
+          // Remove this if you want to test things locally without S3 mocked and want to see the output
+          boolean isFileDeleted = tempFile.delete();
+          if (!isFileDeleted) {
+            log.warn("Failed to clean up file {}", tempFile.getPath());
+          }
+        }
+      }
+
     } catch (IOException e) {
       throw new CsvCreationException("Failure to create Report000: " + e.getMessage());
     }
-
   }
 
 }

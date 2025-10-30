@@ -6,6 +6,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
+import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
 
 /**
  * AbstractReportService serves as a base class for implementing report generation services
@@ -22,6 +23,7 @@ public abstract class AbstractReportService {
   protected final JdbcTemplate jdbcTemplate;
   protected final DataSource dataSource;
   protected final AppConfig appConfig;
+  protected final FileUploader fileUploader;
 
   /**
    * Gets the name of the materialized view associated with the current service.

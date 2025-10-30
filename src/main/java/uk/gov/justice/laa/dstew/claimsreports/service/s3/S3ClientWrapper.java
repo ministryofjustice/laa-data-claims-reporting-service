@@ -1,6 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.service.s3;
 
-import java.nio.file.Paths;
+import java.io.File;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -30,10 +30,10 @@ public class S3ClientWrapper {
   /**
    * todo.
    *
-   * @param filePath - todo.
+   * @param tempFile - todo.
    * @param fileName - todo.
    */
-  public void uploadFile(String filePath, String fileName) {
+  public void uploadFile(File tempFile, String fileName) {
     var putRequest = PutObjectRequest.builder()
         .bucket(s3Bucket)
         .key("reports/" + fileName)
@@ -41,7 +41,7 @@ public class S3ClientWrapper {
 
     log.info("Uploading!");
 
-    s3Client.putObject(putRequest, RequestBody.fromFile(Paths.get(filePath)));
+    s3Client.putObject(putRequest, RequestBody.fromFile(tempFile));
 
     log.info("Uploaded!");
 

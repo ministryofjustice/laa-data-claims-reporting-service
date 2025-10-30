@@ -9,7 +9,7 @@ spec:
     spec:
       template:
         spec:
-          # This gives the pod access to aws envs like the region
+          # This gives the pod aws permissions and access to envs like AWS_REGION
           serviceAccountName: {{ .Values.serviceAccount.name }}
           containers:
             - name: {{ .Chart.Name }}
@@ -19,6 +19,7 @@ spec:
               env:
                 - name: S3_REPORT_STORE
                   value: {{ .Values.s3.bucketName | quote }}
+                # Intellij complains about the below line being an invalid element, but it's fine with helm so ignore that
                 {{ include "data-claims-reporting.dbConnectionDetails" . | nindent 16 }}
               resources:
                 {{ toYaml .Values.resources | nindent 16 }}
