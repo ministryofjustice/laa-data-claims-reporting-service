@@ -1,10 +1,6 @@
 spring:
   application:
     name: LAA Claims Data Reporting Application
-  autoconfigure:
-    exclude:
-      - org.springframework.boot.autoconfigure.orm.jpa.HibernateJpaAutoConfiguration
-      - org.springframework.boot.autoconfigure.data.jpa.JpaRepositoriesAutoConfiguration
   # Default connection details for local dev, overridden in other envs
   datasource:
     driver-class-name: org.postgresql.Driver
