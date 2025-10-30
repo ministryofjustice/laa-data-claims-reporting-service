@@ -5,6 +5,7 @@ import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
+import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3FileUploader;
 
 /**
@@ -17,7 +18,8 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3FileUploader;
 public class S3Config {
 
   @Bean
-  public FileUploader createFileUploader(@Value("${AWS_REGION:''}") String awsRegion, @Value("${S3_REPORT_STORE:''}") String bucketName) {
-    return new S3FileUploader(awsRegion, bucketName);
+  public FileUploader createFileUploader(@Value("${AWS_REGION}") String awsRegion, @Value("${S3_REPORT_STORE}") String bucketName) {
+    return new S3FileUploader(new S3ClientWrapper(awsRegion, bucketName));
   }
+
 }

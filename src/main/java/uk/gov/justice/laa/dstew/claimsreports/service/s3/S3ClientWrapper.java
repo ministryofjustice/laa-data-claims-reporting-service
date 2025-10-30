@@ -26,34 +26,33 @@ public class S3ClientWrapper {
     this.s3Bucket = s3Bucket;
   }
 
-  // TODO note this method of upload has a 5gb size limit
-
   /**
-   * Upload a generated file to S3
+   * Upload a generated file to the S3 bucket.
+   * NOTE: This has a file size limit of 5GB. Above this we'd need to write a multi-part upload.
    *
-   * @param tempFile - todo.
-   * @param fileName - todo.
+   * @param fileToUpload - the CSV file we have just generated
+   * @param desiredFileName - the file name to use on S3.
    */
-  public void uploadFile(File tempFile, String fileName) {
+  public void uploadFile(File fileToUpload, String desiredFileName) {
 
-    if (!tempFile.getPath().endsWith(".csv") || !fileName.endsWith(".csv")){
-      throw new CsvUploadException("Attempting to upload file that is not a CSV file: " + tempFile.getPath());
+    if (!fileToUpload.getPath().endsWith(".csv") || !desiredFileName.endsWith(".csv")) {
+      throw new CsvUploadException("Attempting to upload file that is not a CSV file: " + fileToUpload.getPath());
     }
 
     var putRequest = PutObjectRequest.builder()
         .bucket(s3Bucket)
-        .key("reports/" + fileName)
+        .key("reports/" + desiredFileName)
         .build();
 
-    log.info("Uploading {} to S3 bucket {} with filename {}", tempFile.getPath(), s3Bucket, fileName);
+    log.info("Uploading {} to S3 bucket {} with filename {}", fileToUpload.getPath(), s3Bucket, desiredFileName);
 
     long startTime = System.currentTimeMillis();
     // Response to this request is just metadata, if it errors it will throw an AwsServiceException
-    s3Client.putObject(putRequest, RequestBody.fromFile(tempFile));
+    s3Client.putObject(putRequest, RequestBody.fromFile(fileToUpload));
     long endTime = System.currentTimeMillis();
     long durationMilliseconds = endTime - startTime;
 
-    log.info("Uploaded {} to S3 bucket {} with filename {} in {} ms", tempFile.getPath(), s3Bucket, fileName, durationMilliseconds);
+    log.info("Uploaded {} to S3 bucket {} with filename {} in {} ms", fileToUpload.getPath(), s3Bucket, desiredFileName, durationMilliseconds);
   }
 
 }

@@ -50,8 +50,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
    */
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ExceptionHandler(AwsServiceException.class)
-  public ResponseEntity<String> handleAWSErrors(AwsServiceException e) {
-    var message = "Failed to upload report";
+  public ResponseEntity<String> handleAwsErrors(AwsServiceException e) {
+    var message = "Failed to upload report.";
 
     // Ensure log has specific AWS exception class name in, such as NoSuchKeyException.
     log.error("AwsServiceException ({}) Thrown: {}", e.getClass().getSimpleName(), e.awsErrorDetails().toString());
@@ -68,7 +68,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ExceptionHandler(CsvUploadException.class)
   public ResponseEntity<String> handleCsvUploadException(CsvUploadException e) {
-    var message = "Failed to upload report";
+    var message = "Failed to upload report.";
 
     log.error("CsvUploadException: {}", e.getMessage());
 

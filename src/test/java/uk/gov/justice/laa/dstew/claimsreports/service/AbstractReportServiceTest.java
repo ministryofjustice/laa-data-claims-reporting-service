@@ -4,6 +4,7 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
 import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
+import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
 
 import static org.mockito.Mockito.*;
 
@@ -16,8 +17,8 @@ class AbstractReportServiceTest {
 
   // Define a concrete subclass for testing purposes
   static class TestReportService extends AbstractReportService {
-    public TestReportService(JdbcTemplate template, DataSource dataSource, AppConfig appConfig) {
-      super(template, dataSource, appConfig);
+    public TestReportService(JdbcTemplate template, DataSource dataSource, AppConfig appConfig, FileUploader fileUploader) {
+      super(template, dataSource, appConfig, fileUploader);
     }
 
     @Override
@@ -39,7 +40,8 @@ class AbstractReportServiceTest {
     jdbcTemplate = mock(JdbcTemplate.class);
     DataSource dataSource = mock(DataSource.class);
     AppConfig appConfig = mock(AppConfig.class);
-    service = new TestReportService(jdbcTemplate, dataSource, appConfig);
+    FileUploader fileUploader = mock(FileUploader.class);
+    service = new TestReportService(jdbcTemplate, dataSource, appConfig, fileUploader);
   }
 
   @Test

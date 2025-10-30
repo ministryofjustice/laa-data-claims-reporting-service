@@ -3,21 +3,19 @@ package uk.gov.justice.laa.dstew.claimsreports.service.s3;
 import java.io.File;
 
 /**
- * todo.
+ * Wrapper that tells systems with S3 enabled to use the S3 client to upload files.
+ * c.f. to {@link LocalFileUploader}
  */
 public class S3FileUploader implements FileUploader {
 
-  private final String awsRegion;
-  private final String bucketName;
+  private final S3ClientWrapper s3Client;
 
-  public S3FileUploader(String awsRegion, String bucketName) {
-    this.bucketName = bucketName;
-    this.awsRegion = awsRegion;
+  public S3FileUploader(S3ClientWrapper s3ClientWrapper) {
+    this.s3Client = s3ClientWrapper;
   }
 
   @Override
   public void uploadFile(File fileToUpload, String fileName) {
-    var s3Client = new S3ClientWrapper(awsRegion, bucketName);
     s3Client.uploadFile(fileToUpload, fileName);
   }
 }
