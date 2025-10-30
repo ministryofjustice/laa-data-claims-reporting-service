@@ -5,6 +5,7 @@ import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
 
 /**
  * Class that wraps around the default {@link S3Client}, allowing us to set default behaviours.
@@ -28,24 +29,32 @@ public class S3ClientWrapper {
   // TODO note this method of upload has a 5gb size limit
 
   /**
-   * todo.
+   * Upload a generated file to S3
    *
    * @param tempFile - todo.
    * @param fileName - todo.
    */
   public void uploadFile(File tempFile, String fileName) {
+
+    if (!tempFile.getPath().endsWith(".csv") || !fileName.endsWith(".csv")){
+      throw new CsvUploadException("Attempting to upload file that is not a CSV file: " + tempFile.getPath());
+    }
+
     var putRequest = PutObjectRequest.builder()
         .bucket(s3Bucket)
         .key("reports/" + fileName)
         .build();
 
-    log.info("Uploading!");
+    log.info("Uploading {} to S3 bucket {} with filename {}", tempFile.getPath(), s3Bucket, fileName);
 
+    long startTime = System.currentTimeMillis();
+    // Response to this request is just metadata, if it errors it will throw an AwsServiceException
     s3Client.putObject(putRequest, RequestBody.fromFile(tempFile));
+    long endTime = System.currentTimeMillis();
+    long durationMilliseconds = endTime - startTime;
 
-    log.info("Uploaded!");
-
+    log.info("Uploaded {} to S3 bucket {} with filename {} in {} ms", tempFile.getPath(), s3Bucket, fileName, durationMilliseconds);
   }
 
-
 }
+
