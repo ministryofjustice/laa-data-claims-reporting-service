@@ -8,7 +8,7 @@ image:
   tag: null
 
 serviceAccount:
-  name: "laa-data-claims-reporting-service-uat-irsa-sa"
+  name: "laa-data-claims-reporting-service-staging-irsa-sa"
   automount: true
 
 service:
@@ -30,4 +30,5 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
 
 s3:
+#  This project's "staging" env maps to GLADs "uat" env
   bucketName: laa-get-payments-finance-data-uat-report-store
