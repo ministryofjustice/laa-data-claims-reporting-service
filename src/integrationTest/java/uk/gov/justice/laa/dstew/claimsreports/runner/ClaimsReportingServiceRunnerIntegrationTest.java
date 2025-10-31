@@ -1,6 +1,9 @@
 package uk.gov.justice.laa.dstew.claimsreports.runner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
 
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
@@ -16,6 +19,10 @@ import org.springframework.test.context.ActiveProfiles;
 import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.containers.PostgreSQLContainer;
+import software.amazon.awssdk.core.sync.RequestBody;
+import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import uk.gov.justice.laa.dstew.claimsreports.config.TestConfig;
 import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
 import uk.gov.justice.laa.dstew.claimsreports.service.ReplicationHealthCheckService;
 import uk.gov.justice.laa.dstew.claimsreports.service.Report000Service;
@@ -39,7 +46,7 @@ import uk.gov.justice.laa.dstew.claimsreports.service.Report000Service;
  * An active Spring profile, "test", is set to ensure specific test configurations are applied.
  * e.g. the sql scripts in the testdata folder which insert test data are run only for the test profile.
  */
-@SpringBootTest
+@SpringBootTest(classes = {TestConfig.class})
 @ActiveProfiles("test")
 @Testcontainers
 public class ClaimsReportingServiceRunnerIntegrationTest {
@@ -59,6 +66,9 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
   @Autowired
   private ReplicationHealthCheckService replicationHealthCheckService;
 
+  @Autowired
+  private S3Client s3Client;
+
   static {
     postgres.start();
     System.setProperty("spring.datasource.url", postgres.getJdbcUrl());
@@ -69,6 +79,7 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
   @BeforeEach
   void cleanReplicationSummaryTable() {
     jdbcTemplate.update("DELETE FROM claims.replication_summary");
+    reset(s3Client);
   }
 
   @Test
@@ -84,7 +95,11 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
     assertThat(rows).isNotEmpty();
     assertThat(rows.size()).isEqualTo(2);
 
-    // Validate CSV output or generated file if applicable
+    report000Service.generateReport();
+    verify(s3Client).putObject(any(PutObjectRequest.class), any(RequestBody.class));
+
+    // If we put in proper S3 mocking using LocalStack or Mini.io then we can confirm the CSV body is as expected
+
   }
 
   @Test
@@ -133,7 +148,8 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
         CLAIM_SUMMARY_FEE_TABLE_NAME, "Count mismatch — expected (1/2), actual (2/2)"
     );
 
-    assertThat(report.getFailedChecks()).isEqualTo(expectedFailures);  }
+    assertThat(report.getFailedChecks()).isEqualTo(expectedFailures);
+  }
 
 
   private void createReplicationSummaryTestData(
@@ -148,10 +164,10 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
 
       jdbcTemplate.update(
           """
-          INSERT INTO claims.replication_summary
-          (table_name, summary_date, record_count, updated_count, wal_lsn, created_on)
-          VALUES (?, ?, ?, ?, pg_current_wal_lsn(), ?)
-          """,
+              INSERT INTO claims.replication_summary
+              (table_name, summary_date, record_count, updated_count, wal_lsn, created_on)
+              VALUES (?, ?, ?, ?, pg_current_wal_lsn(), ?)
+              """,
           tableName, yesterday, recordCount, updatedCount, now);
     }
   }
