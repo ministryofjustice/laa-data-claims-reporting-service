@@ -3,11 +3,9 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 import javax.sql.DataSource;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
-import uk.gov.justice.laa.dstew.claimsreports.repository.RefreshableMaterializedView;
 
 /**
  * AbstractReportService serves as a base class for implementing report generation services
@@ -15,30 +13,36 @@ import uk.gov.justice.laa.dstew.claimsreports.repository.RefreshableMaterialized
  * refreshing materialized views and generating reports. Subclasses should provide specific
  * implementations for the abstract methods as needed.
  *
- * @param <T> The type of the entity managed by the associated repository.
- * @param <R> The type of the repository, which must be a combination of JpaRepository and
- *            RefreshableMaterializedView, ensuring support for both JPA operations and
- *            refreshing materialized views.
  */
 @Slf4j
 @Transactional
 @AllArgsConstructor
-public abstract class AbstractReportService<T, R extends JpaRepository<T, ?> & RefreshableMaterializedView> {
+public abstract class AbstractReportService {
 
-  protected final R repository;
   protected final JdbcTemplate jdbcTemplate;
   protected final DataSource dataSource;
-  protected AppConfig appConfig;
+  protected final AppConfig appConfig;
 
   /**
-   * Refreshes the associated materialized view by invoking the repository's refresh method.
-   * This method is implemented as part of the {@code AbstractReportService}, making it available
-   * to all concrete services extending from this base class.
+   * Gets the name of the materialized view associated with the current service.
+   * This method is intended to be implemented by subclasses to define the specific
+   * materialized view they are operating on.
+   *
+   * @return the name of the materialized view as a String
    */
+  protected abstract String getMaterializedViewName();
+
+  /**
+   * Refreshes the associated materialized view.
+   */
+  @Transactional
   public void refreshMaterializedView() {
-    log.info("Refreshing materialized view for {}", getClass().getSimpleName());
-    repository.refreshMaterializedView();
-    log.info("Refresh complete for {}", getClass().getSimpleName());
+    String viewName = getMaterializedViewName();
+    log.info("Refreshing materialized view {}", viewName);
+
+    jdbcTemplate.execute("REFRESH MATERIALIZED VIEW " + viewName);
+
+    log.info("Refresh complete for {}", viewName);
   }
 
   public abstract void generateReport();

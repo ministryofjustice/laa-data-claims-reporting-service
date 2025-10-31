@@ -8,7 +8,6 @@ import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
-import uk.gov.justice.laa.dstew.claimsreports.repository.Report000Repository;
 
 import static org.mockito.Mockito.*;
 
@@ -19,21 +18,15 @@ import javax.sql.DataSource;
  */
 class Report000ServiceTest {
 
-  private Report000Repository repository;
   private Report000Service service;
   private JdbcTemplate jdbcTemplate;
-  private DataSource dataSource;
-  private AppConfig appConfig;
-  private CsvCreationService creationService;
 
   @BeforeEach
   void setUp() {
-    repository = mock(Report000Repository.class);
     jdbcTemplate = mock(JdbcTemplate.class);
-    dataSource = mock(DataSource.class);
-    appConfig = mock(AppConfig.class);
-    creationService = mock(CsvCreationService.class);
-    service = new Report000Service(repository,jdbcTemplate, dataSource, appConfig);
+    DataSource dataSource = mock(DataSource.class);
+    AppConfig appConfig = mock(AppConfig.class);
+    service = new Report000Service(jdbcTemplate, dataSource, appConfig);
   }
 
   @Test
@@ -41,8 +34,9 @@ class Report000ServiceTest {
     // when
     service.refreshMaterializedView();
     // then
-    verify(repository, times(1)).refreshMaterializedView();
-    verifyNoMoreInteractions(repository);
+    verify(jdbcTemplate, times(1))
+        .execute("REFRESH MATERIALIZED VIEW claims.mvw_report_000");
+    verifyNoMoreInteractions(jdbcTemplate);
   }
 
   @Test

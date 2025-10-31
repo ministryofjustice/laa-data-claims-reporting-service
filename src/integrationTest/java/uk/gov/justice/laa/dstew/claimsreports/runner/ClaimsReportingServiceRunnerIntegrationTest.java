@@ -13,11 +13,10 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
+import org.testcontainers.junit.jupiter.Container;
 import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.containers.PostgreSQLContainer;
 import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
-import uk.gov.justice.laa.dstew.claimsreports.entity.Report000Entity;
-import uk.gov.justice.laa.dstew.claimsreports.repository.Report000Repository;
 import uk.gov.justice.laa.dstew.claimsreports.service.ReplicationHealthCheckService;
 import uk.gov.justice.laa.dstew.claimsreports.service.Report000Service;
 
@@ -27,14 +26,14 @@ import uk.gov.justice.laa.dstew.claimsreports.service.Report000Service;
  *
  * <p>
  * This test ensures that:
- * - The materialized view associated with `Report000Entity` is refreshed correctly.
+ * - The materialized view associated with `report000Service` is refreshed correctly.
  * - Data is successfully retrieved from the database.
  * - The generated reports or corresponding data output meet expected conditions.
  *
  * <p>
  * An embedded PostgreSQL container is used for the test database to simulate the production-like
  * environment. The `@SpringBootTest` annotation is used to load the application context, and
- * dependencies such as `Report000Service` and `Report000Repository` are autowired for testing.
+ * dependencies such as `Report000Service` are autowired for testing.
  *
  * <p>
  * An active Spring profile, "test", is set to ensure specific test configurations are applied.
@@ -45,16 +44,17 @@ import uk.gov.justice.laa.dstew.claimsreports.service.Report000Service;
 @Testcontainers
 public class ClaimsReportingServiceRunnerIntegrationTest {
 
+  public static final String CLAIM_TABLE_NAME = "claim";
+  public static final String CLIENT_TABLE_NAME = "client";
+  public static final String CLAIM_SUMMARY_FEE_TABLE_NAME = "claim_summary_fee";
+  @Container
   static PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17");
 
   @Autowired
-  private Report000Repository repository;
+  private JdbcTemplate jdbcTemplate;
 
   @Autowired
   private Report000Service report000Service;
-
-  @Autowired
-  private JdbcTemplate jdbcTemplate;
 
   @Autowired
   private ReplicationHealthCheckService replicationHealthCheckService;
@@ -73,9 +73,14 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
 
   @Test
   void testViewAndReportGeneration() {
+    // When
     report000Service.refreshMaterializedView();
 
-    List<Report000Entity> rows = repository.findAll();
+    // Then: verify materialized view contains expected data
+    List<Map<String, Object>> rows = jdbcTemplate.queryForList(
+        "SELECT * FROM claims.mvw_report_000"
+    );
+
     assertThat(rows).isNotEmpty();
     assertThat(rows.size()).isEqualTo(2);
 
@@ -89,9 +94,9 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
     OffsetDateTime now = OffsetDateTime.now();
 
     Map<String, Pair<Integer, Integer>> tableCounts = Map.of(
-        "claim", Pair.of(2, 1),
-        "client", Pair.of(2, 1),
-        "claim_summary_fee", Pair.of(2, 2)
+        CLAIM_TABLE_NAME, Pair.of(2, 1),
+        CLIENT_TABLE_NAME, Pair.of(2, 1),
+        CLAIM_SUMMARY_FEE_TABLE_NAME, Pair.of(2, 2)
     );
 
     createReplicationSummaryTestData(yesterday, now, tableCounts);
@@ -110,9 +115,9 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
     OffsetDateTime now = OffsetDateTime.now();
 
     Map<String, Pair<Integer, Integer>> tableCounts = Map.of(
-        "claim", Pair.of(3, 1),
-        "client", Pair.of(2, 2),
-        "claim_summary_fee", Pair.of(1, 2)
+        CLAIM_TABLE_NAME, Pair.of(3, 1),
+        CLIENT_TABLE_NAME, Pair.of(2, 2),
+        CLAIM_SUMMARY_FEE_TABLE_NAME, Pair.of(1, 2)
     );
 
     createReplicationSummaryTestData(yesterday, now, tableCounts);
@@ -123,9 +128,9 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
     assertThat(report).isNotNull();
     assertThat(report.isHealthy()).isFalse();
     Map<String, String> expectedFailures = Map.of(
-        "claim", "Count mismatch — expected (3/1), actual (2/1)",
-        "client", "Count mismatch — expected (2/2), actual (2/1)",
-        "claim_summary_fee", "Count mismatch — expected (1/2), actual (2/2)"
+        CLAIM_TABLE_NAME, "Count mismatch — expected (3/1), actual (2/1)",
+        CLIENT_TABLE_NAME, "Count mismatch — expected (2/2), actual (2/1)",
+        CLAIM_SUMMARY_FEE_TABLE_NAME, "Count mismatch — expected (1/2), actual (2/2)"
     );
 
     assertThat(report.getFailedChecks()).isEqualTo(expectedFailures);  }
@@ -143,7 +148,7 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
 
       jdbcTemplate.update(
           """
-          INSERT INTO claims.replication_summary 
+          INSERT INTO claims.replication_summary
           (table_name, summary_date, record_count, updated_count, wal_lsn, created_on)
           VALUES (?, ?, ?, ?, pg_current_wal_lsn(), ?)
           """,

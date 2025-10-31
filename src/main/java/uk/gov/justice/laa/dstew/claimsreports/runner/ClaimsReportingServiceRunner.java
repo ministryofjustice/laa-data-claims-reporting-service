@@ -40,7 +40,7 @@ public class ClaimsReportingServiceRunner  implements ApplicationRunner {
 
   private final ReplicationHealthCheckService replicationHealthCheckService;
   //Spring will auto-inject all services that implement the AbstractReportService
-  private final List<AbstractReportService<?, ?>> reportServices;
+  private final List<AbstractReportService> reportServices;
 
   @Override
   public void run(ApplicationArguments args) {
@@ -86,7 +86,7 @@ public class ClaimsReportingServiceRunner  implements ApplicationRunner {
    * which provides the necessary methods for refreshing materialized views and generating reports.
    */
   private void generateReports() {
-    for (AbstractReportService<?, ?> service : reportServices) {
+    for (AbstractReportService service : reportServices) {
       try {
         service.refreshMaterializedView();
         service.generateReport();
