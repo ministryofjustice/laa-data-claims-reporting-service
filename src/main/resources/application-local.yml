@@ -2,3 +2,6 @@ spring:
   flyway:
     locations:
       - classpath:db/migration/schema
+
+s3:
+  active: false

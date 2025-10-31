@@ -8,7 +8,7 @@ image:
   tag: null
 
 serviceAccount:
-  name: "laa-data-claims-reporting-service-uat-sa"
+  name: "laa-data-claims-reporting-service-uat-irsa-sa"
   automount: true
 
 service:
@@ -33,3 +33,7 @@ additionalScrapeConfigs:
   - job_name: 'pushgateway'
     static_configs:
       - targets: ['laa-data-claims-reporting-service-uat-pushgateway-prometheus-pu.laa-data-claims-reporting-service-uat.svc.cluster.local:9091']
+
+s3:
+  #  This project's "uat" env maps to GLADs "dev" env
+  bucketName: laa-get-payments-finance-data-dev-report-store

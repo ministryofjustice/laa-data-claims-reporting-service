@@ -8,7 +8,7 @@ image:
   tag: null
 
 serviceAccount:
-  name: "laa-data-claims-reporting-service-prod-sa"
+  name: "laa-data-claims-reporting-service-prod-irsa-sa"
   automount: true
 
 service:
@@ -28,3 +28,6 @@ autoscaling:
   minReplicas: 1
   maxReplicas: 100
   targetCPUUtilizationPercentage: 80
+
+s3:
+  bucketName: laa-get-payments-finance-data-prod-report-store

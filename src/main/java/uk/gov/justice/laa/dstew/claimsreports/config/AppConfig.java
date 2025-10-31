@@ -3,11 +3,14 @@ package uk.gov.justice.laa.dstew.claimsreports.config;
 import javax.sql.DataSource;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.autoconfigure.condition.ConditionalOnProperty;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
+import uk.gov.justice.laa.dstew.claimsreports.service.s3.LocalFileUploader;
 
 /**
  * Configuration class for application-level beans and settings.
@@ -55,5 +58,16 @@ public class AppConfig {
   @Getter
   @Value("${csv-creation.data-chunk-size:1000}")
   private int dataChunkSize;
+
+  /**
+   * The "havingValue = true" version is set up in {@link S3Config}.
+   *
+   * @return file uploader instance for local running
+   */
+  @Bean
+  @ConditionalOnProperty(name = "s3.active", havingValue = "false", matchIfMissing = true)
+  public FileUploader createLocalFileUploader() {
+    return new LocalFileUploader();
+  }
 
 }

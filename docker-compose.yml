@@ -6,6 +6,7 @@ services:
       - "8080:8080"
     environment:
       DB_HOST: data-claims-reporting-service-local-postgres
+      SPRING_PROFILES_ACTIVE: local
   postgres:
     image: postgres:17
     container_name: data-claims-reporting-service-local-postgres

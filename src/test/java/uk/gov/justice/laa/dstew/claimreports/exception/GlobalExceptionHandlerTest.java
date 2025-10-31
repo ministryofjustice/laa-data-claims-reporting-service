@@ -6,6 +6,9 @@ import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
+import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
+import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
 import uk.gov.justice.laa.dstew.claimsreports.exception.GlobalExceptionHandler;
 import uk.gov.justice.laa.dstew.claimsreports.exception.ItemNotFoundException;
 
@@ -32,4 +35,29 @@ class GlobalExceptionHandlerTest {
     assertThat(result.getBody()).isNotNull();
     assertThat(result.getBody()).isEqualTo("An unexpected application error has occurred.");
   }
+
+  @Test
+  void handleAwsServiceException_returnsInternalServerErrorStatusAndErrorMessage() {
+    var exception = NoSuchBucketException.builder().message("Bucket don't exist :(")
+        .awsErrorDetails(AwsErrorDetails.builder().errorCode("312").errorMessage("uh oh").build())
+        .build();
+
+    ResponseEntity<String> result = globalExceptionHandler.handleAwsErrors(exception);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getStatusCode()).isEqualTo(INTERNAL_SERVER_ERROR);
+    assertThat(result.getBody()).isNotNull();
+    assertThat(result.getBody()).isEqualTo("Failed to upload report.");
+  }
+
+  @Test
+  void handleCsvUploadException_returnsInternalServerErrorStatusAndErrorMessage() {
+    ResponseEntity<String> result = globalExceptionHandler.handleCsvUploadException(new CsvUploadException("File is wrong type"));
+
+    assertThat(result).isNotNull();
+    assertThat(result.getStatusCode()).isEqualTo(INTERNAL_SERVER_ERROR);
+    assertThat(result.getBody()).isNotNull();
+    assertThat(result.getBody()).isEqualTo("Failed to upload report.");
+  }
+
 }

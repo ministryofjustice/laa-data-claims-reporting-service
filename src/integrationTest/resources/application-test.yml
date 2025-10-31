@@ -3,3 +3,7 @@ spring:
     locations:
       - classpath:db/migration/schema
       - classpath:db/testdata
+
+# Normally these come from Kubernetes hence the formatting difference
+S3_REPORT_STORE: "testBucket"
+AWS_REGION: "eu-west-1"
