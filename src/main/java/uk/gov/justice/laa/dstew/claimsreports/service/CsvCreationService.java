@@ -1,13 +1,16 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import com.opencsv.CSVWriter;
 import java.io.BufferedWriter;
 import java.io.IOException;
+import java.io.StringWriter;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
 import javax.sql.DataSource;
 import lombok.AllArgsConstructor;
+import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -19,11 +22,22 @@ import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
  */
 @Service
 @Slf4j
-@AllArgsConstructor
 public class CsvCreationService {
   private final JdbcTemplate jdbcTemplate;
   private final DataSource dataSource;
   protected AppConfig appConfig;
+  StringWriter stringWriter = new StringWriter();
+  CSVWriter csvWriter = new CSVWriter(stringWriter,
+      CSVWriter.DEFAULT_SEPARATOR,
+      CSVWriter.DEFAULT_QUOTE_CHARACTER,  // Default quote character is double quote
+      CSVWriter.DEFAULT_ESCAPE_CHARACTER, // Default escape character is double quote
+      CSVWriter.DEFAULT_LINE_END);
+
+  public CsvCreationService(JdbcTemplate jdbcTemplate, DataSource dataSource, AppConfig appConfig) {
+    this.jdbcTemplate = jdbcTemplate;
+    this.dataSource = dataSource;
+    this.appConfig = appConfig;
+  }
 
   /**
    * Builds CSV from data retrieved from SQL query
@@ -43,16 +57,18 @@ public class CsvCreationService {
     }
 
     try (writer) {
-      StringBuilder line = new StringBuilder();
+      //StringBuilder line = new StringBuilder();
+      String[] line = null;
 
       jdbcTemplate.query(
           (Connection con) -> {
             return buildPreparedStatement(sqlQuery, con, appConfig.getDataChunkSize());
           },
-          new CsvRowCallbackHandler(writer, line, appConfig.getBufferFlushFrequency())
+          new CsvRowCallbackHandler(writer, line, appConfig.getBufferFlushFrequency(), csvWriter)
       );
 
-      writer.flush();
+      //writer.flush();
+      writer.write(stringWriter.toString());
 
       log.info("CSV creation completed");
 

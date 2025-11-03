@@ -46,7 +46,7 @@ public abstract class AbstractReportService {
     String viewName = getMaterializedViewName();
     log.info("Refreshing materialized view {}", viewName);
 
-    jdbcTemplate.execute("REFRESH MATERIALIZED VIEW " + viewName);
+ //   jdbcTemplate.execute("REFRESH MATERIALIZED VIEW " + viewName);
 
     log.info("Refresh complete for {}", viewName);
   }
@@ -87,12 +87,12 @@ public abstract class AbstractReportService {
       } finally {
         if (tempFile.exists()) {
           // Remove this if you want to test things locally and want to see the output file
-          boolean isFileDeleted = tempFile.delete();
-          if (isFileDeleted) {
-            log.info("Deleted temp file {}", tempFile.getPath());
-          } else {
-            log.warn("Failed to clean up file {}", tempFile.getPath());
-          }
+//          boolean isFileDeleted = tempFile.delete();
+//          if (isFileDeleted) {
+//            log.info("Deleted temp file {}", tempFile.getPath());
+//          } else {
+//            log.warn("Failed to clean up file {}", tempFile.getPath());
+//          }
         }
       }
 

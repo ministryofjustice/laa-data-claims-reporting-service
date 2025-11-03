@@ -26,7 +26,7 @@ public class Report000Service extends AbstractReportService {
 
   @Override
   protected String getMaterializedViewName() {
-    return "claims.mvw_report_000";
+    return "claims.test_table";
   }
 
   @Override

@@ -1,5 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import com.opencsv.CSVWriter;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.sql.ResultSet;
@@ -18,14 +19,16 @@ import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
  */
 class CsvRowCallbackHandler implements RowCallbackHandler {
   private final BufferedWriter writer;
-  private final StringBuilder line;
+  private String[] line;
   private final int bufferFlushFrequency;
+  private final CSVWriter csvWriter;
 
   @Autowired
-  public CsvRowCallbackHandler(BufferedWriter writer, StringBuilder line, int bufferFlushFreq) {
+  public CsvRowCallbackHandler(BufferedWriter writer, String[] line, int bufferFlushFreq, CSVWriter csvWriter) {
     this.writer = writer;
     this.line = line;
     this.bufferFlushFrequency = bufferFlushFreq;
+    this.csvWriter = csvWriter;
   }
 
   @Override
@@ -45,23 +48,31 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
       // Write header once
       if (resultSet.getRow() == 1) {
 
+        line = new String[columnCount];
+
         for (int i = 1; i <= columnCount; i++) {
           buildRow(line, meta.getColumnName(i), i, columnCount);
         }
-        writer.write(line.toString());
-        writer.write("\n");
+        csvWriter.writeNext(line);
+//        writer.write(line.toString());
+//        writer.write("\n");
       }
 
       // Clear StringBuilder instead of creating new instance,
       // as performance saving
-      line.setLength(0);
+      //line.length = ;
+
+      // TODO reset row???
+      line = new String[columnCount];
 
       // Write row
       for (int i = 1; i <= columnCount; i++) {
         buildRow(line, resultSet.getString(i), i, columnCount);
       }
-      writer.write(line.toString());
-      writer.write("\n");
+      csvWriter.writeNext(line);
+
+     // writer.write(line.toString());
+     // writer.write("\n");
 
       // Regular flush of buffer reduces memory usage when
       // processing large files.
@@ -83,10 +94,7 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
    * @param colNo column number
    * @param columnCount total columns in sheet
    */
-  private static void buildRow(StringBuilder line, String value, int colNo, int columnCount) {
-    line.append(value != null ? value : "");
-    if (colNo < columnCount) {
-      line.append(",");
-    }
+  private static void buildRow(String[] line, String value, int colNo, int columnCount) {
+    line[colNo-1] = value;
   }
 }
