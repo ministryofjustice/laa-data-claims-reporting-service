@@ -36,7 +36,7 @@ INSERT INTO submission (
              '11111111-1111-1111-1111-111111111111',
              'OA001',
              '2025-04',
-             'Crime',
+             'CRIME LOWER',
              'VALIDATION_SUCCEEDED',
              'CSN001',
              NULL,
@@ -57,13 +57,32 @@ INSERT INTO submission (
              '11111111-1111-1111-1111-111111111112',
              'OA001',
              '2025-04',
-             'Crime',
+             'CRIME LOWER',
              'VALIDATION_SUCCEEDED',
              'CSN001',
              NULL,
              FALSE,
              1,
              NULL,
+             'test_user',
+             NOW(),
+             'test provider user'
+         );
+
+INSERT INTO submission (
+    id, bulk_submission_id, office_account_number, submission_period, area_of_law, status, crime_lower_schedule_number,
+    previous_submission_id, is_nil_submission, number_of_claims, created_by_user_id, created_on, provider_user_id
+) VALUES (
+             '22222222-2222-2222-2222-222222222224',
+             '11111111-1111-1111-1111-111111111112',
+             'OA001',
+             '2025-05',
+             'CIVIL',
+             'VALIDATION_SUCCEEDED',
+             'CSN002',
+             NULL,
+             FALSE,
+             1,
              'test_user',
              NOW(),
              'test provider user'
