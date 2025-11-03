@@ -25,7 +25,7 @@ services:
     ports:
       - "4566:4566"
     environment:
-      - SERVICES=sqs
+      - SERVICES=s3
       - DEBUG=1
       - LOCALSTACK_INIT_SCRIPTS=/etc/localstack/init/ready.d
     volumes:
