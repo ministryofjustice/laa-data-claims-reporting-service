@@ -46,6 +46,3 @@ management:
 csv-creation:
   buffer-flush-freq: 5000
   data-chunk-size: 1000
-
-s3:
-  active: true
