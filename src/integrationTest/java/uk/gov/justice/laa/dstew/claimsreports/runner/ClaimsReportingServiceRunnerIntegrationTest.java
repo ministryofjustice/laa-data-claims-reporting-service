@@ -6,6 +6,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -87,6 +88,9 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
   @Autowired
   private S3Client s3Client;
 
+  @Autowired
+  private Clock staticClock;
+
   static {
     // Ensure both containers are fully started before Spring initializes the context
     postgres.start();
@@ -122,8 +126,8 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
 
   @Test
   void shouldReportHealthyReplicationWhenCountsMatch() {
-    LocalDate yesterday = LocalDate.now().minusDays(1);
-    OffsetDateTime now = OffsetDateTime.now();
+    LocalDate yesterday = LocalDate.now(staticClock).minusDays(1);
+    OffsetDateTime now = OffsetDateTime.now(staticClock);
 
     Map<String, Pair<Integer, Integer>> tableCounts = Map.of(
         CLAIM_TABLE_NAME, Pair.of(2, 1),
@@ -141,8 +145,8 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
 
   @Test
   void shouldReportUnhealthyReplicationWhenCountsDiffer() {
-    LocalDate yesterday = LocalDate.now().minusDays(1);
-    OffsetDateTime now = OffsetDateTime.now();
+    LocalDate yesterday = LocalDate.now(staticClock).minusDays(1);
+    OffsetDateTime now = OffsetDateTime.now(staticClock);
 
     Map<String, Pair<Integer, Integer>> tableCounts = Map.of(
         CLAIM_TABLE_NAME, Pair.of(3, 1),
@@ -230,8 +234,8 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
 
   private void insertHealthyReplicationData() {
     createReplicationSummaryTestData(
-        LocalDate.now().minusDays(1),
-        OffsetDateTime.now(),
+        LocalDate.now(staticClock).minusDays(1),
+        OffsetDateTime.now(staticClock),
         Map.of(
             CLAIM_TABLE_NAME, Pair.of(2, 1),
             CLIENT_TABLE_NAME, Pair.of(2, 1),

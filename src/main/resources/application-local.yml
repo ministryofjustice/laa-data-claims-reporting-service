@@ -2,6 +2,11 @@ spring:
   flyway:
     locations:
       - classpath:db/migration/schema
-
-s3:
-  active: false
+aws:
+  accessKeyId: test
+  secretAccessKey: test
+  s3:
+    endpoint: http://${LOCALSTACK_HOST:localhost}:4566
+# Normally these come from Kubernetes hence the formatting difference
+S3_REPORT_STORE: "test-bucket"
+AWS_REGION: eu-west-1

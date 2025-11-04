@@ -2,6 +2,7 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import java.math.BigInteger;
 import java.sql.Timestamp;
+import java.time.Clock;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -32,7 +33,7 @@ import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
 public class ReplicationHealthCheckService {
 
   private final JdbcTemplate jdbcTemplate;
-
+  private final Clock clock; //This is the system clock for normal prod use, overridden by a static one for tests.
   /**
    * Checks the replication health for a specific date, typically the previous day.
    * This method evaluates various metrics and conditions such as missing tables,
@@ -42,8 +43,9 @@ public class ReplicationHealthCheckService {
    * <p>@return A {@code ReplicationHealthReport} object containing the health status,
    *         any detected issues, and a summary of the replication's health for the checked date.
    */
+
   public ReplicationHealthReport checkReplicationHealth() {
-    final LocalDate summaryDate = LocalDate.now().minusDays(1);
+    final LocalDate summaryDate = LocalDate.now(clock).minusDays(1);
     final Timestamp startOfDay = Timestamp.valueOf(summaryDate.atStartOfDay());
     final Timestamp endOfDay = Timestamp.valueOf(summaryDate.plusDays(1).atStartOfDay());
 

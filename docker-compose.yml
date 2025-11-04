@@ -7,6 +7,7 @@ services:
     environment:
       DB_HOST: data-claims-reporting-service-local-postgres
       SPRING_PROFILES_ACTIVE: local
+      LOCALSTACK_HOST: localstack
   postgres:
     image: postgres:17
     container_name: data-claims-reporting-service-local-postgres

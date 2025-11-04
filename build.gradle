@@ -8,6 +8,10 @@ test {
     finalizedBy jacocoTestReport
 }
 
+bootRun {
+    systemProperty "spring.profiles.active", "local"
+}
+
 jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {

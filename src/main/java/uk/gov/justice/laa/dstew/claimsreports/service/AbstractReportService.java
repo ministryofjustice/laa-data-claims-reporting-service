@@ -71,7 +71,7 @@ public abstract class AbstractReportService {
   public void generateReport() {
     log.info("Generating report from {}", getClass().getSimpleName());
     File tempFile = new File("/tmp/" + getReportFileName());
-    log.info("Created temp file {}", tempFile.getPath());
+
     try {
       var sql = "SELECT * FROM " + getMaterializedViewName();
       try (BufferedWriter writer = Files.newBufferedWriter(tempFile.toPath())) {

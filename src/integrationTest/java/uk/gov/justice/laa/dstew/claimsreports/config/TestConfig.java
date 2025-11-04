@@ -1,6 +1,9 @@
 package uk.gov.justice.laa.dstew.claimsreports.config;
 
 import java.net.URI;
+import java.time.Clock;
+import java.time.LocalDate;
+import java.time.ZoneId;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.context.annotation.Bean;
@@ -49,4 +52,15 @@ public class TestConfig {
     return new S3FileUploader(s3ClientWrapper);
   }
 
+  @Bean
+  @Primary
+  public Clock fixedClock() {
+    return Clock.fixed(
+        LocalDate.of(2025, 11, 3)
+            .atTime(5, 0)                     // 5:00 AM
+            .atZone(ZoneId.systemDefault())   // apply your timezone
+            .toInstant(),
+        ZoneId.systemDefault()
+    );
+  }
 }
