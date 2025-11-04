@@ -6,11 +6,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.sql.DataSource;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import tools.jackson.databind.SequenceWriter;
 import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 
@@ -24,7 +27,6 @@ public class CsvCreationService {
   private final JdbcTemplate jdbcTemplate;
   private final DataSource dataSource;
   protected AppConfig appConfig;
-
   /**
    * Builds CSV from data retrieved from SQL query
    * Returns data in chunks, size defined in application config, to ensure
@@ -43,17 +45,16 @@ public class CsvCreationService {
     }
 
     try (writer) {
-      StringBuilder line = new StringBuilder();
+      Map<String, String> row = new LinkedHashMap<>();
 
       jdbcTemplate.query(
           (Connection con) -> {
             return buildPreparedStatement(sqlQuery, con, appConfig.getDataChunkSize());
           },
-          new CsvRowCallbackHandler(writer, line, appConfig.getBufferFlushFrequency())
+          new CsvRowCallbackHandler(writer, row, appConfig.getBufferFlushFrequency())
       );
 
       writer.flush();
-
       log.info("CSV creation completed");
 
     } catch (IOException ex) {

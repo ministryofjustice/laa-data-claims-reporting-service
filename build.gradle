@@ -59,4 +59,5 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-}
+
+    implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.0.1'}
