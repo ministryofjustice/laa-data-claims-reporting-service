@@ -1,21 +1,25 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
-
-import static org.mockito.Mockito.*;
-
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
- * Unit tests for {@link Report000Service}.
+ * Unit tests for {@link Report012Service}.
  */
-class Report000ServiceTest {
+class Report012ServiceTest {
 
-  private Report000Service service;
+  private Report012Service service;
   private JdbcTemplate jdbcTemplate;
   private CsvCreationService creationService;
   private S3ClientWrapper s3ClientWrapper;
@@ -25,7 +29,7 @@ class Report000ServiceTest {
     jdbcTemplate = mock(JdbcTemplate.class);
     creationService = mock(CsvCreationService.class);
     s3ClientWrapper = mock(S3ClientWrapper.class);
-    service = new Report000Service(jdbcTemplate, s3ClientWrapper, creationService);
+    service = new Report012Service(jdbcTemplate, s3ClientWrapper, creationService);
   }
 
   @Test
@@ -34,7 +38,7 @@ class Report000ServiceTest {
     service.refreshMaterializedView();
     // then
     verify(jdbcTemplate, times(1))
-        .execute("REFRESH MATERIALIZED VIEW claims.mvw_report_000");
+        .execute("REFRESH MATERIALIZED VIEW claims.mvw_report_012");
     verifyNoMoreInteractions(jdbcTemplate);
   }
 
@@ -43,8 +47,8 @@ class Report000ServiceTest {
 
     service.generateReport();
 
-    verify(creationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_000"), any(BufferedWriter.class));
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("report_000.csv"));
+    verify(creationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_012"), any(BufferedWriter.class));
+    verify(s3ClientWrapper).uploadFile(any(File.class), eq("report_012.csv"));
   }
 
 }

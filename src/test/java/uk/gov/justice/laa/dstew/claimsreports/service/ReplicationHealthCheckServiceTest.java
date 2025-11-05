@@ -1,6 +1,9 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import java.time.Clock;
+import java.time.Instant;
 import java.time.LocalDate;
+import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +27,8 @@ import static org.mockito.Mockito.when;
 
 class ReplicationHealthCheckServiceTest {
 
+  @Mock
+  private Clock clock;
 
   @Mock
   private JdbcTemplate jdbcTemplate;
@@ -34,12 +39,15 @@ class ReplicationHealthCheckServiceTest {
   @BeforeEach
   void setUp() {
     MockitoAnnotations.openMocks(this);
+    // Make clock.now() return a fixed instant
+    Instant fixedInstant = Instant.parse("2025-11-03T05:00:00Z");
+    when(clock.instant()).thenReturn(fixedInstant);
+    when(clock.getZone()).thenReturn(ZoneId.systemDefault());
   }
 
   @Test
   void testHealthyReplication() {
     // Given
-    LocalDate summaryDate = LocalDate.now().minusDays(1);
     List<String> publicationTables = List.of("claims.table1", "claims.table2");
 
     Map<String, ReplicationSummary> summaries = Map.of(
@@ -56,7 +64,7 @@ class ReplicationHealthCheckServiceTest {
         .thenReturn(summaries);
 
     // Mock WAL LSN
-    when(jdbcTemplate.queryForObject(eq("SELECT pg_current_wal_lsn()"), eq(String.class)))
+    when(jdbcTemplate.queryForObject("SELECT pg_current_wal_lsn()", String.class))
         .thenReturn("0/16B6C60");
 
 // Stub for replication summary query
@@ -93,7 +101,7 @@ class ReplicationHealthCheckServiceTest {
 
   @Test
   void testMissingTableDetected() {
-    LocalDate summaryDate = LocalDate.now().minusDays(1);
+    LocalDate summaryDate = LocalDate.now(clock).minusDays(1);
     List<String> publicationTables = List.of("claims.table1", "claims.table2");
     Map<String, ReplicationHealthCheckService.ReplicationSummary> summaries = Map.of(
         "claims.table1", new ReplicationHealthCheckService.ReplicationSummary("claims.table1", 10, 2, "0/16B6C50")
@@ -115,7 +123,7 @@ class ReplicationHealthCheckServiceTest {
 
   @Test
   void testWalProgressAheadTriggersFailure() {
-    LocalDate summaryDate = LocalDate.now().minusDays(1);
+    LocalDate summaryDate = LocalDate.now(clock).minusDays(1);
     List<String> publicationTables = List.of("claims.table1");
     Map<String, ReplicationHealthCheckService.ReplicationSummary> summaries = Map.of(
         "claims.table1", new ReplicationHealthCheckService.ReplicationSummary("claims.table1", 10, 2, "0/16B6D50")
@@ -145,7 +153,7 @@ class ReplicationHealthCheckServiceTest {
 
   @Test
   void testCountMismatchDetected() {
-    LocalDate summaryDate = LocalDate.now().minusDays(1);
+    LocalDate summaryDate = LocalDate.now(clock).minusDays(1);
     List<String> publicationTables = List.of("claims.table1");
     Map<String, ReplicationHealthCheckService.ReplicationSummary> summaries = Map.of(
         "claims.table1", new ReplicationHealthCheckService.ReplicationSummary("claims.table1", 10, 2, "0/16B6C50")

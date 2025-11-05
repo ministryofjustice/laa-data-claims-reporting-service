@@ -5,5 +5,5 @@ spring:
       - classpath:db/testdata
 
 # Normally these come from Kubernetes hence the formatting difference
-S3_REPORT_STORE: "testBucket"
+S3_REPORT_STORE: "test-bucket"
 AWS_REGION: "eu-west-1"

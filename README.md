@@ -43,6 +43,10 @@ kubectl get all
 kubectl logs <pod-name>
 ```
 
+### To view the files uploaded to the localstack S3 bucket you can use commands such as the follows:
+```
+aws --endpoint-url=http://localhost:4566 s3 ls s3://test-bucket/reports/
+```
 ### Updating Helm
 When making updates to Helm, it is possible to lint your changes to ensure no errors
 ```
