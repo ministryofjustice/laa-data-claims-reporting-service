@@ -8,6 +8,10 @@ test {
     finalizedBy jacocoTestReport
 }
 
+bootRun {
+    systemProperty "spring.profiles.active", "local"
+}
+
 jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
@@ -55,6 +59,7 @@ dependencies {
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:postgresql'
+    testImplementation "org.testcontainers:localstack:1.20.1"
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 

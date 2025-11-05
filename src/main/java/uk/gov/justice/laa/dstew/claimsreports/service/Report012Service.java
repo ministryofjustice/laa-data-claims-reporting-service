@@ -6,34 +6,35 @@ import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
- * Report000Service is responsible for generating and managing report_000.
+ * Report012Service is responsible for generating and managing report_012.
  * This service extends the AbstractReportService and provides
  * an implementation for the report generation process.
  * Responsibilities:
- * - Implements report generation logic for Report000 data.
+ * - Implements report generation logic for Report012 data.
  * - Utilizes the inherited functionality to refresh materialized views as needed.
  */
 @Slf4j
 @Service
-public class Report000Service extends AbstractReportService {
+public class Report012Service extends AbstractReportService {
 
-  public Report000Service(JdbcTemplate jdbcTemplate,
+  public Report012Service(JdbcTemplate jdbcTemplate,
                           S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService) {
     super(jdbcTemplate, s3ClientWrapper, csvCreationService);
   }
 
   @Override
   protected String getMaterializedViewName() {
-    return "claims.mvw_report_000";
+    return "claims.mvw_report_012";
   }
 
   @Override
   protected String getReportFileName() {
-    return "report_000.csv";
+    return "report_012.csv";
   }
 
   @Override
   protected String getReportName() {
-    return "REPORT000";
+    return "REPORT012";
   }
+
 }

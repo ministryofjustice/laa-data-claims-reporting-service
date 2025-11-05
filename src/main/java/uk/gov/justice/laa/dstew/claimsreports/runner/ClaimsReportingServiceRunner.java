@@ -86,6 +86,7 @@ public class ClaimsReportingServiceRunner  implements ApplicationRunner {
    * which provides the necessary methods for refreshing materialized views and generating reports.
    */
   private void generateReports() {
+    log.info("Generating {} reports...", reportServices.size());
     for (AbstractReportService service : reportServices) {
       try {
         service.refreshMaterializedView();

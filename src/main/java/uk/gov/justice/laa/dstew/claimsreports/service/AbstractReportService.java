@@ -2,16 +2,14 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import java.io.BufferedWriter;
 import java.io.File;
-import java.io.FileWriter;
 import java.io.IOException;
-import javax.sql.DataSource;
+import java.nio.file.Files;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
-import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
-import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
+import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
  * AbstractReportService serves as a base class for implementing report generation services
@@ -26,7 +24,7 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
 public abstract class AbstractReportService {
 
   protected final JdbcTemplate jdbcTemplate;
-  protected final FileUploader fileUploader;
+  protected final S3ClientWrapper s3ClientWrapper;
   protected final CsvCreationService csvCreationService;
 
   /**
@@ -72,33 +70,30 @@ public abstract class AbstractReportService {
    */
   public void generateReport() {
     log.info("Generating report from {}", getClass().getSimpleName());
+    File tempFile = new File("/tmp/" + getReportFileName());
 
     try {
-      File tempFile = new File("/tmp/" + getReportFileName());
-      log.info("Created temp file {}", tempFile.getPath());
-
-      try {
-        var sql = "SELECT * FROM " + getMaterializedViewName();
-        csvCreationService.buildCsvFromData(sql, new BufferedWriter(new FileWriter(tempFile)));
-        fileUploader.uploadFile(tempFile, getReportFileName());
-      } catch (CsvCreationException e) {
-        log.info("Failure to create {}", getReportName());
-        throw e;
-      } finally {
-        if (tempFile.exists()) {
-          // Remove this if you want to test things locally and want to see the output file
-          boolean isFileDeleted = tempFile.delete();
-          if (isFileDeleted) {
-            log.info("Deleted temp file {}", tempFile.getPath());
-          } else {
-            log.warn("Failed to clean up file {}", tempFile.getPath());
-          }
-        }
+      var sql = "SELECT * FROM " + getMaterializedViewName();
+      try (BufferedWriter writer = Files.newBufferedWriter(tempFile.toPath())) {
+        csvCreationService.buildCsvFromData(sql, writer);
       }
-
-    } catch (IOException e) {
+      s3ClientWrapper.uploadFile(tempFile, getReportFileName());
+    } catch (Exception e) {
+      log.error("Failed to generate {}: {}", getReportName(), e.getMessage());
       throw new CsvCreationException("Failure to create " + getReportName() + ": " + e.getMessage());
+    } finally {
+      deleteTempFile(tempFile);
     }
   }
 
+  private void deleteTempFile(File tempFile) {
+    if (tempFile.exists()) {
+      try {
+        Files.delete(tempFile.toPath());
+        log.info("Deleted temp file {}", tempFile.getPath());
+      } catch (IOException e) {
+        log.warn("Failed to delete temp file {}: {}", tempFile.getPath(), e.getMessage());
+      }
+    }
+  }
 }
