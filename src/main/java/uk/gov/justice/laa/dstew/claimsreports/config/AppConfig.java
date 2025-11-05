@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import tools.jackson.databind.SequenceWriter;
+import tools.jackson.dataformat.csv.CsvMapper;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.LocalFileUploader;
 
@@ -69,6 +70,11 @@ public class AppConfig {
   @ConditionalOnProperty(name = "s3.active", havingValue = "false", matchIfMissing = true)
   public FileUploader createLocalFileUploader() {
     return new LocalFileUploader();
+  }
+
+  @Bean
+  public CsvMapper createCsvMapper(){
+    return new CsvMapper();
   }
 
 }

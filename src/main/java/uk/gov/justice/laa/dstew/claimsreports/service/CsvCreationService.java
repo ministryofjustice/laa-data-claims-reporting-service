@@ -14,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import tools.jackson.databind.SequenceWriter;
+import tools.jackson.dataformat.csv.CsvMapper;
 import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 
@@ -27,6 +28,8 @@ public class CsvCreationService {
   private final JdbcTemplate jdbcTemplate;
   private final DataSource dataSource;
   protected AppConfig appConfig;
+  private final CsvMapper csvMapper;
+
   /**
    * Builds CSV from data retrieved from SQL query
    * Returns data in chunks, size defined in application config, to ensure
@@ -51,7 +54,7 @@ public class CsvCreationService {
           (Connection con) -> {
             return buildPreparedStatement(sqlQuery, con, appConfig.getDataChunkSize());
           },
-          new CsvRowCallbackHandler(writer, row, appConfig.getBufferFlushFrequency())
+          new CsvRowCallbackHandler(writer, row, appConfig.getBufferFlushFrequency(), csvMapper)
       );
 
       writer.flush();

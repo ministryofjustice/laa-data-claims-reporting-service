@@ -27,16 +27,17 @@ import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 class CsvRowCallbackHandler implements RowCallbackHandler {
   private final BufferedWriter writer;
   private final int bufferFlushFrequency;
-  private CsvSchema schema;
   private final Map<String, String> row;
   private SequenceWriter sequenceWriter;
+  private final CsvMapper csvMapper;
 
 
   @Autowired
-  public CsvRowCallbackHandler(BufferedWriter writer, Map<String, String> row, int bufferFlushFreq) {
+  public CsvRowCallbackHandler(BufferedWriter writer, Map<String, String> row, int bufferFlushFreq, CsvMapper csvMapper) {
     this.writer = writer;
     this.row = row;
     this.bufferFlushFrequency = bufferFlushFreq;
+    this.csvMapper = csvMapper;
   }
 
   @Override
@@ -66,11 +67,10 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
           for (int j = 1; j <= columnCount; j++) {
             schemaBuilder.addColumn(meta.getColumnName(j));
           }
-          schema = schemaBuilder.build();
+          CsvSchema schema = schemaBuilder.build();
 
-          CsvMapper mapper = new CsvMapper();
           // Knows what schema and format to use
-          ObjectWriter objectWriter = mapper.writer(schema);
+          ObjectWriter objectWriter = csvMapper.writer(schema);
           // Streaming writer that handles CSV formatting, quotations, line endings etc.
           sequenceWriter = objectWriter.writeValues(writer);
 

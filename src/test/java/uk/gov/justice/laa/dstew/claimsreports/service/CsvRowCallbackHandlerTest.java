@@ -1,7 +1,8 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
-import io.swagger.v3.oas.models.links.Link;
 import org.junit.jupiter.api.Assertions;
+
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -15,10 +16,12 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.boot.actuate.endpoint.web.Link;
 import tools.jackson.databind.ObjectWriter;
 import tools.jackson.databind.SequenceWriter;
 import tools.jackson.databind.SerializationFeature;
 import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvSchema;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -56,25 +59,45 @@ public class CsvRowCallbackHandlerTest {
     row = new LinkedHashMap<>();
     stringWriter = new StringWriter();
     writer = new BufferedWriter(stringWriter);
-    csvRowCallbackHandler = new CsvRowCallbackHandler(writer, row, 10);
+    csvRowCallbackHandler = new CsvRowCallbackHandler(writer, row, 10, csvMapper);
   }
 
   @Test
-  void buildsOutputWithSingleRow() throws SQLException {
+  void willSetupHeaderRowFirstTimeAround() throws SQLException {
+    var expectedRowMap = new LinkedHashMap<String, String>();
     when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
     when(resultSet.getRow()).thenReturn(1);
     when(resultSet.getString(anyInt())).thenReturn("data");
     when(resultSetMetaData.getColumnCount()).thenReturn(10);
     for (int i = 1; i <= 10; i++) {
       when(resultSetMetaData.getColumnName(i)).thenReturn("column_" + i);
+      expectedRowMap.put("column_" + i, "data");
     }
-//    when(csvMapper.writer(any(SerializationFeature.class))).thenReturn(objectWriter);
-//    when(objectWriter.writeValues(writer)).thenReturn(sequenceWriter);
+    when(csvMapper.writer(any(CsvSchema.class))).thenReturn(objectWriter);
+    when(objectWriter.writeValues(writer)).thenReturn(sequenceWriter);
 
     csvRowCallbackHandler.processRow(resultSet);
-    Assertions.assertEquals("column_1,column_2,column_3,column_4,column_5,column_6,column_7,column_8,column_9,column_10\n" +
-            "data,data,data,data,data,data,data,data,data,data\n",stringWriter.toString());
+    verify(sequenceWriter).write(expectedRowMap);
   }
+
+  @Test
+  void buildsOutputForSubsequentRowsWithoutRebuildingSequenceWriter() throws SQLException {
+    var expectedRowMap = new LinkedHashMap<String, String>();
+    when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
+    when(resultSet.getRow()).thenReturn(10);
+    when(resultSet.getString(anyInt())).thenReturn("data");
+    when(resultSetMetaData.getColumnCount()).thenReturn(10);
+    for (int i = 1; i <= 10; i++) {
+      when(resultSetMetaData.getColumnName(i)).thenReturn("column_" + i);
+      expectedRowMap.put("column_" + i, "data");
+    }
+    when(csvMapper.writer(any(CsvSchema.class))).thenReturn(objectWriter);
+    when(objectWriter.writeValues(writer)).thenReturn(sequenceWriter);
+
+    csvRowCallbackHandler.processRow(resultSet);
+    verify(sequenceWriter).write(expectedRowMap);
+  }
+
 
   @Test
   void willNotFlushBufferIfDataSizeIsSmallerThanBufferFlushValue() throws SQLException {
@@ -96,7 +119,7 @@ public class CsvRowCallbackHandlerTest {
   @Test
   void willFlushWhenRowNumberEqualsFlushSize() throws SQLException, IOException {
     // Confirms that buffer will not be fully flushed if no. of rows % flush frequent != 0
-    CsvRowCallbackHandler csvRowCallbackHandler = new CsvRowCallbackHandler(writer, row, 1);
+    CsvRowCallbackHandler csvRowCallbackHandler = new CsvRowCallbackHandler(writer, row, 1, csvMapper);
     when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
     when(resultSet.getRow()).thenReturn(1);
     when(resultSet.getString(anyInt())).thenReturn("data");
