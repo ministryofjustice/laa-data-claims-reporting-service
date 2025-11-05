@@ -5,12 +5,10 @@ import java.io.File;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
-import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
 
 import static org.mockito.Mockito.*;
 
-import javax.sql.DataSource;
-import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
+import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
  * Unit tests for {@link Report000Service}.
@@ -20,14 +18,14 @@ class Report000ServiceTest {
   private Report000Service service;
   private JdbcTemplate jdbcTemplate;
   private CsvCreationService creationService;
-  private FileUploader fileUploader;
+  private S3ClientWrapper s3ClientWrapper;
 
   @BeforeEach
   void setUp() {
     jdbcTemplate = mock(JdbcTemplate.class);
     creationService = mock(CsvCreationService.class);
-    fileUploader = mock(FileUploader.class);
-    service = new Report000Service(jdbcTemplate, fileUploader, creationService);
+    s3ClientWrapper = mock(S3ClientWrapper.class);
+    service = new Report000Service(jdbcTemplate, s3ClientWrapper, creationService);
   }
 
   @Test
@@ -46,7 +44,7 @@ class Report000ServiceTest {
     service.generateReport();
 
     verify(creationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_000"), any(BufferedWriter.class));
-    verify(fileUploader).uploadFile(any(File.class), eq("report_000.csv"));
+    verify(s3ClientWrapper).uploadFile(any(File.class), eq("report_000.csv"));
   }
 
 }

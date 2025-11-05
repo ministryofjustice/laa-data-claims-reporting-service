@@ -9,7 +9,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
-import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
+import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
  * AbstractReportService serves as a base class for implementing report generation services
@@ -24,7 +24,7 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
 public abstract class AbstractReportService {
 
   protected final JdbcTemplate jdbcTemplate;
-  protected final FileUploader fileUploader;
+  protected final S3ClientWrapper s3ClientWrapper;
   protected final CsvCreationService csvCreationService;
 
   /**
@@ -77,7 +77,7 @@ public abstract class AbstractReportService {
       try (BufferedWriter writer = Files.newBufferedWriter(tempFile.toPath())) {
         csvCreationService.buildCsvFromData(sql, writer);
       }
-      fileUploader.uploadFile(tempFile, getReportFileName());
+      s3ClientWrapper.uploadFile(tempFile, getReportFileName());
     } catch (Exception e) {
       log.error("Failed to generate {}: {}", getReportName(), e.getMessage());
       throw new CsvCreationException("Failure to create " + getReportName() + ": " + e.getMessage());

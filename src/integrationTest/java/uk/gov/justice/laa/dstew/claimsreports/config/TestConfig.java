@@ -14,9 +14,7 @@ import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.BucketAlreadyOwnedByYouException;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
-import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
-import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3FileUploader;
 
 @TestConfiguration
 public class TestConfig {
@@ -44,12 +42,6 @@ public class TestConfig {
       // ignore
     }
     return new S3ClientWrapper(localstackS3Client, bucketName);
-  }
-
-  @Bean
-  @Primary
-  public FileUploader createTestFileUploader(S3ClientWrapper s3ClientWrapper) {
-    return new S3FileUploader(s3ClientWrapper);
   }
 
   @Bean

@@ -3,7 +3,7 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
+import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
  * Report012Service is responsible for generating and managing report_012.
@@ -18,8 +18,8 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
 public class Report012Service extends AbstractReportService {
 
   public Report012Service(JdbcTemplate jdbcTemplate,
-                          FileUploader fileUploader, CsvCreationService csvCreationService) {
-    super(jdbcTemplate, fileUploader, csvCreationService);
+                          S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService) {
+    super(jdbcTemplate, s3ClientWrapper, csvCreationService);
   }
 
   @Override

@@ -9,9 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
-import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3FileUploader;
 
 /**
  * Configuration class for application-level beans and settings.
@@ -71,8 +69,8 @@ public class AppConfig {
   private int dataChunkSize;
 
   @Bean
-  public FileUploader createFileUploader(@Value("${AWS_REGION}") String awsRegion, @Value("${S3_REPORT_STORE}") String bucketName) {
-    return new S3FileUploader(new S3ClientWrapper(awsRegion, bucketName));
+  public S3ClientWrapper createS3ClientWrapper(@Value("${AWS_REGION}") String awsRegion, @Value("${S3_REPORT_STORE}") String bucketName) {
+    return new S3ClientWrapper(awsRegion, bucketName);
   }
 
 }

@@ -12,9 +12,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.BucketAlreadyOwnedByYouException;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
-import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
-import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3FileUploader;
 
 /**
  * Configuration class for setting up S3-related beans for use in a local development environment
@@ -82,11 +80,6 @@ public class LocalstackS3Config {
     }
 
     return new S3ClientWrapper(localstackS3Client, bucketName);
-  }
-
-  @Bean
-  public FileUploader fileUploader(S3ClientWrapper s3ClientWrapper) {
-    return new S3FileUploader(s3ClientWrapper);
   }
 
 }

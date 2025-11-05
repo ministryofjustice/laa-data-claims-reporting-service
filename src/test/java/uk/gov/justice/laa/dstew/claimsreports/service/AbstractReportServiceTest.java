@@ -8,14 +8,11 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
-import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
-import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
+import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.mockito.Mockito.*;
-
-import javax.sql.DataSource;
 
 /**
  * Unit tests for AbstractReportService
@@ -24,8 +21,8 @@ class AbstractReportServiceTest {
 
   // Define a concrete subclass for testing purposes
   static class TestReportService extends AbstractReportService {
-    public TestReportService(JdbcTemplate template, FileUploader fileUploader, CsvCreationService csvCreationService) {
-      super(template, fileUploader, csvCreationService);
+    public TestReportService(JdbcTemplate template, S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService) {
+      super(template, s3ClientWrapper, csvCreationService);
     }
 
     @Override
@@ -48,15 +45,15 @@ class AbstractReportServiceTest {
   private TestReportService service;
   private JdbcTemplate jdbcTemplate;
   private CsvCreationService csvCreationService;
-  private FileUploader fileUploader;
+  private S3ClientWrapper s3ClientWrapper;
 
 
   @BeforeEach
   void setUp() {
     jdbcTemplate = mock(JdbcTemplate.class);
-    fileUploader = mock(FileUploader.class);
+    s3ClientWrapper = mock(S3ClientWrapper.class);
     csvCreationService = mock(CsvCreationService.class);
-    service = new TestReportService(jdbcTemplate, fileUploader, csvCreationService);
+    service = new TestReportService(jdbcTemplate, s3ClientWrapper, csvCreationService);
   }
 
   @Test
@@ -96,7 +93,7 @@ class AbstractReportServiceTest {
     service.generateReport();
 
     verify(csvCreationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_000"), any(BufferedWriter.class));
-    verify(fileUploader).uploadFile(any(File.class), eq("test_report.csv"));
+    verify(s3ClientWrapper).uploadFile(any(File.class), eq("test_report.csv"));
   }
 
   @Test

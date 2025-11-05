@@ -12,7 +12,7 @@ import java.io.File;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
-import uk.gov.justice.laa.dstew.claimsreports.service.s3.FileUploader;
+import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
  * Unit tests for {@link Report012Service}.
@@ -22,14 +22,14 @@ class Report012ServiceTest {
   private Report012Service service;
   private JdbcTemplate jdbcTemplate;
   private CsvCreationService creationService;
-  private FileUploader fileUploader;
+  private S3ClientWrapper s3ClientWrapper;
 
   @BeforeEach
   void setUp() {
     jdbcTemplate = mock(JdbcTemplate.class);
     creationService = mock(CsvCreationService.class);
-    fileUploader = mock(FileUploader.class);
-    service = new Report012Service(jdbcTemplate, fileUploader, creationService);
+    s3ClientWrapper = mock(S3ClientWrapper.class);
+    service = new Report012Service(jdbcTemplate, s3ClientWrapper, creationService);
   }
 
   @Test
@@ -48,7 +48,7 @@ class Report012ServiceTest {
     service.generateReport();
 
     verify(creationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_012"), any(BufferedWriter.class));
-    verify(fileUploader).uploadFile(any(File.class), eq("report_012.csv"));
+    verify(s3ClientWrapper).uploadFile(any(File.class), eq("report_012.csv"));
   }
 
 }
