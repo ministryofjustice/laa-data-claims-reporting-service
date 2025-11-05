@@ -13,7 +13,6 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-import tools.jackson.databind.SequenceWriter;
 import tools.jackson.dataformat.csv.CsvMapper;
 import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
@@ -51,9 +50,7 @@ public class CsvCreationService {
       Map<String, String> row = new LinkedHashMap<>();
 
       jdbcTemplate.query(
-          (Connection con) -> {
-            return buildPreparedStatement(sqlQuery, con, appConfig.getDataChunkSize());
-          },
+          (Connection con) -> buildPreparedStatement(sqlQuery, con, appConfig.getDataChunkSize()),
           new CsvRowCallbackHandler(writer, row, appConfig.getBufferFlushFrequency(), csvMapper)
       );
 

@@ -48,4 +48,4 @@ csv-creation:
   data-chunk-size: 1000
 
 s3:
-  active: false
+  active: true

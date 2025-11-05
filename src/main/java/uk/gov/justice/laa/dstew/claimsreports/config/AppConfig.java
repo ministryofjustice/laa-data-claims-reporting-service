@@ -72,9 +72,13 @@ public class AppConfig {
     return new LocalFileUploader();
   }
 
+  /**
+   * Defines CSV mapping instance for use in CSV creation.
+   *
+   * @return csvMapper
+   */
   @Bean
-  public CsvMapper createCsvMapper(){
+  public CsvMapper createCsvMapper() {
     return new CsvMapper();
   }
-
 }
