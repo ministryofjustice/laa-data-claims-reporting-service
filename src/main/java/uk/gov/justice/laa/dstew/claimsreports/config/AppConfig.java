@@ -9,8 +9,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
-import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 import tools.jackson.dataformat.csv.CsvMapper;
+import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
  * Configuration class for application-level beans and settings.

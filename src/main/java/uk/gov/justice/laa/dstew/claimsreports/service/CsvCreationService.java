@@ -58,11 +58,11 @@ public class CsvCreationService {
       log.info("CSV creation completed");
 
     } catch (IOException ex) {
-      throw new CsvCreationException("Failure to write to file: " + ex.getMessage());
+      throw new CsvCreationException("Failure to write to file", ex);
     } catch (CsvCreationException ex) {
       throw ex;
     } catch (Exception ex) {
-      throw new CsvCreationException("Failure during CSV creation " + ex.getMessage());
+      throw new CsvCreationException("Failure during CSV creation", ex);
     }
   }
 
@@ -86,8 +86,7 @@ public class CsvCreationService {
       statement.setFetchSize(dataChunkSize);
       return statement;
     } catch (SQLException ex) {
-      throw new CsvCreationException("Failed on creation of prepared statement "
-          + ex.getNextException());
+      throw new CsvCreationException("Failed on creation of prepared statement", ex);
     }
   }
 

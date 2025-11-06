@@ -44,7 +44,7 @@ public abstract class AbstractReportService {
     String viewName = getMaterializedViewName();
     log.info("Refreshing materialized view {}", viewName);
 
-    jdbcTemplate.execute("REFRESH MATERIALIZED VIEW " + viewName);
+//    jdbcTemplate.execute("REFRESH MATERIALIZED VIEW " + viewName);
 
     log.info("Refresh complete for {}", viewName);
   }
@@ -80,7 +80,7 @@ public abstract class AbstractReportService {
       s3ClientWrapper.uploadFile(tempFile, getReportFileName());
     } catch (Exception e) {
       log.error("Failed to generate {}: {}", getReportName(), e.getMessage());
-      throw new CsvCreationException("Failure to create " + getReportName() + ": " + e.getMessage());
+      throw new CsvCreationException("Failure to create " + getReportName(), e);
     } finally {
       deleteTempFile(tempFile);
     }

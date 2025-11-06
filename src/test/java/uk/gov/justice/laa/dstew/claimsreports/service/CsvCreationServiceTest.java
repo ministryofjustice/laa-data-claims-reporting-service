@@ -76,7 +76,7 @@ public class CsvCreationServiceTest {
   void shouldThrowCsvCreationExceptionWhenFlushThrows() throws IOException {
     doThrow(new IOException("Stream error")).when(bufferedWriter).flush();
     Exception ex = assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData("SELECT * FROM ANY_REPORT.DATA", bufferedWriter));
-    assertTrue(ex.getMessage().contains("Failure to write to file: "));
+    assertTrue(ex.getMessage().contains("Failure to write to file"));
   }
 
   @Test

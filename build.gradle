@@ -52,6 +52,8 @@ dependencies {
     implementation 'io.netty:netty-codec-http:4.1.125.Final'
     implementation 'io.netty:netty-codec-http2:4.1.125.Final'
 
+    implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.0.1'
+
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly "org.flywaydb:flyway-database-postgresql"
 
@@ -64,5 +66,4 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
-
-    implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.0.1'}
+}

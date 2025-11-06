@@ -5,8 +5,7 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Map;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import tools.jackson.core.exc.JacksonIOException;
 import tools.jackson.databind.ObjectWriter;
@@ -20,21 +19,13 @@ import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
  * will be flushed to ensure CSV creation remains performant and does not hold too much data in memory during processing.
  * Final buffer flush will need to be done by method that utilises this handler, to ensure there are no remaining rows left in the buffer.
  */
+@RequiredArgsConstructor
 class CsvRowCallbackHandler implements RowCallbackHandler {
   private final BufferedWriter writer;
-  private final int bufferFlushFrequency;
   private final Map<String, String> row;
-  private SequenceWriter sequenceWriter;
+  private final int bufferFlushFrequency;
   private final CsvMapper csvMapper;
-
-
-  @Autowired
-  public CsvRowCallbackHandler(BufferedWriter writer, Map<String, String> row, int bufferFlushFreq, CsvMapper csvMapper) {
-    this.writer = writer;
-    this.row = row;
-    this.bufferFlushFrequency = bufferFlushFreq;
-    this.csvMapper = csvMapper;
-  }
+  private SequenceWriter sequenceWriter;
 
   @Override
   public void processRow(ResultSet resultSet) {
@@ -53,19 +44,7 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
 
       // Write header once
       if (resultSet.getRow() == 1) {
-
-        for (int i = 1; i <= columnCount; i++) {
-          CsvSchema.Builder schemaBuilder = CsvSchema.builder().setUseHeader(true);
-          for (int j = 1; j <= columnCount; j++) {
-            schemaBuilder.addColumn(meta.getColumnName(j));
-          }
-          CsvSchema schema = schemaBuilder.build();
-
-          // Knows what schema and format to use
-          ObjectWriter objectWriter = csvMapper.writer(schema);
-          // Streaming writer that handles CSV formatting, quotations, line endings etc.
-          sequenceWriter = objectWriter.writeValues(writer);
-        }
+        addCsvHeaders(columnCount, meta);
       }
 
       // Clear Map instead of creating new instance,
@@ -84,8 +63,20 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
       }
 
     } catch (JacksonIOException | SQLException ex) {
-      throw new CsvCreationException("Failure to write data row to new csv file: "
-          + ex.getMessage());
+      throw new CsvCreationException("Failure to write data row to new csv file", ex);
     }
+  }
+
+  private void addCsvHeaders(int columnCount, ResultSetMetaData meta) throws SQLException {
+    CsvSchema.Builder schemaBuilder = CsvSchema.builder().setUseHeader(true);
+    for (int i = 1; i <= columnCount; i++) {
+      schemaBuilder.addColumn(meta.getColumnName(i));
+    }
+    CsvSchema schema = schemaBuilder.build();
+
+    // Knows what schema and format to use
+    ObjectWriter objectWriter = csvMapper.writer(schema);
+    // Streaming writer that handles CSV formatting, quotations, line endings etc.
+    sequenceWriter = objectWriter.writeValues(writer);
   }
 }

@@ -13,4 +13,15 @@ public class CsvCreationException extends RuntimeException {
   public CsvCreationException(String message) {
     super(message);
   }
+
+  /**
+   * Constructor for CsV Creation Exception that provides information on root cause of error.
+   *
+   * @param message new error message
+   * @param cause original source of error
+   */
+  public CsvCreationException(String message, Throwable cause) {
+    super(message, cause);
+  }
+
 }
