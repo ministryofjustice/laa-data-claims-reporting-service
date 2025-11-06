@@ -6,11 +6,14 @@ import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;
 import java.sql.SQLException;
+import java.util.LinkedHashMap;
+import java.util.Map;
 import javax.sql.DataSource;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import tools.jackson.dataformat.csv.CsvMapper;
 import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 
@@ -24,6 +27,7 @@ public class CsvCreationService {
   private final JdbcTemplate jdbcTemplate;
   private final DataSource dataSource;
   protected AppConfig appConfig;
+  private final CsvMapper csvMapper;
 
   /**
    * Builds CSV from data retrieved from SQL query
@@ -43,25 +47,22 @@ public class CsvCreationService {
     }
 
     try (writer) {
-      StringBuilder line = new StringBuilder();
+      Map<String, String> row = new LinkedHashMap<>();
 
       jdbcTemplate.query(
-          (Connection con) -> {
-            return buildPreparedStatement(sqlQuery, con, appConfig.getDataChunkSize());
-          },
-          new CsvRowCallbackHandler(writer, line, appConfig.getBufferFlushFrequency())
+          (Connection con) -> buildPreparedStatement(sqlQuery, con, appConfig.getDataChunkSize()),
+          new CsvRowCallbackHandler(writer, row, appConfig.getBufferFlushFrequency(), csvMapper)
       );
 
       writer.flush();
-
       log.info("CSV creation completed");
 
     } catch (IOException ex) {
-      throw new CsvCreationException("Failure to write to file: " + ex.getMessage());
+      throw new CsvCreationException("Failure to write to file", ex);
     } catch (CsvCreationException ex) {
       throw ex;
     } catch (Exception ex) {
-      throw new CsvCreationException("Failure during CSV creation " + ex.getMessage());
+      throw new CsvCreationException("Failure during CSV creation", ex);
     }
   }
 
@@ -85,8 +86,7 @@ public class CsvCreationService {
       statement.setFetchSize(dataChunkSize);
       return statement;
     } catch (SQLException ex) {
-      throw new CsvCreationException("Failed on creation of prepared statement "
-          + ex.getNextException());
+      throw new CsvCreationException("Failed on creation of prepared statement", ex);
     }
   }
 

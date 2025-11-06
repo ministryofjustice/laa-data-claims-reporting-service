@@ -1,14 +1,17 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import java.io.BufferedWriter;
-import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
+import java.util.Map;
+import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowCallbackHandler;
-import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
+import tools.jackson.core.exc.JacksonIOException;
+import tools.jackson.databind.ObjectWriter;
+import tools.jackson.databind.SequenceWriter;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvSchema;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 
 /**
@@ -16,77 +19,64 @@ import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
  * will be flushed to ensure CSV creation remains performant and does not hold too much data in memory during processing.
  * Final buffer flush will need to be done by method that utilises this handler, to ensure there are no remaining rows left in the buffer.
  */
+@RequiredArgsConstructor
 class CsvRowCallbackHandler implements RowCallbackHandler {
   private final BufferedWriter writer;
-  private final StringBuilder line;
+  private final Map<String, String> row;
   private final int bufferFlushFrequency;
-
-  @Autowired
-  public CsvRowCallbackHandler(BufferedWriter writer, StringBuilder line, int bufferFlushFreq) {
-    this.writer = writer;
-    this.line = line;
-    this.bufferFlushFrequency = bufferFlushFreq;
-  }
+  private final CsvMapper csvMapper;
+  private SequenceWriter sequenceWriter;
 
   @Override
-  public void processRow(ResultSet resultSet) throws SQLException {
+  public void processRow(ResultSet resultSet) {
+
     if (resultSet == null) {
       throw new CsvCreationException("Result set invalid");
     }
 
-    if (resultSet.getMetaData() == null) {
-      throw new CsvCreationException("Metadata invalid");
-    }
-
     try {
+      if (resultSet.getMetaData() == null) {
+        throw new CsvCreationException("Metadata invalid");
+      }
+
       ResultSetMetaData meta = resultSet.getMetaData();
       int columnCount = meta.getColumnCount();
 
       // Write header once
       if (resultSet.getRow() == 1) {
-
-        for (int i = 1; i <= columnCount; i++) {
-          buildRow(line, meta.getColumnName(i), i, columnCount);
-        }
-        writer.write(line.toString());
-        writer.write("\n");
+        addCsvHeaders(columnCount, meta);
       }
 
-      // Clear StringBuilder instead of creating new instance,
+      // Clear Map instead of creating new instance,
       // as performance saving
-      line.setLength(0);
+      row.clear();
 
-      // Write row
       for (int i = 1; i <= columnCount; i++) {
-        buildRow(line, resultSet.getString(i), i, columnCount);
+        row.put(meta.getColumnName(i), resultSet.getString(i));
       }
-      writer.write(line.toString());
-      writer.write("\n");
+      sequenceWriter.write(row);
 
       // Regular flush of buffer reduces memory usage when
       // processing large files.
       if (resultSet.getRow() % bufferFlushFrequency == 0) {
-        writer.flush();
+        sequenceWriter.flush();
       }
 
-    } catch (IOException ex) {
-      throw new CsvCreationException("Failure to write data row to new csv file: "
-          + ex.getMessage());
+    } catch (JacksonIOException | SQLException ex) {
+      throw new CsvCreationException("Failure to write data row to new csv file", ex);
     }
   }
 
-  /**
-   * Uses {StringBuilder} to create a row of data; each value is separated by a comma.
-   *
-   * @param line row number
-   * @param value contents of cell
-   * @param colNo column number
-   * @param columnCount total columns in sheet
-   */
-  private static void buildRow(StringBuilder line, String value, int colNo, int columnCount) {
-    line.append(value != null ? value : "");
-    if (colNo < columnCount) {
-      line.append(",");
+  private void addCsvHeaders(int columnCount, ResultSetMetaData meta) throws SQLException {
+    CsvSchema.Builder schemaBuilder = CsvSchema.builder().setUseHeader(true);
+    for (int i = 1; i <= columnCount; i++) {
+      schemaBuilder.addColumn(meta.getColumnName(i));
     }
+    CsvSchema schema = schemaBuilder.build();
+
+    // Knows what schema and format to use
+    ObjectWriter objectWriter = csvMapper.writer(schema);
+    // Streaming writer that handles CSV formatting, quotations, line endings etc.
+    sequenceWriter = objectWriter.writeValues(writer);
   }
 }

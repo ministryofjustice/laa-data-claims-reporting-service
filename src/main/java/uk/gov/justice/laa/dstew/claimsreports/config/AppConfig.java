@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import tools.jackson.dataformat.csv.CsvMapper;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
@@ -73,4 +74,13 @@ public class AppConfig {
     return new S3ClientWrapper(awsRegion, bucketName);
   }
 
+  /**
+   * Defines CSV mapping instance for use in CSV creation.
+   *
+   * @return csvMapper
+   */
+  @Bean
+  public CsvMapper createCsvMapper() {
+    return new CsvMapper();
+  }
 }
