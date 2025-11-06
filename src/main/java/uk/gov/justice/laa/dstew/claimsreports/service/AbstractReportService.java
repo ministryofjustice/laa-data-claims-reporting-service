@@ -44,7 +44,7 @@ public abstract class AbstractReportService {
     String viewName = getMaterializedViewName();
     log.info("Refreshing materialized view {}", viewName);
 
-//    jdbcTemplate.execute("REFRESH MATERIALIZED VIEW " + viewName);
+    jdbcTemplate.execute("REFRESH MATERIALIZED VIEW " + viewName);
 
     log.info("Refresh complete for {}", viewName);
   }
