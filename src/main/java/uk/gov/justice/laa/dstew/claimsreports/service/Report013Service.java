@@ -28,8 +28,8 @@ public class Report013Service extends AbstractReportService {
   }
 
   /**
-   * This is a complex report which needs a function (with local arrays and procedural elements) to
-   * refresh the underlying report data, rather than a materialised view with a single SQL statement
+   * This is a complex report with variable columns and needs a stored function.
+   * The function refreshes the underlying report data in a table, rather than a materialised view.
    */
   @Override
   protected String getRefreshCommand() {
