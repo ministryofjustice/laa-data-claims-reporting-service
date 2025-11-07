@@ -37,7 +37,7 @@ public class CsvCreationService {
    * @param sqlQuery query for retrieving dataset
    * @param writer writes string buffer into csv file
    */
-  public void buildCsvFromData(String sqlQuery, BufferedWriter writer) {
+  public void buildCsvFromData(String sqlQuery, BufferedWriter writer, String reportName) {
     if (sqlQuery == null || sqlQuery.trim().isEmpty()) {
       throw new CsvCreationException("SQL query is not provided");
     }
@@ -48,21 +48,22 @@ public class CsvCreationService {
 
     try (writer) {
       Map<String, String> row = new LinkedHashMap<>();
+      var handler = new CsvRowCallbackHandler(writer, row, appConfig.getBufferFlushFrequency(), csvMapper);
 
       jdbcTemplate.query(
-          (Connection con) -> buildPreparedStatement(sqlQuery, con, appConfig.getDataChunkSize()),
-          new CsvRowCallbackHandler(writer, row, appConfig.getBufferFlushFrequency(), csvMapper)
+          (Connection con) -> buildPreparedStatement(sqlQuery, con, appConfig.getDataChunkSize()), handler
       );
 
       writer.flush();
-      log.info("CSV creation completed");
+      log.info("CSV creation completed for {}", reportName);
+      log.info("Rows written for {}: " + handler.getRowCount(), reportName);
 
     } catch (IOException ex) {
-      throw new CsvCreationException("Failure to write to file", ex);
+      throw new CsvCreationException("Failure to write to file for " + reportName, ex);
     } catch (CsvCreationException ex) {
       throw ex;
     } catch (Exception ex) {
-      throw new CsvCreationException("Failure during CSV creation", ex);
+      throw new CsvCreationException("Failure during CSV creation of " + reportName, ex);
     }
   }
 

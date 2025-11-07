@@ -43,10 +43,13 @@ public abstract class AbstractReportService {
   public void refreshMaterializedView() {
     String viewName = getMaterializedViewName();
     log.info("Refreshing materialized view {}", viewName);
+    long startTime = System.currentTimeMillis();
 
     jdbcTemplate.execute("REFRESH MATERIALIZED VIEW " + viewName);
 
-    log.info("Refresh complete for {}", viewName);
+    long endTime = System.currentTimeMillis();
+    long durationMilliseconds = endTime - startTime;
+    log.info("Refresh complete for {} in {} ms", viewName, durationMilliseconds);
   }
 
   /**
@@ -71,12 +74,17 @@ public abstract class AbstractReportService {
   public void generateReport() {
     log.info("Generating report from {}", getClass().getSimpleName());
     File tempFile = new File("/tmp/" + getReportFileName());
+    long startTime = System.currentTimeMillis();
 
     try {
       var sql = "SELECT * FROM " + getMaterializedViewName();
       try (BufferedWriter writer = Files.newBufferedWriter(tempFile.toPath())) {
-        csvCreationService.buildCsvFromData(sql, writer);
+        csvCreationService.buildCsvFromData(sql, writer, getReportName());
       }
+      long endTime = System.currentTimeMillis();
+      long durationMilliseconds = endTime - startTime;
+      log.info("Created {} file {} with filename {} in {} ms", getReportName(), getReportFileName(), durationMilliseconds);
+
       s3ClientWrapper.uploadFile(tempFile, getReportFileName());
     } catch (Exception e) {
       log.error("Failed to generate {}: {}", getReportName(), e.getMessage());
