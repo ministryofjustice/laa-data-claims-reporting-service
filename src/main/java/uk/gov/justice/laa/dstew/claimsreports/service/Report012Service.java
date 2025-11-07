@@ -23,8 +23,13 @@ public class Report012Service extends AbstractReportService {
   }
 
   @Override
-  protected String getMaterializedViewName() {
+  protected String getDataSourceName() {
     return "claims.mvw_report_012";
+  }
+
+  @Override
+  protected String getRefreshCommand() {
+    return "REFRESH MATERIALIZED VIEW claims.mvw_report_012";
   }
 
   @Override

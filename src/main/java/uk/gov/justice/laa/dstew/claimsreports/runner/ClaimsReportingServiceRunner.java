@@ -89,7 +89,7 @@ public class ClaimsReportingServiceRunner  implements ApplicationRunner {
     log.info("Generating {} reports...", reportServices.size());
     for (AbstractReportService service : reportServices) {
       try {
-        service.refreshMaterializedView();
+        service.refreshDataSource();
         service.generateReport();
       } catch (Exception e) {
         log.error("Report generation failed for {}: {}",

@@ -26,8 +26,13 @@ class AbstractReportServiceTest {
     }
 
     @Override
-    protected String getMaterializedViewName() {
+    protected String getDataSourceName() {
       return "claims.mvw_report_000";
+    }
+
+    @Override
+    protected String getRefreshCommand() {
+      return "REFRESH MATERIALIZED VIEW claims.mvw_report_000";
     }
 
     @Override
@@ -57,9 +62,9 @@ class AbstractReportServiceTest {
   }
 
   @Test
-  void refreshMaterializedViewShouldInvokeRepositoryAndLog() {
+  void refreshDataSourceShouldInvokeRepositoryAndLog() {
     // when
-    service.refreshMaterializedView();
+    service.refreshDataSource();
 
     // then
     verify(jdbcTemplate, times(1))
@@ -68,9 +73,9 @@ class AbstractReportServiceTest {
   }
 
   @Test
-  void refreshMaterializedView_ShouldHandleMultipleInvocations() {
-    service.refreshMaterializedView();
-    service.refreshMaterializedView();
+  void refreshDataSource_ShouldHandleMultipleInvocations() {
+    service.refreshDataSource();
+    service.refreshDataSource();
     verify(jdbcTemplate, times(2))
         .execute("REFRESH MATERIALIZED VIEW claims.mvw_report_000");
     verifyNoMoreInteractions(jdbcTemplate);
