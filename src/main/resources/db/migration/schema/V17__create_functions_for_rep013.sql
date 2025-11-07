@@ -142,7 +142,7 @@ BEGIN
                 split_part(p.row_id, ''|'', 2) AS "Provider Office Account Number",
                 split_part(p.row_id, ''|'', 1) AS "Area of Law",
                 ' || column_selections || '
-            FROM public.crosstab(
+            FROM claims.crosstab(
                 ' || quote_literal(data_query) || ',
                 ' || quote_literal(values_clause) || '
             ) AS p(row_id TEXT, ' || crosstab_columns || ')
