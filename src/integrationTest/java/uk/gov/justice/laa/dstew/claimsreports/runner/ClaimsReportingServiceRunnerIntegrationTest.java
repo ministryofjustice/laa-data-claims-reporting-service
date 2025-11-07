@@ -59,9 +59,9 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
 
   @Value("${S3_REPORT_STORE}")
   private String bucketName;
-  private static final String CLAIM_TABLE_NAME = "claim";
-  private static final String CLIENT_TABLE_NAME = "client";
-  private static final String CLAIM_SUMMARY_FEE_TABLE_NAME = "claim_summary_fee";
+  private static final String CLAIM_TABLE_NAME = "claims.claim";
+  private static final String CLIENT_TABLE_NAME = "claims.client";
+  private static final String CLAIM_SUMMARY_FEE_TABLE_NAME= "claims.claim_summary_fee";
   private static final int NUMBER_OF_REPORTS = 3;
 
   // -------------------- Containers --------------------
