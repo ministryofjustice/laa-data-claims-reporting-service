@@ -50,11 +50,11 @@ class ClaimsReportingServiceRunnerTest {
     // Call the run method
     runner.run(applicationArguments);
 
-    // Verify that refreshMaterializedView and generateReport were called on each service
-    verify(reportService1).refreshMaterializedView();
+    // Verify that refreshDataSource and generateReport were called on each service
+    verify(reportService1).refreshDataSource();
     verify(reportService1).generateReport();
 
-    verify(reportService2).refreshMaterializedView();
+    verify(reportService2).refreshDataSource();
     verify(reportService2).generateReport();
   }
 
@@ -71,17 +71,17 @@ class ClaimsReportingServiceRunnerTest {
   @Test
   void shouldContinueWhenOneServiceFails() {
     // Make the first service throw an exception when refreshing
-    doThrow(new RuntimeException("Refresh failed")).when(reportService1).refreshMaterializedView();
+    doThrow(new RuntimeException("Refresh failed")).when(reportService1).refreshDataSource();
 
     // Call run (should continue to second service)
     runner.run(applicationArguments);
 
     // First service was called
-    verify(reportService1).refreshMaterializedView();
+    verify(reportService1).refreshDataSource();
     verify(reportService1, never()).generateReport(); // generateReport skipped because refresh failed
 
     // Second service should still run
-    verify(reportService2).refreshMaterializedView();
+    verify(reportService2).refreshDataSource();
     verify(reportService2).generateReport();
   }
 

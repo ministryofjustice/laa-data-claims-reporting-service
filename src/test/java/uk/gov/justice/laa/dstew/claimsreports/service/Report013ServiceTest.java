@@ -15,11 +15,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
- * Unit tests for {@link Report012Service}.
+ * Unit tests for {@link Report013Service}.
  */
-class Report012ServiceTest {
+class Report013ServiceTest {
 
-  private Report012Service service;
+  private Report013Service service;
   private JdbcTemplate jdbcTemplate;
   private CsvCreationService creationService;
   private S3ClientWrapper s3ClientWrapper;
@@ -29,7 +29,7 @@ class Report012ServiceTest {
     jdbcTemplate = mock(JdbcTemplate.class);
     creationService = mock(CsvCreationService.class);
     s3ClientWrapper = mock(S3ClientWrapper.class);
-    service = new Report012Service(jdbcTemplate, s3ClientWrapper, creationService);
+    service = new Report013Service(jdbcTemplate, s3ClientWrapper, creationService);
   }
 
   @Test
@@ -38,7 +38,7 @@ class Report012ServiceTest {
     service.refreshDataSource();
     // then
     verify(jdbcTemplate, times(1))
-        .execute("REFRESH MATERIALIZED VIEW claims.mvw_report_012");
+        .execute("SELECT claims.refresh_report013()");
     verifyNoMoreInteractions(jdbcTemplate);
   }
 
@@ -47,8 +47,8 @@ class Report012ServiceTest {
 
     service.generateReport();
 
-    verify(creationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_012"), any(BufferedWriter.class), any());
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("report_012.csv"));
+    verify(creationService).buildCsvFromData(eq("SELECT * FROM claims.report_013"), any(BufferedWriter.class), any());
+    verify(s3ClientWrapper).uploadFile(any(File.class), eq("report_013.csv"));
   }
 
 }

@@ -29,9 +29,9 @@ class Report000ServiceTest {
   }
 
   @Test
-  void refreshMaterializedView_ShouldCallRepositoryMethod() {
+  void refreshDataSource_ShouldCallRepositoryMethod() {
     // when
-    service.refreshMaterializedView();
+    service.refreshDataSource();
     // then
     verify(jdbcTemplate, times(1))
         .execute("REFRESH MATERIALIZED VIEW claims.mvw_report_000");

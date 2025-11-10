@@ -59,14 +59,18 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
 
   @Value("${S3_REPORT_STORE}")
   private String bucketName;
-  private static final String CLAIM_TABLE_NAME = "claim";
-  private static final String CLIENT_TABLE_NAME = "client";
-  private static final String CLAIM_SUMMARY_FEE_TABLE_NAME = "claim_summary_fee";
-  private static final int NUMBER_OF_REPORTS = 2;
+  private static final String CLAIM_TABLE_NAME = "claims.claim";
+  private static final String CLIENT_TABLE_NAME = "claims.client";
+  private static final String CLAIM_SUMMARY_FEE_TABLE_NAME= "claims.claim_summary_fee";
+  private static final int NUMBER_OF_REPORTS = 3;
 
   // -------------------- Containers --------------------
   @Container
-  static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17").withExposedPorts(5432);
+  static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17")
+      .withUsername("postgres")  // default superuser
+      .withPassword("password")
+      .withInitScript("init_extensions.sql") // <-- preload extensions
+      .withExposedPorts(5432);
 
   @Container
   static final LocalStackContainer localstack =

@@ -133,8 +133,8 @@ public class ReplicationHealthCheckService {
       Timestamp startOfDay, Timestamp endOfDay,
       ReplicationHealthReport report) {
     for (ReplicationSummary summary : summaries.values()) {
-      String countSql = String.format("SELECT count(*) FROM claims.%s WHERE created_on < ?", summary.tableName());
-      String updatedSql = String.format("SELECT count(*) FROM claims.%s WHERE updated_on BETWEEN ? AND ?", summary.tableName());
+      String countSql = String.format("SELECT count(*) FROM %s WHERE created_on < ?", summary.tableName());
+      String updatedSql = String.format("SELECT count(*) FROM %s WHERE updated_on BETWEEN ? AND ?", summary.tableName());
 
       Long actualRecordCount = jdbcTemplate.query(countSql, rs -> {
         if (rs.next()) {

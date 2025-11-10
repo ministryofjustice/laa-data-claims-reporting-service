@@ -28,28 +28,30 @@ public abstract class AbstractReportService {
   protected final CsvCreationService csvCreationService;
 
   /**
-   * Gets the name of the materialized view associated with the current service.
+   * Gets the name of the materialized view or table associated with the current service.
    * This method is intended to be implemented by subclasses to define the specific
-   * materialized view they are operating on.
+   * data source they read from.
    *
-   * @return the name of the materialized view as a String
+   * @return the name of the materialized view or table as a String
    */
-  protected abstract String getMaterializedViewName();
+  protected abstract String getDataSourceName();
+
+  protected abstract String getRefreshCommand();
 
   /**
    * Refreshes the associated materialized view.
    */
   @Transactional
-  public void refreshMaterializedView() {
-    String viewName = getMaterializedViewName();
-    log.info("Refreshing materialized view {}", viewName);
+  public void refreshDataSource() {
+    String refreshCommand = getRefreshCommand();
+    log.info("Refreshing data for {}", getReportName());
     long startTime = System.currentTimeMillis();
 
-    jdbcTemplate.execute("REFRESH MATERIALIZED VIEW " + viewName);
+    jdbcTemplate.execute(refreshCommand);
 
     long endTime = System.currentTimeMillis();
     long durationMilliseconds = endTime - startTime;
-    log.info("Refresh complete for {} in {} ms", viewName, durationMilliseconds);
+    log.info("Refresh complete for {} in {} ms", getReportName(), durationMilliseconds);
   }
 
   /**
@@ -77,7 +79,7 @@ public abstract class AbstractReportService {
     long startTime = System.currentTimeMillis();
 
     try {
-      var sql = "SELECT * FROM " + getMaterializedViewName();
+      var sql = "SELECT * FROM " + getDataSourceName();
       try (BufferedWriter writer = Files.newBufferedWriter(tempFile.toPath())) {
         csvCreationService.buildCsvFromData(sql, writer, getReportName());
       }
