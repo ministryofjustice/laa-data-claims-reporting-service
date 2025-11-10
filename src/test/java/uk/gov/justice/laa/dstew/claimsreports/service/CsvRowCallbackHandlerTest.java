@@ -1,5 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -153,6 +154,21 @@ public class CsvRowCallbackHandlerTest {
 
     csvRowCallbackHandler.processRow(resultSet);
     verify(sequenceWriter).write(dataWithCommaMap);
+  }
+
+  @Test
+  void willNotIncrementCountIfRowHandlingFails() throws SQLException {
+    when(resultSet.getMetaData()).thenThrow(SQLException.class);
+    assertThrows(CsvCreationException.class, () -> csvRowCallbackHandler.processRow(resultSet));
+    assertEquals(0, csvRowCallbackHandler.getRowCount());
+  }
+
+  @Test
+  void willIncrementCounterWhenRowsAreHandled() throws SQLException {
+    buildFirstRowAndSchema();
+    setupResultSetData(10, "second_data_row");
+    csvRowCallbackHandler.processRow(resultSet);
+    assertEquals(2, csvRowCallbackHandler.getRowCount());
   }
 
   private void setupResultSetData(int rowNo, String data) throws SQLException {

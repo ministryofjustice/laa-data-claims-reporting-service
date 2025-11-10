@@ -80,7 +80,7 @@ class AbstractReportServiceTest {
   void willThrowCsvExceptionWhenCsvServiceThrows() {
     doThrow(new CsvCreationException("Simulated SQL error"))
         .when(csvCreationService)
-        .buildCsvFromData(any(), any());
+        .buildCsvFromData(any(), any(), any());
     Assertions.assertThrows(CsvCreationException.class, () -> service.generateReport());
 
     // And ensure it cleans up after itself
@@ -92,7 +92,7 @@ class AbstractReportServiceTest {
 
     service.generateReport();
 
-    verify(csvCreationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_000"), any(BufferedWriter.class));
+    verify(csvCreationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_000"), any(BufferedWriter.class), any());
     verify(s3ClientWrapper).uploadFile(any(File.class), eq("test_report.csv"));
   }
 
