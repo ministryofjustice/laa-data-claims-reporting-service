@@ -47,7 +47,7 @@ class Report012ServiceTest {
 
     service.generateReport();
 
-    verify(creationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_012"), any(BufferedWriter.class));
+    verify(creationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_012"), any(BufferedWriter.class), any());
     verify(s3ClientWrapper).uploadFile(any(File.class), eq("report_012.csv"));
   }
 

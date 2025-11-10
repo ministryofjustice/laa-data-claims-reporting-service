@@ -26,6 +26,7 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
   private final int bufferFlushFrequency;
   private final CsvMapper csvMapper;
   private SequenceWriter sequenceWriter;
+  private int rowCount;
 
   @Override
   public void processRow(ResultSet resultSet) {
@@ -62,6 +63,8 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
         sequenceWriter.flush();
       }
 
+      rowCount++;
+
     } catch (JacksonIOException | SQLException ex) {
       throw new CsvCreationException("Failure to write data row to new csv file", ex);
     }
@@ -78,5 +81,9 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
     ObjectWriter objectWriter = csvMapper.writer(schema);
     // Streaming writer that handles CSV formatting, quotations, line endings etc.
     sequenceWriter = objectWriter.writeValues(writer);
+  }
+
+  public int getRowCount() {
+    return rowCount;
   }
 }

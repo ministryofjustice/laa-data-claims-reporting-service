@@ -45,10 +45,13 @@ public abstract class AbstractReportService {
   public void refreshDataSource() {
     String refreshCommand = getRefreshCommand();
     log.info("Refreshing data for {}", getReportName());
+    long startTime = System.currentTimeMillis();
 
     jdbcTemplate.execute(refreshCommand);
 
-    log.info("Refresh complete for {}", getReportName());
+    long endTime = System.currentTimeMillis();
+    long durationMilliseconds = endTime - startTime;
+    log.info("Refresh complete for {} in {} ms", getReportName(), durationMilliseconds);
   }
 
   /**
@@ -73,12 +76,17 @@ public abstract class AbstractReportService {
   public void generateReport() {
     log.info("Generating report from {}", getClass().getSimpleName());
     File tempFile = new File("/tmp/" + getReportFileName());
+    long startTime = System.currentTimeMillis();
 
     try {
       var sql = "SELECT * FROM " + getDataSourceName();
       try (BufferedWriter writer = Files.newBufferedWriter(tempFile.toPath())) {
-        csvCreationService.buildCsvFromData(sql, writer);
+        csvCreationService.buildCsvFromData(sql, writer, getReportName());
       }
+      long endTime = System.currentTimeMillis();
+      long durationMilliseconds = endTime - startTime;
+      log.info("Created {} file {} with filename {} in {} ms", getReportName(), getReportFileName(), durationMilliseconds);
+
       s3ClientWrapper.uploadFile(tempFile, getReportFileName());
     } catch (Exception e) {
       log.error("Failed to generate {}: {}", getReportName(), e.getMessage());

@@ -48,34 +48,34 @@ public class CsvCreationServiceTest {
 
   @Test
   void shouldThrowIllegalArgumentExceptionWhenSqlIsNull() {
-    assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData(null, bufferedWriter));
+    assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData(null, bufferedWriter, "test_report"));
   }
 
   @Test
   void shouldThrowIllegalArgumentExceptionWhenSqlIsEmpty() {
-    assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData("", bufferedWriter));
+    assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData("", bufferedWriter, "test_report"));
   }
 
   @Test
   void shouldThrowIllegalArgumentExceptionWhenSqlIsBlank() {
-    assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData(" ", bufferedWriter));
+    assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData(" ", bufferedWriter, "test_report"));
   }
 
   @Test
   void shouldThrowIllegalArgumentExceptionWhenBufferedWriterIsNull() {
-    assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData("SELECT * FROM ANY_REPORT.DATA", null));
+    assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData("SELECT * FROM ANY_REPORT.DATA", null, "test_report"));
   }
 
   @Test
   void shouldExecuteQueryWhenValidParametersProvided() {
-    csvCreationService.buildCsvFromData("SELECT * FROM ANY_REPORT.DATA", bufferedWriter);
+    csvCreationService.buildCsvFromData("SELECT * FROM ANY_REPORT.DATA", bufferedWriter, "test_report");
     verify(jdbcTemplate).query(any(PreparedStatementCreator.class), any(CsvRowCallbackHandler.class));
   }
 
   @Test
   void shouldThrowCsvCreationExceptionWhenFlushThrows() throws IOException {
     doThrow(new IOException("Stream error")).when(bufferedWriter).flush();
-    Exception ex = assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData("SELECT * FROM ANY_REPORT.DATA", bufferedWriter));
+    Exception ex = assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData("SELECT * FROM ANY_REPORT.DATA", bufferedWriter, "test_report"));
     assertTrue(ex.getMessage().contains("Failure to write to file"));
   }
 
@@ -84,7 +84,7 @@ public class CsvCreationServiceTest {
     doThrow(new CsvCreationException("Simulated SQL error"))
         .when(jdbcTemplate)
         .query(any(PreparedStatementCreator.class), any(RowCallbackHandler.class));
-    assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData("SELECT * FROM ANY_REPORT.DATA", bufferedWriter));
+    assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData("SELECT * FROM ANY_REPORT.DATA", bufferedWriter, "test_report"));
   }
 
   @Test
@@ -99,7 +99,7 @@ public class CsvCreationServiceTest {
       return null;
     }).when(jdbcTemplate).query(any(PreparedStatementCreator.class), any(CsvRowCallbackHandler.class));
 
-    assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData("SELECT * FROM ANY_REPORT.DATA", bufferedWriter));
+    assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData("SELECT * FROM ANY_REPORT.DATA", bufferedWriter, "test_report"));
   }
 
   @Test
@@ -116,6 +116,6 @@ public class CsvCreationServiceTest {
       return null;
     }).when(jdbcTemplate).query(any(PreparedStatementCreator.class), any(CsvRowCallbackHandler.class));
 
-    assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData("SELECT * FROM ANY_REPORT.DATA", bufferedWriter));
+    assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData("SELECT * FROM ANY_REPORT.DATA", bufferedWriter, "test_report"));
   }
 }
