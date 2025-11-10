@@ -66,16 +66,16 @@ BEGIN
                AND submission_period IS NOT NULL
          ) AS ordered_periods;
 
-    -- Step 2: Create the table if it doesn't exist
+-- Step 2: Drop persistent table
+    EXECUTE 'DROP TABLE IF EXISTS claims.report_013';
+
+-- Step 3: Create the table from the latest data
     EXECUTE 'CREATE TABLE IF NOT EXISTS claims.report_013 (
             order_by_id BIGINT,
             "Provider Office Account Number" TEXT,
             "Area of Law" TEXT,
             ' || column_definitions || '
         )';
-
-    -- Step 3: Clear persistent table
-    TRUNCATE TABLE claims.report_013;
 
     -- Step 4: Build the data query
     data_query := $dq$
