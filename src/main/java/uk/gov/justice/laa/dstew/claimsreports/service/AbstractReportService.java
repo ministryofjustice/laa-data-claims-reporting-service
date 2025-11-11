@@ -27,16 +27,13 @@ public abstract class AbstractReportService {
   protected final S3ClientWrapper s3ClientWrapper;
   protected final CsvCreationService csvCreationService;
 
-  /**
-   * Gets the name of the materialized view or table associated with the current service.
-   * This method is intended to be implemented by subclasses to define the specific
-   * data source they read from.
-   *
-   * @return the name of the materialized view or table as a String
-   */
+  //Abstract methods (implemented by subclasses) to provide relevant details for individual reports
+
   protected abstract String getDataSourceName();
 
   protected abstract String getRefreshCommand();
+
+  protected abstract String getOrderByClause();
 
   /**
    * Refreshes the associated materialized view.
@@ -79,13 +76,13 @@ public abstract class AbstractReportService {
     long startTime = System.currentTimeMillis();
 
     try {
-      var sql = "SELECT * FROM " + getDataSourceName();
+      var sql = "SELECT * FROM " + getDataSourceName() + " ORDER BY " + getOrderByClause();
       try (BufferedWriter writer = Files.newBufferedWriter(tempFile.toPath())) {
         csvCreationService.buildCsvFromData(sql, writer, getReportName());
       }
       long endTime = System.currentTimeMillis();
       long durationMilliseconds = endTime - startTime;
-      log.info("Created {} file {} with filename {} in {} ms", getReportName(), getReportFileName(), durationMilliseconds);
+      log.info("Created {} file with filename {} in {} ms", getReportName(), getReportFileName(), durationMilliseconds);
 
       s3ClientWrapper.uploadFile(tempFile, getReportFileName());
     } catch (Exception e) {

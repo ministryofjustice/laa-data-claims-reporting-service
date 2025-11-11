@@ -43,7 +43,14 @@ class Report000ServiceTest {
 
     service.generateReport();
 
-    verify(creationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_000"), any(BufferedWriter.class), any());
+    verify(creationService).buildCsvFromData(
+        eq("SELECT * FROM claims.mvw_report_000 "
+            + "ORDER BY  to_char(to_date(\"Submission Period\", 'MON-YYYY'), 'YYYYMM') NULLS LAST,"
+            + "    \"Office Account Number\","
+            + "    \"Line Number\""),
+        any(BufferedWriter.class),
+        any()
+    );
     verify(s3ClientWrapper).uploadFile(any(File.class), eq("report_000.csv"));
   }
 

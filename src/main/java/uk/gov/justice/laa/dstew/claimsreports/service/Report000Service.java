@@ -41,4 +41,11 @@ public class Report000Service extends AbstractReportService {
   protected String getReportName() {
     return "REPORT000";
   }
+
+  @Override
+  protected String getOrderByClause() {
+    return " to_char(to_date(\"Submission Period\", 'MON-YYYY'), 'YYYYMM') NULLS LAST,"
+        + "    \"Office Account Number\","
+        + "    \"Line Number\"";
+  }
 }

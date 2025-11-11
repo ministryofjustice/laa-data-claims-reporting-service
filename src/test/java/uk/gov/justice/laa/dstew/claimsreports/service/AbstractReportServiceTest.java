@@ -21,7 +21,9 @@ class AbstractReportServiceTest {
 
   // Define a concrete subclass for testing purposes
   static class TestReportService extends AbstractReportService {
-    public TestReportService(JdbcTemplate template, S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService) {
+
+    public TestReportService(JdbcTemplate template, S3ClientWrapper s3ClientWrapper,
+        CsvCreationService csvCreationService) {
       super(template, s3ClientWrapper, csvCreationService);
     }
 
@@ -45,6 +47,10 @@ class AbstractReportServiceTest {
       return "test_report.csv";
     }
 
+    @Override
+    protected String getOrderByClause() {
+      return " test_order_by_column";
+    }
   }
 
   private TestReportService service;
@@ -97,7 +103,8 @@ class AbstractReportServiceTest {
 
     service.generateReport();
 
-    verify(csvCreationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_000"), any(BufferedWriter.class), any());
+    verify(csvCreationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_000 ORDER BY  test_order_by_column"),
+        any(BufferedWriter.class), any());
     verify(s3ClientWrapper).uploadFile(any(File.class), eq("test_report.csv"));
   }
 
