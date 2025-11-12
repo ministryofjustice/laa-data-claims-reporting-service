@@ -42,4 +42,11 @@ public class Report012Service extends AbstractReportService {
     return "REPORT012";
   }
 
+  @Override
+  protected String getOrderByClause() {
+    return " \"Provider office account number\","
+        + "    to_char(to_date(\"Submission month\", 'MON-YYYY'), 'YYYYMM'),"
+        + "    \"Area of law\"";
+  }
+
 }

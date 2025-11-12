@@ -46,4 +46,8 @@ public class Report013Service extends AbstractReportService {
     return "REPORT013";
   }
 
+  @Override
+  protected String getOrderByClause() {
+    return " \"Provider Office Account Number\", \"Area of Law\"";
+  }
 }
