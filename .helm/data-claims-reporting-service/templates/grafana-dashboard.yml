@@ -137,7 +137,7 @@ data:
             {
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "sum by(instance) (increase(http_server_requests_seconds_count{namespace='laa-get-payments-finance-data-dev'}[$__rate_interval])) ",
+              "expr": "sum by(instance) (increase(http_server_requests_seconds_count{namespace='laa-data-claims-reporting-service-uat'}[$__rate_interval])) ",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "__auto",
@@ -237,526 +237,13 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum by(instance) (increase(http_server_requests_seconds_count{namespace='laa-get-payments-finance-data-dev',status='200'}[$__rate_interval])) ",
+              "expr": "sum by(instance) (increase(http_server_requests_seconds_count{namespace='laa-data-claims-reporting-service-uat',status='200'}[$__rate_interval])) ",
               "legendFormat": "__auto",
               "range": true,
               "refId": "A"
             }
           ],
           "title": "Successful Requests Per Instance",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 10,
-            "w": 7,
-            "x": 17,
-            "y": 1
-          },
-          "id": 4,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "11.5.6+security-01",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "sum by(uri) (increase(http_server_requests_seconds_count{namespace='laa-get-payments-finance-data-dev', uri!~'.*swagger.*|.*health.*', status='200'}[$__rate_interval])) ",
-              "legendFormat": "{{uri}}",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Successful Requests Per Api Endpoints",
-          "type": "timeseries"
-        },
-        {
-          "collapsed": false,
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 11
-          },
-          "id": 64,
-          "panels": [],
-          "title": "API Error Rates",
-          "type": "row"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 0,
-            "y": 12
-          },
-          "id": 58,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "11.5.6+security-01",
-          "targets": [
-            {
-              "disableTextWrap": false,
-              "editorMode": "code",
-              "expr": "sum(rate(nginx_ingress_controller_requests{exported_namespace = \"laa-get-payments-finance-data-dev\",status=~\"4.*\"}[5m])) by (status)",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A",
-              "useBackend": false
-            }
-          ],
-          "title": "HTTP Code 4xx",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              }
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 8,
-            "w": 12,
-            "x": 12,
-            "y": 12
-          },
-          "id": 57,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "11.5.6+security-01",
-          "targets": [
-            {
-              "disableTextWrap": false,
-              "editorMode": "code",
-              "expr": "sum(rate(nginx_ingress_controller_requests{exported_namespace = \"laa-get-payments-finance-data-dev\",status=~\"5.*\"}[5m])) by (status)",
-              "fullMetaSearch": false,
-              "includeNullMetadata": true,
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A",
-              "useBackend": false
-            }
-          ],
-          "title": "HTTP Code 5xx",
-          "type": "timeseries"
-        },
-        {
-          "collapsed": false,
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
-            "y": 20
-          },
-          "id": 63,
-          "panels": [],
-          "title": "API Response Time",
-          "type": "row"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "s"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 10,
-            "w": 12,
-            "x": 0,
-            "y": 21
-          },
-          "id": 42,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "11.5.6+security-01",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "sum by(uri) (rate(http_server_requests_seconds_sum{namespace='laa-get-payments-finance-data-dev', uri!~'.*swagger.*|.*health.*', status='200'}[1m])) / sum by(uri) (rate(http_server_requests_seconds_count{namespace='laa-get-payments-finance-data-dev', uri!~'.*swagger.*|.*health.*', status='200'}[$__rate_interval]))",
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Average Response Time Per Uri",
-          "type": "timeseries"
-        },
-        {
-          "datasource": {
-            "type": "prometheus",
-            "uid": "prometheus"
-          },
-          "fieldConfig": {
-            "defaults": {
-              "color": {
-                "mode": "palette-classic"
-              },
-              "custom": {
-                "axisBorderShow": false,
-                "axisCenteredZero": false,
-                "axisColorMode": "text",
-                "axisLabel": "",
-                "axisPlacement": "auto",
-                "barAlignment": 0,
-                "barWidthFactor": 0.6,
-                "drawStyle": "line",
-                "fillOpacity": 0,
-                "gradientMode": "none",
-                "hideFrom": {
-                  "legend": false,
-                  "tooltip": false,
-                  "viz": false
-                },
-                "insertNulls": false,
-                "lineInterpolation": "linear",
-                "lineWidth": 1,
-                "pointSize": 5,
-                "scaleDistribution": {
-                  "type": "linear"
-                },
-                "showPoints": "auto",
-                "spanNulls": false,
-                "stacking": {
-                  "group": "A",
-                  "mode": "none"
-                },
-                "thresholdsStyle": {
-                  "mode": "off"
-                }
-              },
-              "mappings": [],
-              "thresholds": {
-                "mode": "absolute",
-                "steps": [
-                  {
-                    "color": "green",
-                    "value": null
-                  },
-                  {
-                    "color": "red",
-                    "value": 80
-                  }
-                ]
-              },
-              "unit": "s"
-            },
-            "overrides": []
-          },
-          "gridPos": {
-            "h": 10,
-            "w": 12,
-            "x": 12,
-            "y": 21
-          },
-          "id": 44,
-          "options": {
-            "legend": {
-              "calcs": [],
-              "displayMode": "list",
-              "placement": "bottom",
-              "showLegend": true
-            },
-            "tooltip": {
-              "hideZeros": false,
-              "mode": "single",
-              "sort": "none"
-            }
-          },
-          "pluginVersion": "11.5.6+security-01",
-          "targets": [
-            {
-              "datasource": {
-                "type": "prometheus",
-                "uid": "prometheus"
-              },
-              "editorMode": "code",
-              "expr": "max by(uri) (http_server_requests_seconds_max{namespace='laa-get-payments-finance-data-dev', uri!~'.*swagger.*|.*health.*', status='200'}) ",
-              "legendFormat": "__auto",
-              "range": true,
-              "refId": "A"
-            }
-          ],
-          "title": "Max Response Time Per Uri",
           "type": "timeseries"
         },
         {
@@ -829,7 +316,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "builder",
-              "expr": "sum(kube_pod_container_info{namespace='laa-get-payments-finance-data-dev',pod=~'.*gpfd.*'})",
+              "expr": "sum(kube_pod_container_info{namespace='laa-data-claims-reporting-service-uat',pod=~'.*main-data-claims-reporting-service-*'})",
               "legendFormat": "Total",
               "range": true,
               "refId": "A"
@@ -840,7 +327,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum({namespace='laa-get-payments-finance-data-dev',phase='Running',pod=~'.*gpfd.*'} + 0)",
+              "expr": "sum({namespace='laa-data-claims-reporting-service-uat',phase='Running',pod=~'.*main-data-claims-reporting-service-*'} + 0)",
               "hide": false,
               "legendFormat": "Running",
               "range": true,
@@ -852,7 +339,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "builder",
-              "expr": "sum({namespace='laa-get-payments-finance-data-dev',phase='Pending',pod=~'.*gpfd.*'} + 0)",
+              "expr": "sum({namespace='laa-data-claims-reporting-service-uat',phase='Pending',pod=~'.*main-data-claims-reporting-service-*'} + 0)",
               "hide": false,
               "legendFormat": "Pending",
               "range": true,
@@ -864,7 +351,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum({namespace='laa-get-payments-finance-data-dev',phase='Failed',pod=~'.*gpfd.*'} + 0)",
+              "expr": "sum({namespace='laa-data-claims-reporting-service-uat',phase='Failed',pod=~'.*main-data-claims-reporting-service-*'} + 0)",
               "hide": false,
               "legendFormat": "Failed",
               "range": true,
@@ -1188,7 +675,7 @@ data:
             {
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "round(\n  100 *\n    sum(container_memory_working_set_bytes{image!='',namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service.*\"}) by (container, pod)\n      /\n    sum(kube_pod_container_resource_requests{resource='memory', namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service.*\"} > 0) by (container, pod)\n)",
+              "expr": "round(\n  100 *\n    sum(container_memory_working_set_bytes{image!='',namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service-*\"}) by (container, pod)\n      /\n    sum(kube_pod_container_resource_requests{resource='memory', namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service-*\"} > 0) by (container, pod)\n)",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "{{pod}}",
@@ -1285,7 +772,7 @@ data:
             {
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "container_memory_usage_bytes{namespace=\"laa-data-claims-reporting-service-uat\", pod=~'main-data-claims-reporting-service.*'}",
+              "expr": "container_memory_usage_bytes{namespace=\"laa-data-claims-reporting-service-uat\", pod=~'main-data-claims-reporting-service-*'}",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "{{pod}}",
@@ -1300,7 +787,7 @@ data:
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "container_memory_max_usage_bytes{namespace=\"laa-data-claims-reporting-service-uat\", pod=~'main-data-claims-reporting-service.*'}",
+              "expr": "container_memory_max_usage_bytes{namespace=\"laa-data-claims-reporting-service-uat\", pod=~'main-data-claims-reporting-service-*'}",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -1417,7 +904,7 @@ data:
             {
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "round(\n  100 *\n    sum(container_memory_working_set_bytes{image!=\"\", namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service.*\"}) by (container, pod)\n      /\n    sum(kube_pod_container_resource_requests{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service.*\",resource=\"memory\"} > 0) by (container, pod)\n)",
+              "expr": "round(\n  100 *\n    sum(container_memory_working_set_bytes{image!=\"\", namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service-*\"}) by (container, pod)\n      /\n    sum(kube_pod_container_resource_requests{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service-*\",resource=\"memory\"} > 0) by (container, pod)\n)",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "{{pod}}",
@@ -1532,7 +1019,7 @@ data:
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "round(\n  100 *\n    sum(\n      rate(container_cpu_usage_seconds_total{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service.*\"}[5m])\n    ) by (pod_name, container_name, namespace)\n      /\n    sum(\n      kube_pod_container_resource_limits{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service.*\",resource='cpu'}\n    ) by (pod_name, container_name, namespace)\n)",
+              "expr": "round(\n  100 *\n    sum(\n      rate(container_cpu_usage_seconds_total{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service-*\"}[5m])\n    ) by (pod_name, container_name, namespace)\n      /\n    sum(\n      kube_pod_container_resource_limits{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service-*\",resource='cpu'}\n    ) by (pod_name, container_name, namespace)\n)",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -1632,7 +1119,7 @@ data:
             {
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "round(\n  100 *\n    sum(\n      rate(container_cpu_usage_seconds_total{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service.*\"}[5m])\n    ) by (pod, container_name, namespace)\n      /\n    sum(\n      kube_pod_container_resource_limits{namespace='laa-data-claims-reporting-service-uat', container_name!='main-data-claims-reporting-service.*', resource='cpu'}\n    ) by (pod, container_name, namespace)\n)",
+              "expr": "round(\n  100 *\n    sum(\n      rate(container_cpu_usage_seconds_total{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service-*\"}[5m])\n    ) by (pod, container_name, namespace)\n      /\n    sum(\n      kube_pod_container_resource_limits{namespace='laa-data-claims-reporting-service-uat', container_name!='main-data-claims-reporting-service-*', resource='cpu'}\n    ) by (pod, container_name, namespace)\n)",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "__auto",
@@ -1730,7 +1217,7 @@ data:
             {
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "topk(3, max by (pod, container)(rate(container_cpu_usage_seconds_total{image!='', namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service.*\"}[$__rate_interval]))) / 10",
+              "expr": "topk(3, max by (pod, container)(rate(container_cpu_usage_seconds_total{image!='', namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service-*\"}[$__rate_interval]))) / 10",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "__auto",
@@ -1809,7 +1296,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "jvm_memory_max_bytes{namespace='laa-get-payments-finance-data-dev',area='heap',id='G1 Survivor Space'} / 1000000",
+              "expr": "jvm_memory_max_bytes{namespace='laa-data-claims-reporting-service-uat',area='heap',id='G1 Survivor Space'} / 1000000",
               "legendFormat": "{{instance}}",
               "range": true,
               "refId": "A"
@@ -1968,7 +1455,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "jvm_memory_max_bytes{namespace='laa-get-payments-finance-data-dev',area='heap',id='G1 Eden Space'}/1000000",
+              "expr": "jvm_memory_max_bytes{namespace='laa-data-claims-reporting-service-uat',area='heap',id='G1 Eden Space'}/1000000",
               "legendFormat": "{{instance}}",
               "range": true,
               "refId": "A"
@@ -2127,7 +1614,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "jvm_memory_max_bytes{namespace='laa-get-payments-finance-data-dev',area='heap',id='G1 Old Gen'} /1000000",
+              "expr": "jvm_memory_max_bytes{namespace='laa-data-claims-reporting-service-uat',area='heap',id='G1 Old Gen'} /1000000",
               "legendFormat": "{{instance}}",
               "range": true,
               "refId": "A"
@@ -2266,7 +1753,7 @@ data:
       },
       "timezone": "browser",
       "title": "LAA Data Claims Reporting Service uat dashboard",
-      "uid": "laa-gpfd-dev",
+      "uid": "laa-data-claims-reporting-uat",
       "version": 1,
       "weekStart": ""
     }
