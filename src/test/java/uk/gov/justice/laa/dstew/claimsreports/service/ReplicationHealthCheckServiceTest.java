@@ -28,6 +28,20 @@ import static org.mockito.Mockito.when;
 
 class ReplicationHealthCheckServiceTest {
 
+  //Mock WAL (Write Ahead Log) LSNs (Log Sequence Numbers) to mimic various replication test scenarios
+  public static final String OLD_WAL_LSN = "0/16B6C40";
+  public static final String MID_WAL_LSN = "0/16B6C50";
+  public static final String RECENT_WAL_LSN = "0/16B6C60";
+  public static final String LATEST_WAL_LSN = "0/16B6C70";
+
+  //Other constants used in test scenarios
+  public static final long TABLE1_RECORD_COUNT = 10L;
+  public static final long TABLE2_RECORD_COUNT = 5L;
+  public static final long TABLE1_UPDATE_COUNT = 2L;
+  public static final long TABLE2_UPDATE_COUNT = 1L;
+  public static final long TABLE1_INCORRECT_RECORD_COUNT = 9L;
+  public static final long TABLE2_INCORRECT_RECORD_COUNT = 3L;
+
   @Mock
   private Clock clock;
 
@@ -52,8 +66,8 @@ class ReplicationHealthCheckServiceTest {
     List<String> publicationTables = List.of("claims.table1", "claims.table2");
 
     Map<String, ReplicationSummary> summaries = Map.of(
-        "claims.table1", new ReplicationSummary("claims.table1", 10, 2, "0/16B6C50"),
-        "claims.table2", new ReplicationSummary("claims.table2", 5, 1, "0/16B6C40")
+        "claims.table1", new ReplicationSummary("claims.table1", TABLE1_RECORD_COUNT, TABLE1_UPDATE_COUNT, MID_WAL_LSN),
+        "claims.table2", new ReplicationSummary("claims.table2", TABLE2_RECORD_COUNT, TABLE2_UPDATE_COUNT, OLD_WAL_LSN)
     );
 
     // Mock get tables
@@ -64,9 +78,9 @@ class ReplicationHealthCheckServiceTest {
     when(jdbcTemplate.query(anyString(), any(ResultSetExtractor.class), any(Object[].class)))
         .thenReturn(summaries);
 
-    // Mock WAL LSN
+    // Mock actual WAL LSN to be a recent one to indicate that the replication has caught up with previous changes.
     when(jdbcTemplate.queryForObject("SELECT latest_end_lsn FROM pg_stat_subscription WHERE subname = 'claims_reporting_service_sub'", String.class))
-        .thenReturn("0/16B6C60");
+        .thenReturn(RECENT_WAL_LSN);
 
 // Stub for replication summary query
     when(jdbcTemplate.query(contains("FROM claims.replication_summary"),
@@ -78,8 +92,8 @@ class ReplicationHealthCheckServiceTest {
         any(ResultSetExtractor.class), any(Object[].class)))
         .thenAnswer(invocation -> {
           String sql = invocation.getArgument(0);
-          if (sql.contains("table1")) return 10L;
-          if (sql.contains("table2")) return 5L;
+          if (sql.contains("table1")) return TABLE1_RECORD_COUNT;
+          if (sql.contains("table2")) return TABLE2_RECORD_COUNT;
           return 0L;
         });
 
@@ -87,8 +101,8 @@ class ReplicationHealthCheckServiceTest {
         any(ResultSetExtractor.class), any(Object[].class)))
         .thenAnswer(invocation -> {
           String sql = invocation.getArgument(0);
-          if (sql.contains("table1")) return 2L;
-          if (sql.contains("table2")) return 1L;
+          if (sql.contains("table1")) return TABLE1_UPDATE_COUNT;
+          if (sql.contains("table2")) return TABLE2_UPDATE_COUNT;
           return 0L;
         });
 
@@ -102,10 +116,10 @@ class ReplicationHealthCheckServiceTest {
 
   @Test
   void testMissingTableDetected() {
-    mockReplicationHealth(List.of("claims.table1", "claims.table2"), "0/16B6C50");
+    mockReplicationHealth(List.of("claims.table1", "claims.table2"), MID_WAL_LSN);
 
-    when(jdbcTemplate.queryForObject(anyString(), eq(Long.class), any())).thenReturn(10L);
-    when(jdbcTemplate.queryForObject(anyString(), eq(Long.class), any(), any())).thenReturn(2L);
+    when(jdbcTemplate.queryForObject(anyString(), eq(Long.class), any())).thenReturn(TABLE1_RECORD_COUNT);
+    when(jdbcTemplate.queryForObject(anyString(), eq(Long.class), any(), any())).thenReturn(TABLE1_UPDATE_COUNT);
 
     ReplicationHealthReport report = service.checkReplicationHealth();
 
@@ -115,18 +129,18 @@ class ReplicationHealthCheckServiceTest {
 
   @Test
   void testWalProgressAheadTriggersFailure() {
-    mockReplicationHealth(List.of("claims.table1"), "0/16B6D50");
+    mockReplicationHealth(List.of("claims.table1"), LATEST_WAL_LSN);
 
 // Stub for count queries
     when(jdbcTemplate.query(contains("WHERE created_on"),
         any(ResultSetExtractor.class),
         any(Object[].class)))
-        .thenReturn(10L);
+        .thenReturn(TABLE1_RECORD_COUNT);
 
     when(jdbcTemplate.query(contains("WHERE updated_on"),
         any(ResultSetExtractor.class),
         any(Object[].class)))
-        .thenReturn(2L);
+        .thenReturn(TABLE1_UPDATE_COUNT);
 
     ReplicationHealthReport report = service.checkReplicationHealth();
 
@@ -136,13 +150,13 @@ class ReplicationHealthCheckServiceTest {
 
   @Test
   void testCountMismatchDetected() {
-    mockReplicationHealth(List.of("claims.table1"), "0/16B6C50");
+    mockReplicationHealth(List.of("claims.table1"), MID_WAL_LSN);
 
     // mismatch: actual counts differ
     when(jdbcTemplate.queryForObject(startsWith("SELECT count(*) FROM claims.table1"), eq(Long.class), any()))
-        .thenReturn(9L);
+        .thenReturn(TABLE1_INCORRECT_RECORD_COUNT);
     when(jdbcTemplate.queryForObject(contains("claims.table1 WHERE updated_on"), eq(Long.class), any(), any()))
-        .thenReturn(3L);
+        .thenReturn(TABLE2_INCORRECT_RECORD_COUNT);
 
     ReplicationHealthReport report = service.checkReplicationHealth();
 
@@ -153,15 +167,16 @@ class ReplicationHealthCheckServiceTest {
   private void mockReplicationHealth(List<@NotNull String> publicationTables, String walLsn) {
     LocalDate summaryDate = LocalDate.now(clock).minusDays(1);
     Map<String, ReplicationSummary> summaries = Map.of(
-        "claims.table1", new ReplicationSummary("claims.table1", 10, 2, walLsn)
+        "claims.table1", new ReplicationSummary("claims.table1", TABLE1_RECORD_COUNT, TABLE1_UPDATE_COUNT, walLsn)
     );
 
     when(jdbcTemplate.queryForList(anyString(), eq(String.class))).thenReturn(publicationTables);
     when(jdbcTemplate.query(anyString(), any(ResultSetExtractor.class), eq(summaryDate))).thenReturn(
         summaries);
+    //Mock the WAL (Write Ahead Log)'s LSN (Log Sequence Number) to a high value to indicate that the replication has processed all previous changes.
     when(jdbcTemplate.queryForObject(
         eq("SELECT latest_end_lsn FROM pg_stat_subscription WHERE subname = 'claims_reporting_service_sub'"),
         eq(String.class)))
-        .thenReturn("0/16B6C60");
+        .thenReturn(RECENT_WAL_LSN);
   }
 }
