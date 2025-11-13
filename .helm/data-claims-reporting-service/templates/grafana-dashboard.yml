@@ -675,7 +675,7 @@ data:
             {
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "round(\n  100 *\n    sum(container_memory_working_set_bytes{image!='',namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service-*\"}) by (container, pod)\n      /\n    sum(kube_pod_container_resource_requests{resource='memory', namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service-*\"} > 0) by (container, pod)\n)",
+              "expr": "round(\n  100 *\n    sum(container_memory_working_set_bytes{image!='',namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service.*\"}) by (container, pod)\n      /\n    sum(kube_pod_container_resource_requests{resource='memory', namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service.*\"} > 0) by (container, pod)\n)",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "pod",
@@ -772,7 +772,7 @@ data:
             {
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "container_memory_usage_bytes{namespace=\"laa-data-claims-reporting-service-uat\", pod=~'main-data-claims-reporting-service-*'}",
+              "expr": "container_memory_usage_bytes{namespace=\"laa-data-claims-reporting-service-uat\", pod=~'main-data-claims-reporting-service.*'}",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "pod",
@@ -787,7 +787,7 @@ data:
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "container_memory_max_usage_bytes{namespace=\"laa-data-claims-reporting-service-uat\", pod=~'main-data-claims-reporting-service-*'}",
+              "expr": "container_memory_max_usage_bytes{namespace=\"laa-data-claims-reporting-service-uat\", pod=~'main-data-claims-reporting-service.*'}",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -904,7 +904,7 @@ data:
             {
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "round(\n  100 *\n    sum(container_memory_working_set_bytes{image!=\"\", namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service-*\"}) by (container, pod)\n      /\n    sum(kube_pod_container_resource_requests{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service-*\",resource=\"memory\"} > 0) by (container, pod)\n)",
+              "expr": "round(\n  100 *\n    sum(container_memory_working_set_bytes{image!=\"\", namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service.*\"}) by (container, pod)\n      /\n    sum(kube_pod_container_resource_requests{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service.*\",resource=\"memory\"} > 0) by (container, pod)\n)",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "pod",
@@ -1019,7 +1019,7 @@ data:
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "round(\n  100 *\n    sum(\n      rate(container_cpu_usage_seconds_total{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service-*\"}[5m])\n    ) by (pod_name, container_name, namespace)\n      /\n    sum(\n      kube_pod_container_resource_limits{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service-*\",resource='cpu'}\n    ) by (pod_name, container_name, namespace)\n)",
+              "expr": "round(\n  100 *\n    sum(\n      rate(container_cpu_usage_seconds_total{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service.*\"}[5m])\n    ) by (pod_name, container_name, namespace)\n      /\n    sum(\n      kube_pod_container_resource_limits{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service.*\",resource='cpu'}\n    ) by (pod_name, container_name, namespace)\n)",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -1119,7 +1119,7 @@ data:
             {
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "round(\n  100 *\n    sum(\n      rate(container_cpu_usage_seconds_total{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service-*\"}[5m])\n    ) by (pod, container_name, namespace)\n      /\n    sum(\n      kube_pod_container_resource_limits{namespace='laa-data-claims-reporting-service-uat', container_name!='main-data-claims-reporting-service-*', resource='cpu'}\n    ) by (pod, container_name, namespace)\n)",
+              "expr": "round(\n  100 *\n    sum(\n      rate(container_cpu_usage_seconds_total{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service.*\"}[5m])\n    ) by (pod, container_name, namespace)\n      /\n    sum(\n      kube_pod_container_resource_limits{namespace='laa-data-claims-reporting-service-uat', container_name!='main-data-claims-reporting-service.*', resource='cpu'}\n    ) by (pod, container_name, namespace)\n)",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "__auto",
@@ -1217,7 +1217,7 @@ data:
             {
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "topk(3, max by (pod, container)(rate(container_cpu_usage_seconds_total{image!='', namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service-*\"}[$__rate_interval]))) / 10",
+              "expr": "topk(3, max by (pod, container)(rate(container_cpu_usage_seconds_total{image!='', namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service.*\"}[$__rate_interval]))) / 10",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "__auto",
