@@ -114,13 +114,14 @@ public class ReplicationHealthCheckService {
 
   private void checkWalProgress(Map<String, ReplicationSummary> summaries,
       ReplicationHealthReport report) {
-    String currentWal = jdbcTemplate.queryForObject("SELECT pg_current_wal_lsn()", String.class);
-    for (ReplicationSummary summary : summaries.values()) {
-      if (compareWal(summary.walLsn(), currentWal) > 0) {
-        report.addFailure(summary.tableName(),
-            String.format("WAL LSN in summary (%s) is ahead of current WAL (%s)",
-                summary.walLsn(), currentWal));
-      }
+    String currentWal = jdbcTemplate.queryForObject(
+        "SELECT latest_end_lsn FROM pg_stat_subscription WHERE subname = 'claims_reporting_service_sub'",
+        String.class);
+    ReplicationSummary summary = summaries.values().stream().findFirst().orElse(null);
+    if (summary != null && compareWal(summary.walLsn(), currentWal) > 0) {
+      report.addFailure(summary.tableName(),
+          String.format("WAL LSN in summary (%s) is ahead of current WAL (%s)",
+              summary.walLsn(), currentWal));
     }
   }
 
