@@ -45,19 +45,6 @@ data:
             "h": 1,
             "w": 24,
             "x": 0,
-            "y": 0
-          },
-          "id": 65,
-          "panels": [],
-          "title": "API Request Rates",
-          "type": "row"
-        },
-        {
-          "collapsed": false,
-          "gridPos": {
-            "h": 1,
-            "w": 24,
-            "x": 0,
             "y": 31
           },
           "id": 62,
@@ -484,7 +471,7 @@ data:
               "expr": "round(\n  100 *\n    sum(container_memory_working_set_bytes{image!='',namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service.*\"}) by (container, pod)\n      /\n    sum(kube_pod_container_resource_requests{resource='memory', namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service.*\"} > 0) by (container, pod)\n)",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
-              "legendFormat": "pod",
+              "legendFormat": "__auto",
               "range": true,
               "refId": "A",
               "useBackend": false
@@ -581,7 +568,7 @@ data:
               "expr": "container_memory_usage_bytes{namespace=\"laa-data-claims-reporting-service-uat\", pod=~'main-data-claims-reporting-service.*'}",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
-              "legendFormat": "pod",
+              "legendFormat": "__auto",
               "range": true,
               "refId": "A",
               "useBackend": false
@@ -598,7 +585,7 @@ data:
               "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "pod",
+              "legendFormat": "__auto",
               "range": true,
               "refId": "B",
               "useBackend": false
@@ -713,7 +700,7 @@ data:
               "expr": "round(\n  100 *\n    sum(container_memory_working_set_bytes{image!=\"\", namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service.*\"}) by (container, pod)\n      /\n    sum(kube_pod_container_resource_requests{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service.*\",resource=\"memory\"} > 0) by (container, pod)\n)",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
-              "legendFormat": "pod",
+              "legendFormat": "__auto",
               "range": true,
               "refId": "A",
               "useBackend": false
