@@ -316,7 +316,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "builder",
-              "expr": "sum(kube_pod_container_info{namespace='laa-data-claims-reporting-service-uat',pod=~'.*main-data-claims-reporting-service-*'})",
+              "expr": "sum(kube_pod_container_info{namespace='laa-data-claims-reporting-service-uat',pod=~'main-data-claims-reporting-service.*'})",
               "legendFormat": "Total",
               "range": true,
               "refId": "A"
@@ -327,7 +327,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum({namespace='laa-data-claims-reporting-service-uat',phase='Running',pod=~'.*main-data-claims-reporting-service-*'} + 0)",
+              "expr": "sum({namespace='laa-data-claims-reporting-service-uat',phase='Running',pod=~'main-data-claims-reporting-service.*'} + 0)",
               "hide": false,
               "legendFormat": "Running",
               "range": true,
@@ -339,7 +339,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "builder",
-              "expr": "sum({namespace='laa-data-claims-reporting-service-uat',phase='Pending',pod=~'.*main-data-claims-reporting-service-*'} + 0)",
+              "expr": "sum({namespace='laa-data-claims-reporting-service-uat',phase='Pending',pod=~'main-data-claims-reporting-service.*'} + 0)",
               "hide": false,
               "legendFormat": "Pending",
               "range": true,
@@ -351,7 +351,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum({namespace='laa-data-claims-reporting-service-uat',phase='Failed',pod=~'.*main-data-claims-reporting-service-*'} + 0)",
+              "expr": "sum({namespace='laa-data-claims-reporting-service-uat',phase='Failed',pod=~'main-data-claims-reporting-service.*'} + 0)",
               "hide": false,
               "legendFormat": "Failed",
               "range": true,
