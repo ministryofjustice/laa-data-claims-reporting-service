@@ -2,12 +2,12 @@
 apiVersion: v1
 kind: ConfigMap
 metadata:
-  name: {{ .Values.namespace }}-dashboard
-  namespace: {{ .Values.namespace }}
+  name: {{ .Release.Namespace }}-dashboard
+  namespace: {{ .Release.Namespace }}
   labels:
-    grafana_dashboard: {{ .Values.namespace }}-dashboard
+    grafana_dashboard: {{ .Release.Namespace }}-dashboard
 data:
-  "{{ .Values.namespace }}-dashboard.json": |
+  "{{ .Release.Namespace }}-dashboard.json": |
     {
       "annotations": {
         "list": [
