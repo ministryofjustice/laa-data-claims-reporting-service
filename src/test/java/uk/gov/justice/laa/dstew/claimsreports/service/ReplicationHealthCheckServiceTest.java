@@ -6,6 +6,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
+import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.InjectMocks;
@@ -64,7 +65,7 @@ class ReplicationHealthCheckServiceTest {
         .thenReturn(summaries);
 
     // Mock WAL LSN
-    when(jdbcTemplate.queryForObject("SELECT pg_current_wal_lsn()", String.class))
+    when(jdbcTemplate.queryForObject("SELECT latest_end_lsn FROM pg_stat_subscription WHERE subname = 'claims_reporting_service_sub'", String.class))
         .thenReturn("0/16B6C60");
 
 // Stub for replication summary query
@@ -101,16 +102,7 @@ class ReplicationHealthCheckServiceTest {
 
   @Test
   void testMissingTableDetected() {
-    LocalDate summaryDate = LocalDate.now(clock).minusDays(1);
-    List<String> publicationTables = List.of("claims.table1", "claims.table2");
-    Map<String, ReplicationHealthCheckService.ReplicationSummary> summaries = Map.of(
-        "claims.table1", new ReplicationHealthCheckService.ReplicationSummary("claims.table1", 10, 2, "0/16B6C50")
-    );
-
-    when(jdbcTemplate.queryForList(anyString(), eq(String.class))).thenReturn(publicationTables);
-    when(jdbcTemplate.query(anyString(), any(ResultSetExtractor.class), eq(summaryDate))).thenReturn(summaries);
-    when(jdbcTemplate.queryForObject(eq("SELECT pg_current_wal_lsn()"), eq(String.class)))
-        .thenReturn("0/16B6C60");
+    mockReplicationHealth(List.of("claims.table1", "claims.table2"), "0/16B6C50");
 
     when(jdbcTemplate.queryForObject(anyString(), eq(Long.class), any())).thenReturn(10L);
     when(jdbcTemplate.queryForObject(anyString(), eq(Long.class), any(), any())).thenReturn(2L);
@@ -123,16 +115,7 @@ class ReplicationHealthCheckServiceTest {
 
   @Test
   void testWalProgressAheadTriggersFailure() {
-    LocalDate summaryDate = LocalDate.now(clock).minusDays(1);
-    List<String> publicationTables = List.of("claims.table1");
-    Map<String, ReplicationHealthCheckService.ReplicationSummary> summaries = Map.of(
-        "claims.table1", new ReplicationHealthCheckService.ReplicationSummary("claims.table1", 10, 2, "0/16B6D50")
-    );
-
-    when(jdbcTemplate.queryForList(anyString(), eq(String.class))).thenReturn(publicationTables);
-    when(jdbcTemplate.query(anyString(), any(ResultSetExtractor.class), eq(summaryDate))).thenReturn(summaries);
-    when(jdbcTemplate.queryForObject(eq("SELECT pg_current_wal_lsn()"), eq(String.class)))
-        .thenReturn("0/16B6C60");
+    mockReplicationHealth(List.of("claims.table1"), "0/16B6D50");
 
 // Stub for count queries
     when(jdbcTemplate.query(contains("WHERE created_on"),
@@ -153,16 +136,7 @@ class ReplicationHealthCheckServiceTest {
 
   @Test
   void testCountMismatchDetected() {
-    LocalDate summaryDate = LocalDate.now(clock).minusDays(1);
-    List<String> publicationTables = List.of("claims.table1");
-    Map<String, ReplicationHealthCheckService.ReplicationSummary> summaries = Map.of(
-        "claims.table1", new ReplicationHealthCheckService.ReplicationSummary("claims.table1", 10, 2, "0/16B6C50")
-    );
-
-    when(jdbcTemplate.queryForList(anyString(), eq(String.class))).thenReturn(publicationTables);
-    when(jdbcTemplate.query(anyString(), any(ResultSetExtractor.class), eq(summaryDate))).thenReturn(summaries);
-    when(jdbcTemplate.queryForObject(eq("SELECT pg_current_wal_lsn()"), eq(String.class)))
-        .thenReturn("0/16B6C60");
+    mockReplicationHealth(List.of("claims.table1"), "0/16B6C50");
 
     // mismatch: actual counts differ
     when(jdbcTemplate.queryForObject(startsWith("SELECT count(*) FROM claims.table1"), eq(Long.class), any()))
@@ -174,5 +148,20 @@ class ReplicationHealthCheckServiceTest {
 
     assertFalse(report.isHealthy());
     assertTrue(report.summary().contains("Count mismatch"));
+  }
+
+  private void mockReplicationHealth(List<@NotNull String> publicationTables, String walLsn) {
+    LocalDate summaryDate = LocalDate.now(clock).minusDays(1);
+    Map<String, ReplicationSummary> summaries = Map.of(
+        "claims.table1", new ReplicationSummary("claims.table1", 10, 2, walLsn)
+    );
+
+    when(jdbcTemplate.queryForList(anyString(), eq(String.class))).thenReturn(publicationTables);
+    when(jdbcTemplate.query(anyString(), any(ResultSetExtractor.class), eq(summaryDate))).thenReturn(
+        summaries);
+    when(jdbcTemplate.queryForObject(
+        eq("SELECT latest_end_lsn FROM pg_stat_subscription WHERE subname = 'claims_reporting_service_sub'"),
+        eq(String.class)))
+        .thenReturn("0/16B6C60");
   }
 }
