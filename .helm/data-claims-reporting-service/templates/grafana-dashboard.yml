@@ -678,7 +678,7 @@ data:
               "expr": "round(\n  100 *\n    sum(container_memory_working_set_bytes{image!='',namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service-*\"}) by (container, pod)\n      /\n    sum(kube_pod_container_resource_requests{resource='memory', namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service-*\"} > 0) by (container, pod)\n)",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
-              "legendFormat": "{{pod}}",
+              "legendFormat": "pod",
               "range": true,
               "refId": "A",
               "useBackend": false
@@ -775,7 +775,7 @@ data:
               "expr": "container_memory_usage_bytes{namespace=\"laa-data-claims-reporting-service-uat\", pod=~'main-data-claims-reporting-service-*'}",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
-              "legendFormat": "{{pod}}",
+              "legendFormat": "pod",
               "range": true,
               "refId": "A",
               "useBackend": false
@@ -792,7 +792,7 @@ data:
               "hide": false,
               "includeNullMetadata": true,
               "instant": false,
-              "legendFormat": "{{pod}}",
+              "legendFormat": "pod",
               "range": true,
               "refId": "B",
               "useBackend": false
@@ -907,7 +907,7 @@ data:
               "expr": "round(\n  100 *\n    sum(container_memory_working_set_bytes{image!=\"\", namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service-*\"}) by (container, pod)\n      /\n    sum(kube_pod_container_resource_requests{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service-*\",resource=\"memory\"} > 0) by (container, pod)\n)",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
-              "legendFormat": "{{pod}}",
+              "legendFormat": "pod",
               "range": true,
               "refId": "A",
               "useBackend": false
@@ -1297,7 +1297,7 @@ data:
               },
               "editorMode": "code",
               "expr": "jvm_memory_max_bytes{namespace='laa-data-claims-reporting-service-uat',area='heap',id='G1 Survivor Space'} / 1000000",
-              "legendFormat": "{{instance}}",
+              "legendFormat": "instance",
               "range": true,
               "refId": "A"
             }
@@ -1394,7 +1394,7 @@ data:
               },
               "editorMode": "code",
               "expr": "jvm_memory_used_bytes{namespace='laa-data-claims-reporting-service-uat',area='heap',id='G1 Survivor Space'}/1000000",
-              "legendFormat": "{{instance}}",
+              "legendFormat": "instance",
               "range": true,
               "refId": "A"
             }
@@ -1456,7 +1456,7 @@ data:
               },
               "editorMode": "code",
               "expr": "jvm_memory_max_bytes{namespace='laa-data-claims-reporting-service-uat',area='heap',id='G1 Eden Space'}/1000000",
-              "legendFormat": "{{instance}}",
+              "legendFormat": "instance",
               "range": true,
               "refId": "A"
             }
@@ -1553,7 +1553,7 @@ data:
               },
               "editorMode": "code",
               "expr": "jvm_memory_used_bytes{namespace='laa-data-claims-reporting-service-uat',area='heap',id='G1 Eden Space'}/1000000",
-              "legendFormat": "{{instance}}",
+              "legendFormat": "instance",
               "range": true,
               "refId": "A"
             }
@@ -1615,7 +1615,7 @@ data:
               },
               "editorMode": "code",
               "expr": "jvm_memory_max_bytes{namespace='laa-data-claims-reporting-service-uat',area='heap',id='G1 Old Gen'} /1000000",
-              "legendFormat": "{{instance}}",
+              "legendFormat": "instance",
               "range": true,
               "refId": "A"
             }
@@ -1712,7 +1712,7 @@ data:
               },
               "editorMode": "code",
               "expr": "jvm_memory_used_bytes{namespace='laa-data-claims-reporting-service-uat',area='heap',id='G1 Old Gen'} /1000000",
-              "legendFormat": "{{instance}}",
+              "legendFormat": "instance",
               "range": true,
               "refId": "A"
             }
