@@ -15,7 +15,13 @@ spec:
             - name: {{ .Chart.Name }}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               imagePullPolicy: IfNotPresent
-              command: ["java", "-jar", "/opt/laa-data-reporting-service/claims-reporting/app.jar"]
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  java -jar /opt/laa-data-reporting-service/claims-reporting/app.jar && \
+                  echo "cronjob_last_run_timestamp $(date +%s)" | curl --data-binary @- http://pushgateway:9091/metrics/job=my-cronjob && \
+                  echo "cronjob_success 1" | curl --data-binary @- http://pushgateway:9091/metrics/job=my-cronjob
               env:
                 - name: S3_REPORT_STORE
                   value: {{ .Values.s3.bucketName | quote }}
