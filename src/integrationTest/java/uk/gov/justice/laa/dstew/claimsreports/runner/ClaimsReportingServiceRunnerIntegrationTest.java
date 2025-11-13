@@ -258,13 +258,19 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
       Integer recordCount = entry.getValue().getLeft();
       Integer updatedCount = entry.getValue().getRight();
 
+      //latest_end_lsn (Log Sequence Number) is a marker which indicates how far the subsription has reached.
+      //We set up the test summary data so that it looks like the subscription has reached the LSN recorded in the summary
+      String mockLsn = jdbcTemplate.queryForObject(
+          "SELECT latest_end_lsn FROM pg_stat_subscription WHERE subname = 'claims_reporting_service_sub'",
+          String.class);
+
       jdbcTemplate.update(
           """
               INSERT INTO claims.replication_summary
               (table_name, summary_date, record_count, updated_count, wal_lsn, created_on)
-              VALUES (?, ?, ?, ?, pg_current_wal_lsn(), ?)
+              VALUES (?, ?, ?, ?, ?::pg_lsn, ?)
               """,
-          tableName, yesterday, recordCount, updatedCount, now);
+          tableName, yesterday, recordCount, updatedCount, mockLsn, now);
     }
   }
 }
