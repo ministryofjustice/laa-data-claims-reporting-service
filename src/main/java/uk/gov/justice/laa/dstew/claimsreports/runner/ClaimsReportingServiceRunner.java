@@ -3,6 +3,7 @@ package uk.gov.justice.laa.dstew.claimsreports.runner;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
@@ -38,6 +39,8 @@ import uk.gov.justice.laa.dstew.claimsreports.service.ReplicationHealthCheckServ
 @RequiredArgsConstructor
 public class ClaimsReportingServiceRunner  implements ApplicationRunner {
 
+  @Value("${feature.ignore-replication-rowcount-mismatch:false}")
+  private boolean ignoreRowCountMismatch;
   private final ReplicationHealthCheckService replicationHealthCheckService;
   //Spring will auto-inject all services that implement the AbstractReportService
   private final List<AbstractReportService> reportServices;
@@ -67,7 +70,14 @@ public class ClaimsReportingServiceRunner  implements ApplicationRunner {
 
     if (!report.isHealthy()) {
       log.error("Replication health check failed:\n{}", report.summary());
-      throw new IllegalStateException("Replication health check failed — aborting report generation");
+
+      //Even if the overall replication is unhealthy, we want to continue if ignoreRowCountMismatch is set and basic WAL check passed.
+      if (ignoreRowCountMismatch && report.isWalLsnOk()) {
+        log.info("Ignoring Row Count Mismatch because ignoreRowCountMismatch is set to true and WAL LSN check has passed ");
+      } else {
+        throw new IllegalStateException(
+            "Replication health check failed — aborting report generation");
+      }
     }
 
     log.info("Replication health confirmed — proceeding with report generation.");
