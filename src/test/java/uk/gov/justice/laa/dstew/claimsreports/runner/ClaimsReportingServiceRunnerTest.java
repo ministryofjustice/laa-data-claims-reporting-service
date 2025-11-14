@@ -116,7 +116,7 @@ class ClaimsReportingServiceRunnerTest {
     // given
     ReplicationHealthReport unhealthyButSafe = new ReplicationHealthReport(LocalDate.now());
     unhealthyButSafe.setHealthy(false);
-    unhealthyButSafe.setWalLsnOK(true);
+    unhealthyButSafe.setWalLsnOk(true);
 
     when(replicationHealthCheckService.checkReplicationHealth()).thenReturn(unhealthyButSafe);
 
@@ -142,7 +142,7 @@ class ClaimsReportingServiceRunnerTest {
     // given
     ReplicationHealthReport unhealthy = new ReplicationHealthReport(LocalDate.now());
     unhealthy.setHealthy(false);
-    unhealthy.setWalLsnOK(false);
+    unhealthy.setWalLsnOk(false);
 
     when(replicationHealthCheckService.checkReplicationHealth()).thenReturn(unhealthy);
 

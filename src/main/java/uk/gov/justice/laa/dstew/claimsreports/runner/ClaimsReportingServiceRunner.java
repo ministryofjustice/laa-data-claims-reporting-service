@@ -72,7 +72,7 @@ public class ClaimsReportingServiceRunner  implements ApplicationRunner {
       log.error("Replication health check failed:\n{}", report.summary());
 
       //Even if the overall replication is unhealthy, we want to continue if ignoreRowCountMismatch is set and basic WAL check passed.
-      if (ignoreRowCountMismatch && report.isWalLsnOK()) {
+      if (ignoreRowCountMismatch && report.isWalLsnOk()) {
         log.info("Ignoring Row Count Mismatch because ignoreRowCountMismatch is set to true and WAL LSN check has passed ");
       } else {
         throw new IllegalStateException(
