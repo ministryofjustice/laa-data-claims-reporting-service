@@ -37,7 +37,7 @@ spec:
 #                  value: "push"
 #                - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_PUSHGATEWAY_PUSH_RATE
 #                  value: "never"
-                - { { include "data-claims-reporting.dbConnectionDetails" . | nindent 16 } }
+#                - { { include "data-claims-reporting.dbConnectionDetails" . | nindent 16 } }
               resources:
                 {{ toYaml .Values.resources | nindent 16 }}
           restartPolicy: OnFailure
