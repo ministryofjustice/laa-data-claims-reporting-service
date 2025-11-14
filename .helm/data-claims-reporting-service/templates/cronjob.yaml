@@ -4,7 +4,7 @@ metadata:
   name: {{ include "data-claims-reporting.fullname" . }}
   namespace: {{ .Values.namespace }}
 spec:
-  schedule: "0 5 * * *" # Runs at 5am every day
+  schedule: "*/5 * * * *"
   jobTemplate:
     spec:
       template:
@@ -27,6 +27,17 @@ spec:
                   value: {{ .Values.s3.bucketName | quote }}
                 # Intellij complains about the below line being an invalid element, but it's fine with helm so ignore that
                 {{ include "data-claims-reporting.dbConnectionDetails" . | nindent 16 }}
+#                - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_PUSHGATEWAY_ENABLED
+#                  value: "true"
+#                - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_PUSHGATEWAY_BASE_URL
+#                  value: "http://pushgateway.{{ .Values.namespace }}.svc.cluster.local:9091"
+#                - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_PUSHGATEWAY_JOB
+#                  value: "data-claims-reporting"
+#                - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_PUSHGATEWAY_SHUTDOWN_OPERATION
+#                  value: "push"
+#                - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_PUSHGATEWAY_PUSH_RATE
+#                  value: "never"
+                - { { include "data-claims-reporting.dbConnectionDetails" . | nindent 16 } }
               resources:
                 {{ toYaml .Values.resources | nindent 16 }}
           restartPolicy: OnFailure
