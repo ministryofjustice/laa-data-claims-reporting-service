@@ -58,6 +58,8 @@ public class CsvCreationService {
       log.info("CSV creation completed for {}", reportName);
       log.info("Rows written for {}: " + handler.getRowCount(), reportName);
 
+      Thread.sleep(10000000);
+
     } catch (IOException ex) {
       throw new CsvCreationException("Failure to write to file for " + reportName, ex);
     } catch (CsvCreationException ex) {
