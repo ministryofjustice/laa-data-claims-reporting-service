@@ -4,7 +4,7 @@ metadata:
   name: {{ include "data-claims-reporting.fullname" . }}
   namespace: {{ .Values.namespace }}
 spec:
-  schedule: "0 5 * * *" # Runs at 5am every day
+  schedule: "10 * * * *"
   jobTemplate:
     spec:
       template:
@@ -15,12 +15,29 @@ spec:
             - name: {{ .Chart.Name }}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               imagePullPolicy: IfNotPresent
-              command: ["java", "-jar", "/opt/laa-data-reporting-service/claims-reporting/app.jar"]
+              command:
+                - /bin/sh
+                - -c
+                - |
+                  java -jar /opt/laa-data-reporting-service/claims-reporting/app.jar && \
+                  echo "cronjob_last_run_timestamp $(date +%s)" | curl --data-binary @- http://pushgateway:9091/metrics/job=my-cronjob && \
+                  echo "cronjob_success 1" | curl --data-binary @- http://pushgateway:9091/metrics/job=my-cronjob
               env:
                 - name: S3_REPORT_STORE
                   value: {{ .Values.s3.bucketName | quote }}
                 # Intellij complains about the below line being an invalid element, but it's fine with helm so ignore that
                 {{ include "data-claims-reporting.dbConnectionDetails" . | nindent 16 }}
+#                - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_PUSHGATEWAY_ENABLED
+#                  value: "true"
+#                - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_PUSHGATEWAY_BASE_URL
+#                  value: "http://pushgateway.{{ .Values.namespace }}.svc.cluster.local:9091"
+#                - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_PUSHGATEWAY_JOB
+#                  value: "data-claims-reporting"
+#                - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_PUSHGATEWAY_SHUTDOWN_OPERATION
+#                  value: "push"
+#                - name: MANAGEMENT_METRICS_EXPORT_PROMETHEUS_PUSHGATEWAY_PUSH_RATE
+#                  value: "never"
+#                - { { include "data-claims-reporting.dbConnectionDetails" . | nindent 16 } }
               resources:
                 {{ toYaml .Values.resources | nindent 16 }}
           restartPolicy: OnFailure
