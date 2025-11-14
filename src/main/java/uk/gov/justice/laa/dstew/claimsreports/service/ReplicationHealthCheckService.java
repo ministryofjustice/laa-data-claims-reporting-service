@@ -56,11 +56,11 @@ public class ReplicationHealthCheckService {
 
     ReplicationHealthReport report = new ReplicationHealthReport(summaryDate);
 
-    checkMissingTables(publicationTables, summaries, report);
     checkWalProgress(summaries, report);
+    checkMissingTables(publicationTables, summaries, report);
     checkCounts(summaries, startOfDay, endOfDay, report);
 
-    report.setHealthy(report.getFailedChecks().isEmpty());
+    report.setHealthy(report.isWalLsnOK() && report.isTableSummaryOK() && report.isTableCountsOK());
 
     if (report.isHealthy()) {
       log.info("Replication looks healthy for {}", summaryDate);
@@ -105,9 +105,11 @@ public class ReplicationHealthCheckService {
 
   private void checkMissingTables(List<String> tables, Map<String, ReplicationSummary> summaries,
       ReplicationHealthReport report) {
+    report.setTableSummaryOK(true);
     for (String table : tables) {
       if (!summaries.containsKey(table)) {
         report.addFailure(table, "Missing replication summary for table");
+        report.setTableSummaryOK(false);
       }
     }
   }
@@ -119,9 +121,12 @@ public class ReplicationHealthCheckService {
         String.class);
     ReplicationSummary summary = summaries.values().stream().findFirst().orElse(null);
     if (summary != null && compareWal(summary.walLsn(), currentWal) > 0) {
+      report.setWalLsnOK(false);
       report.addFailure(summary.tableName(),
           String.format("WAL LSN in summary (%s) is ahead of current WAL (%s)",
               summary.walLsn(), currentWal));
+    } else {
+      report.setWalLsnOK(true);
     }
   }
 
@@ -133,6 +138,7 @@ public class ReplicationHealthCheckService {
   private void checkCounts(Map<String, ReplicationSummary> summaries,
       Timestamp startOfDay, Timestamp endOfDay,
       ReplicationHealthReport report) {
+    report.setTableCountsOK(true);
     for (ReplicationSummary summary : summaries.values()) {
       String countSql = String.format("SELECT count(*) FROM %s WHERE created_on < ?", summary.tableName());
       String updatedSql = String.format("SELECT count(*) FROM %s WHERE updated_on BETWEEN ? AND ?", summary.tableName());
@@ -153,6 +159,7 @@ public class ReplicationHealthCheckService {
 
       if (!Objects.equals(actualRecordCount, summary.recordCount())
           || !Objects.equals(actualUpdatedCount, summary.updatedCount())) {
+        report.setTableCountsOK(false);
         report.addFailure(summary.tableName(),
             String.format("Count mismatch — expected (%d/%d), actual (%d/%d)",
                 summary.recordCount(), summary.updatedCount(),

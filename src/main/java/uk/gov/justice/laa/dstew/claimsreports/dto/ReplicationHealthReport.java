@@ -22,6 +22,9 @@ public class ReplicationHealthReport {
   private final LocalDate summaryDate;
   private final Map<String, String> failedChecks = new LinkedHashMap<>();
   private boolean healthy;
+  private boolean walLsnOK;
+  private boolean tableSummaryOK;
+  private boolean tableCountsOK;
 
   public void addFailure(String table, String reason) {
     failedChecks.put(table, reason);
