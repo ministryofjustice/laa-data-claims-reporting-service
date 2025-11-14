@@ -46,3 +46,6 @@ management:
 csv-creation:
   buffer-flush-freq: 5000
   data-chunk-size: 1000
+
+feature:
+  ignore-replication-rowcount-mismatch: ${FEATURE_IGNORE_REPLICATION_ROWCOUNT_MISMATCH:false}

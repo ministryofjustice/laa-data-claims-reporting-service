@@ -13,6 +13,7 @@ import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.ApplicationArguments;
 
+import org.springframework.test.util.ReflectionTestUtils;
 import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
 import uk.gov.justice.laa.dstew.claimsreports.service.AbstractReportService;
 import uk.gov.justice.laa.dstew.claimsreports.service.ReplicationHealthCheckService;
@@ -108,5 +109,54 @@ class ClaimsReportingServiceRunnerTest {
     runner.run(applicationArguments);
 
     verify(replicationHealthCheckService, times(1)).checkReplicationHealth();
+  }
+
+  @Test
+  void shouldContinueWhenIgnoreMismatchTrueAndWalLsnOK() {
+    // given
+    ReplicationHealthReport unhealthyButSafe = new ReplicationHealthReport(LocalDate.now());
+    unhealthyButSafe.setHealthy(false);
+    unhealthyButSafe.setWalLsnOk(true);
+
+    when(replicationHealthCheckService.checkReplicationHealth()).thenReturn(unhealthyButSafe);
+
+    runner = new ClaimsReportingServiceRunner(
+        replicationHealthCheckService,
+        List.of(reportService1, reportService2)
+    );
+    // use reflection to set the private @Value field
+    ReflectionTestUtils.setField(runner, "ignoreRowCountMismatch", true);
+
+    // when
+    runner.run(applicationArguments);
+
+    // then - reports should still be generated
+    verify(reportService1).refreshDataSource();
+    verify(reportService1).generateReport();
+    verify(reportService2).refreshDataSource();
+    verify(reportService2).generateReport();
+  }
+
+  @Test
+  void shouldAbortWhenIgnoreMismatchTrueButWalLsnNotOK() {
+    // given
+    ReplicationHealthReport unhealthy = new ReplicationHealthReport(LocalDate.now());
+    unhealthy.setHealthy(false);
+    unhealthy.setWalLsnOk(false);
+
+    when(replicationHealthCheckService.checkReplicationHealth()).thenReturn(unhealthy);
+
+    runner = new ClaimsReportingServiceRunner(
+        replicationHealthCheckService,
+        List.of(reportService1, reportService2)
+    );
+    ReflectionTestUtils.setField(runner, "ignoreRowCountMismatch", true);
+
+    // when / then
+    assertThatThrownBy(() -> runner.run(applicationArguments))
+        .isInstanceOf(IllegalStateException.class)
+        .hasMessageContaining("Replication health check failed");
+
+    verifyNoInteractions(reportService1, reportService2);
   }
 }

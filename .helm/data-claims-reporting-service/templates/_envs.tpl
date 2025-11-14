@@ -27,6 +27,9 @@ Extract DB environment variables from rds-postgresql-instance-output secret
       key: rds_instance_address
 - name: SPRING_DATASOURCE_URL
   value: "jdbc:postgresql://$(DB_HOST):5432/$(DB_NAME)"
+{{/*
+Extract other environment variables from laa-data-claims-reporting-service-secrets secret
+*/}}
 - name: SPRING_FLYWAY_PLACEHOLDERS_REPORTING_USERNAME
   valueFrom:
     secretKeyRef:
@@ -47,4 +50,9 @@ Extract DB environment variables from rds-postgresql-instance-output secret
     secretKeyRef:
       name: laa-data-claims-reporting-service-secrets
       key: replication-source-db-name
+- name: FEATURE_IGNORE_REPLICATION_ROWCOUNT_MISMATCH
+  valueFrom:
+    secretKeyRef:
+      name: laa-data-claims-reporting-service-secrets
+      key: feature-ignore-replication-rowcount-mismatch
 {{- end }}
