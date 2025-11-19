@@ -37,6 +37,7 @@ management:
     web:
       exposure:
         include: health
+        exclude: prometheus # ensures this endpoint remains unreachable after integration of micrometer-registry dependency
 
   # show detailed health status
   endpoint:
