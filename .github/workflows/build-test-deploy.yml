@@ -38,7 +38,7 @@ jobs:
 #        Add run of integration tests when these are added to the repo
 
       - name: Upload service JAR artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: service-jar
           path: build/libs/*.jar
@@ -46,7 +46,7 @@ jobs:
 
       - name: Upload checkstyle report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: checkstyle-report
           path: build/reports/checkstyle
@@ -54,7 +54,7 @@ jobs:
 
       - name: Upload test report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: test-report
           path: build/reports/tests
@@ -62,7 +62,7 @@ jobs:
 
       - name: Upload jacoco coverage report
         if: always()
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v5
         with:
           name: jacoco-coverage-report
           path: build/reports/jacoco
@@ -131,7 +131,7 @@ jobs:
       - uses: actions/checkout@v5
 
       - name: Download JAR artifact
-        uses: actions/download-artifact@v5
+        uses: actions/download-artifact@v6
         with:
           name: service-jar
           path: build/libs/
