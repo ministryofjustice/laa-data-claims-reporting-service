@@ -4,15 +4,20 @@ import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import io.prometheus.metrics.exporter.pushgateway.PushGateway;
 import jakarta.annotation.PreDestroy;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
+/**
+ * Pushes prometheus metrics from ephemeral job to pushgateway.
+ */
 @Component
 public class MetricsHandler {
 
   @Autowired
   private PrometheusMeterRegistry prometheusMeterRegistry;
 
+  /**
+   * When the job is complete, send metrics to pushgateway.
+   */
   @PreDestroy
   public void pushMetrics() {
     try {
