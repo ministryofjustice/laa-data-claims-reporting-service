@@ -23,7 +23,7 @@ public class MetricsHandler {
     try {
       PushGateway.builder()
           .address("laa-data-claims-reporting-service-uat-pushgateway-prometheus-pu:9091")
-          .job("report generation")
+          .job("report_generation")
           .registry(prometheusMeterRegistry.getPrometheusRegistry()).build()
           .push();
       System.out.println("Metrics pushed successfully");
