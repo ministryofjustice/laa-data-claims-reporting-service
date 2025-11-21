@@ -11,5 +11,5 @@ spec:
   endpoints:
       - port: {{ .Chart.Name }}-metrics
         interval: 15s
-        path: /metrics
+        path: /metricssdlfkjsldkfjslkf
   {{- end -}}
