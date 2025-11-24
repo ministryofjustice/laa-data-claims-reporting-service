@@ -1,4 +1,3 @@
-{{- define "laa-data-claims-reproting-service.network-policy" -}}
 apiVersion: networking.k8s.io/v1
 kind: NetworkPolicy
 metadata:
@@ -15,4 +14,3 @@ spec:
         - namespaceSelector:
             matchLabels:
               component: monitoring
-  {{- end -}}
