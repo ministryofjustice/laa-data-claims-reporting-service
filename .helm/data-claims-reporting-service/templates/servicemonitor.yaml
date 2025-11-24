@@ -8,6 +8,6 @@ spec:
     matchLabels:
       app: prometheus-pushgateway
   endpoints:
-      - port: {{ .Chart.Name }}-metrics
+      - port: http
         interval: 15s
         path: /metrics
