@@ -11,4 +11,3 @@ spec:
       - port: {{ .Chart.Name }}-metrics
         interval: 15s
         path: /metrics123456
-  {{- end -}}
