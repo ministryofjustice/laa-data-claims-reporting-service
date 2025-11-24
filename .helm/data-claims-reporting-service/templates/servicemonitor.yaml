@@ -1,3 +1,4 @@
+{{- define "laa-data-claims-reporting-service.service-monitor" -}}
 apiVersion: monitoring.coreos.com/v1
 kind: ServiceMonitor
 metadata:
@@ -10,4 +11,5 @@ spec:
   endpoints:
       - port: {{ .Chart.Name }}-metrics
         interval: 15s
-        path: /metricssdlfkjsldkfjslkf
+        path: /metrics123456
+  {{- end -}}
