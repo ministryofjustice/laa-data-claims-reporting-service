@@ -3,10 +3,9 @@ package uk.gov.justice.laa.dstew.claimsreports.config;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import io.prometheus.metrics.exporter.pushgateway.PushGateway;
 import jakarta.annotation.PreDestroy;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Component;
-
-import java.util.UUID;
 
 /**
  * Pushes prometheus metrics from ephemeral job to pushgateway.
