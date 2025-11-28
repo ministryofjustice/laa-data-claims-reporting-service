@@ -12,6 +12,7 @@ import java.io.File;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
+import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
@@ -23,13 +24,15 @@ class Report012ServiceTest {
   private JdbcTemplate jdbcTemplate;
   private CsvCreationService creationService;
   private S3ClientWrapper s3ClientWrapper;
+  private MetricsHandler metricsHandler;
 
   @BeforeEach
   void setUp() {
     jdbcTemplate = mock(JdbcTemplate.class);
     creationService = mock(CsvCreationService.class);
     s3ClientWrapper = mock(S3ClientWrapper.class);
-    service = new Report012Service(jdbcTemplate, s3ClientWrapper, creationService);
+    metricsHandler = mock(MetricsHandler.class);
+    service = new Report012Service(jdbcTemplate, s3ClientWrapper, creationService, metricsHandler);
   }
 
   @Test
