@@ -21,8 +21,9 @@ public class MetricsHandler {
   @PreDestroy
   public void pushMetrics(String jobName) {
     try {
-      if(jobName == null || jobName.isEmpty())
+      if (jobName == null || jobName.isEmpty()) {
         jobName = "end of job metrics";
+      }
 
       PushGateway.builder()
           .address("laa-data-claims-reporting-service-uat-pushgateway-prometheus-pu:9091")
