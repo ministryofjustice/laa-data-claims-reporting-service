@@ -14,7 +14,8 @@ import org.springframework.stereotype.Component;
 
 public class MetricsHandler {
 
-  @Value("${GATEWAY_ADDRESS}") String gatewayAddress;
+  @Value("${GATEWAY_ADDRESS}")
+  private String gatewayAddress;
 
   @Autowired
   private PrometheusMeterRegistry prometheusMeterRegistry;
@@ -29,6 +30,7 @@ public class MetricsHandler {
           .job(reportName)
           .registry(prometheusMeterRegistry.getPrometheusRegistry()).build()
           .push();
+      System.out.println("**************** " + gatewayAddress);
     } catch (Exception e) {
       System.err.println("Failed to push metrics: " + e.getMessage());
     }
