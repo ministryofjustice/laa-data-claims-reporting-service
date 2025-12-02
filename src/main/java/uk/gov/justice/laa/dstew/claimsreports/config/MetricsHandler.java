@@ -11,7 +11,6 @@ import org.springframework.stereotype.Component;
  * Pushes prometheus metrics from ephemeral job to pushgateway.
  */
 @Component
-
 public class MetricsHandler {
 
   @Value("${GATEWAY_ADDRESS}")
