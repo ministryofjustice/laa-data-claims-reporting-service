@@ -106,7 +106,7 @@ jobs:
         uses: gradle/actions/setup-gradle@v5
 
       - name: Build app jar with gradle
-        run: ./gradlew build -x test
+        run: ./gradlew build
 
       - name: Build a Docker image
         run: docker build -t spring-boot-microservice:scan .
