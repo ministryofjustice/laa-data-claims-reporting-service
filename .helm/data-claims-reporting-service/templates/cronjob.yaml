@@ -25,8 +25,8 @@ spec:
               env:
                 - name: S3_REPORT_STORE
                   value: {{ .Values.s3.bucketName | quote }}
-                - name: GATEWAY_ADDRESS_1357
-                  value: {{ .Values.namespace | quote }}
+                - name: GATEWAY_ADDRESS
+                  value: {{ .Values.pushgatewayAddress }}
                 # Intellij complains about the below line being an invalid element, but it's fine with helm so ignore that
                 {{ include "data-claims-reporting.dbConnectionDetails" . | nindent 16 }}
               resources:

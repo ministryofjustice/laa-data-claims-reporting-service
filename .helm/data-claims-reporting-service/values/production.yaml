@@ -30,4 +30,4 @@ autoscaling:
   targetCPUUtilizationPercentage: 80
 
 s3:
-  bucketName: laa-get-payments-finance-data-prod-report-store
+  pushgatewayAddress: laa-data-claims-reporting-service-prod-pushgateway-prometheus-pu:9091
