@@ -15,7 +15,7 @@ spec:
             - name: {{ .Chart.Name }}
               image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
               imagePullPolicy: IfNotPresent
-              command: ["java -jar /opt/laa-data-reporting-service/claims-reporting/app.jar"]
+              command: ["java", "-jar", "/opt/laa-data-reporting-service/claims-reporting/app.jar"]
               env:
                 - name: S3_REPORT_STORE
                   value: {{ .Values.s3.bucketName | quote }}
