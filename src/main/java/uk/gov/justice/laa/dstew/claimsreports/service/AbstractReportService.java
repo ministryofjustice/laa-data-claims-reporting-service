@@ -87,7 +87,7 @@ public abstract class AbstractReportService {
       log.info("Created {} file with filename {} in {} ms", getReportName(), getReportFileName(), durationMilliseconds);
 
       s3ClientWrapper.uploadFile(tempFile, getReportFileName());
-      metricsHandler.pushMetrics();
+      metricsHandler.pushMetrics(getReportName());
 
     } catch (Exception e) {
       log.error("Failed to generate {}: {}", getReportName(), e.getMessage());

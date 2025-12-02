@@ -17,19 +17,25 @@ public class MetricsHandler {
   private PrometheusMeterRegistry prometheusMeterRegistry;
 
   /**
-   * When the job is complete, send metrics to pushgateway.
+   * Allow dynamic pushing of metrics.
    */
-  @PreDestroy
-  public void pushMetrics() {
+  public void pushMetrics(String reportName) {
     try {
       PushGateway.builder()
           .address("laa-data-claims-reporting-service-uat-pushgateway-prometheus-pu:9091")
-          .job("new job " + UUID.randomUUID())
+          .job("new job " + reportName)
           .registry(prometheusMeterRegistry.getPrometheusRegistry()).build()
           .push();
-      System.out.println("Metrics pushed successfully");
     } catch (Exception e) {
       System.err.println("Failed to push metrics: " + e.getMessage());
     }
+  }
+
+  /**
+   * When the job is complete, send metrics to pushgateway.
+   */
+  @PreDestroy
+  public void pushEndOfJobMetrics() {
+    pushMetrics("End of job");
   }
 }
