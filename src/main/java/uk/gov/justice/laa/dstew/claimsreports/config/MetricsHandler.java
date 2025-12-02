@@ -3,15 +3,18 @@ package uk.gov.justice.laa.dstew.claimsreports.config;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import io.prometheus.metrics.exporter.pushgateway.PushGateway;
 import jakarta.annotation.PreDestroy;
-import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 
 /**
  * Pushes prometheus metrics from ephemeral job to pushgateway.
  */
 @Component
+
 public class MetricsHandler {
+
+  @Value("${GATEWAY_ADDRESS}") String gatewayAddress;
 
   @Autowired
   private PrometheusMeterRegistry prometheusMeterRegistry;
@@ -22,8 +25,8 @@ public class MetricsHandler {
   public void pushMetrics(String reportName) {
     try {
       PushGateway.builder()
-          .address("laa-data-claims-reporting-service-uat-pushgateway-prometheus-pu:9091")
-          .job("new job " + reportName)
+          .address(gatewayAddress)
+          .job(reportName)
           .registry(prometheusMeterRegistry.getPrometheusRegistry()).build()
           .push();
     } catch (Exception e) {
@@ -36,6 +39,6 @@ public class MetricsHandler {
    */
   @PreDestroy
   public void pushEndOfJobMetrics() {
-    pushMetrics("End of job");
+    pushMetrics("JobEnd");
   }
 }
