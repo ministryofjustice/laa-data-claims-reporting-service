@@ -31,14 +31,6 @@ info:
     description: An example Spring Boot Microservice application that provides a REST API.
     version: 1.0.0
 
-#management:
-#  # specify actuator endpoints to enable
-#  endpoints:
-#    web:
-#      exposure:
-#        include: health
-#        exclude: prometheus # ensures this endpoint remains unreachable after integration of micrometer-registry dependency
-
   # show detailed health status
   endpoint:
     health:
