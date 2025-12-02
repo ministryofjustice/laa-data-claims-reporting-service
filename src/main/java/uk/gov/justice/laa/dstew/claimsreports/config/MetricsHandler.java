@@ -30,7 +30,6 @@ public class MetricsHandler {
           .job(reportName)
           .registry(prometheusMeterRegistry.getPrometheusRegistry()).build()
           .push();
-      System.out.println("**************** " + gatewayAddress);
     } catch (Exception e) {
       System.err.println("Failed to push metrics: " + e.getMessage());
     }
