@@ -19,7 +19,7 @@ spec:
                 - /bin/sh
                 - -c
                 - |
-                  java -jar /opt/laa-data-reporting-service/claims-reporting/app.jar && \
+                  java -jar /opt/laa-data-reporting-service/claims-reporting/app.jar
 #                  echo "cronjob_last_run_timestamp $(date +%s)" | curl --data-binary @- http://pushgateway:9091/metrics/job=my-cronjob && \
 #                  echo "cronjob_success 1" | curl --data-binary @- http://pushgateway:9091/metrics/job=my-cronjob
               env:
