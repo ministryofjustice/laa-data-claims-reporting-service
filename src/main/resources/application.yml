@@ -31,13 +31,6 @@ info:
     description: An example Spring Boot Microservice application that provides a REST API.
     version: 1.0.0
 
-management:
-  # specify actuator endpoints to enable
-  endpoints:
-    web:
-      exposure:
-        include: health
-
   # show detailed health status
   endpoint:
     health:

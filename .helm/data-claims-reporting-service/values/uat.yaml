@@ -37,3 +37,5 @@ additionalScrapeConfigs:
 s3:
   #  This project's "uat" env maps to GLADs "dev" env
   bucketName: laa-get-payments-finance-data-dev-report-store
+
+pushgatewayAddress: laa-data-claims-reporting-service-uat-pushgateway-prometheus-pu:9091

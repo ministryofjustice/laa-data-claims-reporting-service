@@ -3,6 +3,7 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
@@ -18,8 +19,8 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 public class Report000Service extends AbstractReportService {
 
   public Report000Service(JdbcTemplate jdbcTemplate,
-                          S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService) {
-    super(jdbcTemplate, s3ClientWrapper, csvCreationService);
+                          S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService, MetricsHandler metricsHandler) {
+    super(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler);
   }
 
   @Override

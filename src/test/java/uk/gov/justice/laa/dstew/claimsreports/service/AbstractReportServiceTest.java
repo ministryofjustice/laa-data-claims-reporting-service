@@ -8,6 +8,7 @@ import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
+import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
@@ -23,8 +24,8 @@ class AbstractReportServiceTest {
   static class TestReportService extends AbstractReportService {
 
     public TestReportService(JdbcTemplate template, S3ClientWrapper s3ClientWrapper,
-        CsvCreationService csvCreationService) {
-      super(template, s3ClientWrapper, csvCreationService);
+                             CsvCreationService csvCreationService, MetricsHandler metricsHandler) {
+      super(template, s3ClientWrapper, csvCreationService, metricsHandler);
     }
 
     @Override
@@ -57,6 +58,7 @@ class AbstractReportServiceTest {
   private JdbcTemplate jdbcTemplate;
   private CsvCreationService csvCreationService;
   private S3ClientWrapper s3ClientWrapper;
+  private MetricsHandler metricsHandler;
 
 
   @BeforeEach
@@ -64,7 +66,8 @@ class AbstractReportServiceTest {
     jdbcTemplate = mock(JdbcTemplate.class);
     s3ClientWrapper = mock(S3ClientWrapper.class);
     csvCreationService = mock(CsvCreationService.class);
-    service = new TestReportService(jdbcTemplate, s3ClientWrapper, csvCreationService);
+    metricsHandler = mock(MetricsHandler.class);
+    service = new TestReportService(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler);
   }
 
   @Test

@@ -8,6 +8,7 @@ import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
+import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
@@ -26,6 +27,7 @@ public abstract class AbstractReportService {
   protected final JdbcTemplate jdbcTemplate;
   protected final S3ClientWrapper s3ClientWrapper;
   protected final CsvCreationService csvCreationService;
+  protected MetricsHandler metricsHandler;
 
   //Abstract methods (implemented by subclasses) to provide relevant details for individual reports
 
@@ -85,6 +87,8 @@ public abstract class AbstractReportService {
       log.info("Created {} file with filename {} in {} ms", getReportName(), getReportFileName(), durationMilliseconds);
 
       s3ClientWrapper.uploadFile(tempFile, getReportFileName());
+      metricsHandler.pushMetrics(getReportName());
+
     } catch (Exception e) {
       log.error("Failed to generate {}: {}", getReportName(), e.getMessage());
       throw new CsvCreationException("Failure to create " + getReportName(), e);

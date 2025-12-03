@@ -32,3 +32,5 @@ autoscaling:
 s3:
 #  This project's "staging" env maps to GLADs "uat" env
   bucketName: laa-get-payments-finance-data-uat-report-store
+
+pushgatewayAddress: laa-data-claims-reporting-service-staging-pushgateway-prometheus-pu:9091
