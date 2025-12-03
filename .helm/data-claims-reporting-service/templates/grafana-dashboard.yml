@@ -109,7 +109,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "builder",
-              "expr": "sum(kube_pod_container_info{namespace='laa-data-claims-reporting-service-uat',pod=~'main-data-claims-reporting-service.*'})",
+              "expr": "sum(kube_pod_container_info{namespace='{{ .Release.Namespace }}',pod=~'main-data-claims-reporting-service.*'})",
               "legendFormat": "Total",
               "range": true,
               "refId": "A"
@@ -120,7 +120,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum({namespace='laa-data-claims-reporting-service-uat',phase='Running',pod=~'main-data-claims-reporting-service.*'} + 0)",
+              "expr": "sum({namespace='{{ .Release.Namespace }}',phase='Running',pod=~'main-data-claims-reporting-service.*'} + 0)",
               "hide": false,
               "legendFormat": "Running",
               "range": true,
@@ -132,7 +132,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "builder",
-              "expr": "sum({namespace='laa-data-claims-reporting-service-uat',phase='Pending',pod=~'main-data-claims-reporting-service.*'} + 0)",
+              "expr": "sum({namespace='{{ .Release.Namespace }}',phase='Pending',pod=~'main-data-claims-reporting-service.*'} + 0)",
               "hide": false,
               "legendFormat": "Pending",
               "range": true,
@@ -144,7 +144,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "sum({namespace='laa-data-claims-reporting-service-uat',phase='Failed',pod=~'main-data-claims-reporting-service.*'} + 0)",
+              "expr": "sum({namespace='{{ .Release.Namespace }}',phase='Failed',pod=~'main-data-claims-reporting-service.*'} + 0)",
               "hide": false,
               "legendFormat": "Failed",
               "range": true,
@@ -239,7 +239,7 @@ data:
             {
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "sort_desc(avg(sum by (pod_name) (rate(container_network_receive_bytes_total{namespace='laa-data-claims-reporting-service-uat'}[5m]))))",
+              "expr": "sort_desc(avg(sum by (pod_name) (rate(container_network_receive_bytes_total{namespace='{{ .Release.Namespace }}'}[5m]))))",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "Average Bytes Received",
@@ -254,7 +254,7 @@ data:
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "sort_desc(avg(sum by (pod_name) (rate(container_network_transmit_bytes_total{namespace='laa-data-claims-reporting-service-uat'}[5m]))))",
+              "expr": "sort_desc(avg(sum by (pod_name) (rate(container_network_transmit_bytes_total{namespace='{{ .Release.Namespace }}'}[5m]))))",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -355,7 +355,7 @@ data:
               "disableTextWrap": false,
               "editorMode": "code",
               "exemplar": false,
-              "expr": "100 * kube_resourcequota{job=\"kube-state-metrics\", type=\"used\", namespace=\"laa-data-claims-reporting-service-uat\"}\n/ ignoring(instance, job, type)\n(kube_resourcequota{job=\"kube-state-metrics\", type=\"hard\", namespace=\"laa-data-claims-reporting-service-uat\"} > 0)",
+              "expr": "100 * kube_resourcequota{job=\"kube-state-metrics\", type=\"used\", namespace=\"{{ .Release.Namespace }}\"}\n/ ignoring(instance, job, type)\n(kube_resourcequota{job=\"kube-state-metrics\", type=\"hard\", namespace=\"{{ .Release.Namespace }}\"} > 0)",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "instant": false,
@@ -468,7 +468,7 @@ data:
             {
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "round(\n  100 *\n    sum(container_memory_working_set_bytes{image!='',namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service.*\"}) by (container, pod)\n      /\n    sum(kube_pod_container_resource_requests{resource='memory', namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service.*\"} > 0) by (container, pod)\n)",
+              "expr": "round(\n  100 *\n    sum(container_memory_working_set_bytes{image!='',namespace='{{ .Release.Namespace }}',pod=~\"main-data-claims-reporting-service.*\"}) by (container, pod)\n      /\n    sum(kube_pod_container_resource_requests{resource='memory', namespace='{{ .Release.Namespace }}',pod=~\"main-data-claims-reporting-service.*\"} > 0) by (container, pod)\n)",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "__auto",
@@ -565,7 +565,7 @@ data:
             {
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "container_memory_usage_bytes{namespace=\"laa-data-claims-reporting-service-uat\", pod=~'main-data-claims-reporting-service.*'}",
+              "expr": "container_memory_usage_bytes{namespace=\"{{ .Release.Namespace }}\", pod=~'main-data-claims-reporting-service.*'}",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "__auto",
@@ -580,7 +580,7 @@ data:
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "container_memory_max_usage_bytes{namespace=\"laa-data-claims-reporting-service-uat\", pod=~'main-data-claims-reporting-service.*'}",
+              "expr": "container_memory_max_usage_bytes{namespace=\"{{ .Release.Namespace }}\", pod=~'main-data-claims-reporting-service.*'}",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -697,7 +697,7 @@ data:
             {
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "round(\n  100 *\n    sum(container_memory_working_set_bytes{image!=\"\", namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service.*\"}) by (container, pod)\n      /\n    sum(kube_pod_container_resource_requests{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service.*\",resource=\"memory\"} > 0) by (container, pod)\n)",
+              "expr": "round(\n  100 *\n    sum(container_memory_working_set_bytes{image!=\"\", namespace='{{ .Release.Namespace }}', container_name!=\"main-data-claims-reporting-service.*\"}) by (container, pod)\n      /\n    sum(kube_pod_container_resource_requests{namespace='{{ .Release.Namespace }}', container_name!=\"main-data-claims-reporting-service.*\",resource=\"memory\"} > 0) by (container, pod)\n)",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "__auto",
@@ -812,7 +812,7 @@ data:
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "round(\n  100 *\n    sum(\n      rate(container_cpu_usage_seconds_total{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service.*\"}[5m])\n    ) by (pod_name, container_name, namespace)\n      /\n    sum(\n      kube_pod_container_resource_limits{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service.*\",resource='cpu'}\n    ) by (pod_name, container_name, namespace)\n)",
+              "expr": "round(\n  100 *\n    sum(\n      rate(container_cpu_usage_seconds_total{namespace='{{ .Release.Namespace }}', container_name!=\"main-data-claims-reporting-service.*\"}[5m])\n    ) by (pod_name, container_name, namespace)\n      /\n    sum(\n      kube_pod_container_resource_limits{namespace='{{ .Release.Namespace }}', container_name!=\"main-data-claims-reporting-service.*\",resource='cpu'}\n    ) by (pod_name, container_name, namespace)\n)",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
@@ -912,7 +912,7 @@ data:
             {
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "round(\n  100 *\n    sum(\n      rate(container_cpu_usage_seconds_total{namespace='laa-data-claims-reporting-service-uat', container_name!=\"main-data-claims-reporting-service.*\"}[5m])\n    ) by (pod, container_name, namespace)\n      /\n    sum(\n      kube_pod_container_resource_limits{namespace='laa-data-claims-reporting-service-uat', container_name!='main-data-claims-reporting-service.*', resource='cpu'}\n    ) by (pod, container_name, namespace)\n)",
+              "expr": "round(\n  100 *\n    sum(\n      rate(container_cpu_usage_seconds_total{namespace='{{ .Release.Namespace }}', container_name!=\"main-data-claims-reporting-service.*\"}[5m])\n    ) by (pod, container_name, namespace)\n      /\n    sum(\n      kube_pod_container_resource_limits{namespace='{{ .Release.Namespace }}', container_name!='main-data-claims-reporting-service.*', resource='cpu'}\n    ) by (pod, container_name, namespace)\n)",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "__auto",
@@ -1010,7 +1010,7 @@ data:
             {
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "topk(3, max by (pod, container)(rate(container_cpu_usage_seconds_total{image!='', namespace='laa-data-claims-reporting-service-uat',pod=~\"main-data-claims-reporting-service.*\"}[$__rate_interval]))) / 10",
+              "expr": "topk(3, max by (pod, container)(rate(container_cpu_usage_seconds_total{image!='', namespace='{{ .Release.Namespace }}',pod=~\"main-data-claims-reporting-service.*\"}[$__rate_interval]))) / 10",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "legendFormat": "__auto",
@@ -1089,7 +1089,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "jvm_memory_max_bytes{namespace='laa-data-claims-reporting-service-uat',area='heap',id='G1 Survivor Space'} / 1000000",
+              "expr": "jvm_memory_max_bytes{namespace='{{ .Release.Namespace }}',area='heap',id='G1 Survivor Space'} / 1000000",
               "legendFormat": "instance",
               "range": true,
               "refId": "A"
@@ -1186,7 +1186,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "jvm_memory_used_bytes{namespace='laa-data-claims-reporting-service-uat',area='heap',id='G1 Survivor Space'}/1000000",
+              "expr": "jvm_memory_used_bytes{namespace='{{ .Release.Namespace }}',area='heap',id='G1 Survivor Space'}/1000000",
               "legendFormat": "instance",
               "range": true,
               "refId": "A"
@@ -1248,7 +1248,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "jvm_memory_max_bytes{namespace='laa-data-claims-reporting-service-uat',area='heap',id='G1 Eden Space'}/1000000",
+              "expr": "jvm_memory_max_bytes{namespace='{{ .Release.Namespace }}',area='heap',id='G1 Eden Space'}/1000000",
               "legendFormat": "instance",
               "range": true,
               "refId": "A"
@@ -1345,7 +1345,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "jvm_memory_used_bytes{namespace='laa-data-claims-reporting-service-uat',area='heap',id='G1 Eden Space'}/1000000",
+              "expr": "jvm_memory_used_bytes{namespace='{{ .Release.Namespace }}',area='heap',id='G1 Eden Space'}/1000000",
               "legendFormat": "instance",
               "range": true,
               "refId": "A"
@@ -1407,7 +1407,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "jvm_memory_max_bytes{namespace='laa-data-claims-reporting-service-uat',area='heap',id='G1 Old Gen'} /1000000",
+              "expr": "jvm_memory_max_bytes{namespace='{{ .Release.Namespace }}',area='heap',id='G1 Old Gen'} /1000000",
               "legendFormat": "instance",
               "range": true,
               "refId": "A"
@@ -1504,7 +1504,7 @@ data:
                 "uid": "prometheus"
               },
               "editorMode": "code",
-              "expr": "jvm_memory_used_bytes{namespace='laa-data-claims-reporting-service-uat',area='heap',id='G1 Old Gen'} /1000000",
+              "expr": "jvm_memory_used_bytes{namespace='{{ .Release.Namespace }}',area='heap',id='G1 Old Gen'} /1000000",
               "legendFormat": "instance",
               "range": true,
               "refId": "A"
@@ -1545,8 +1545,8 @@ data:
         ]
       },
       "timezone": "browser",
-      "title": "LAA Data Claims Reporting Service uat dashboard",
-      "uid": "laa-data-claims-reporting-uat",
+      "title": "LAA Data Claims Reporting Service dashboard - {{ .Release.Name }} / {{ .Release.Namespace }}",
+      "uid": "{ .Release.Name | trunc 12 }}-{{ .Release.Namespace | trunc -10 }}-{{ .Chart.Name | trunc -12 }}",
       "version": 1,
       "weekStart": ""
     }
