@@ -74,7 +74,7 @@ public abstract class AbstractReportService {
    */
   public void generateReport() {
     if (!runToday()) {
-      log.info("Report {} will not run", getReportName());
+      log.info("Report {} is not scheduled to run today", getReportName());
       return;
     }
 
