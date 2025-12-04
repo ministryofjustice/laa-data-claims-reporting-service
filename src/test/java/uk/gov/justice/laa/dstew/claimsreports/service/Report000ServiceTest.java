@@ -2,8 +2,15 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
+
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.jdbc.core.JdbcTemplate;
 
 import static org.mockito.Mockito.*;
@@ -14,6 +21,7 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 /**
  * Unit tests for {@link Report000Service}.
  */
+@ExtendWith(MockitoExtension.class)
 class Report000ServiceTest {
 
   private Report000Service service;
@@ -21,6 +29,7 @@ class Report000ServiceTest {
   private CsvCreationService creationService;
   private S3ClientWrapper s3ClientWrapper;
   private MetricsHandler metricsHandler;
+  private Clock fixedClock;
 
   @BeforeEach
   void setUp() {
@@ -28,7 +37,11 @@ class Report000ServiceTest {
     creationService = mock(CsvCreationService.class);
     s3ClientWrapper = mock(S3ClientWrapper.class);
     metricsHandler = mock(MetricsHandler.class);
-    service = new Report000Service(jdbcTemplate, s3ClientWrapper, creationService, metricsHandler);
+
+    Instant fixedNow = Instant.parse("2025-12-21T10:00:00Z");
+    fixedClock = Clock.fixed(fixedNow, ZoneOffset.UTC);
+
+    service = new Report000Service(jdbcTemplate, s3ClientWrapper, creationService, metricsHandler, fixedClock);
   }
 
   @Test
@@ -43,7 +56,6 @@ class Report000ServiceTest {
 
   @Test
   void generateReport_shouldCallTheRightServicesWithTheRightValues(){
-
     service.generateReport();
 
     verify(creationService).buildCsvFromData(
@@ -55,6 +67,20 @@ class Report000ServiceTest {
         any()
     );
     verify(s3ClientWrapper).uploadFile(any(File.class), eq("report_000.csv"));
+  }
+
+  @Test
+  void returnsTrueOnThe21stOfMonth() {
+    Assertions.assertTrue(service.runToday());
+  }
+
+  @Test
+  void returnsFalseOnThe22ndOfMonth() {
+    Instant fixedNow = Instant.parse("2025-12-22T10:00:00Z");
+    fixedClock = Clock.fixed(fixedNow, ZoneOffset.UTC);
+    Report000Service service = new Report000Service(jdbcTemplate, s3ClientWrapper, creationService, metricsHandler, fixedClock);
+
+    Assertions.assertFalse(service.runToday());
   }
 
 }

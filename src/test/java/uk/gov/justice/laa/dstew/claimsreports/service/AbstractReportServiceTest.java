@@ -20,46 +20,11 @@ import static org.mockito.Mockito.*;
  */
 class AbstractReportServiceTest {
 
-  // Define a concrete subclass for testing purposes
-  static class TestReportService extends AbstractReportService {
-
-    public TestReportService(JdbcTemplate template, S3ClientWrapper s3ClientWrapper,
-                             CsvCreationService csvCreationService, MetricsHandler metricsHandler) {
-      super(template, s3ClientWrapper, csvCreationService, metricsHandler);
-    }
-
-    @Override
-    protected String getDataSourceName() {
-      return "claims.mvw_report_000";
-    }
-
-    @Override
-    protected String getRefreshCommand() {
-      return "REFRESH MATERIALIZED VIEW claims.mvw_report_000";
-    }
-
-    @Override
-    protected String getReportName() {
-      return "testReport";
-    }
-
-    @Override
-    protected String getReportFileName() {
-      return "test_report.csv";
-    }
-
-    @Override
-    protected String getOrderByClause() {
-      return " test_order_by_column";
-    }
-  }
-
   private TestReportService service;
   private JdbcTemplate jdbcTemplate;
   private CsvCreationService csvCreationService;
   private S3ClientWrapper s3ClientWrapper;
   private MetricsHandler metricsHandler;
-
 
   @BeforeEach
   void setUp() {
@@ -67,7 +32,7 @@ class AbstractReportServiceTest {
     s3ClientWrapper = mock(S3ClientWrapper.class);
     csvCreationService = mock(CsvCreationService.class);
     metricsHandler = mock(MetricsHandler.class);
-    service = new TestReportService(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler);
+    service = new TestReportService(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, true);
   }
 
   @Test
@@ -103,7 +68,6 @@ class AbstractReportServiceTest {
 
   @Test
   void generateReport_shouldCallTheRightServices(){
-
     service.generateReport();
 
     verify(csvCreationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_000 ORDER BY  test_order_by_column"),
@@ -113,11 +77,16 @@ class AbstractReportServiceTest {
 
   @Test
   void generateReport_shouldDeleteTheTempFileWhenFinished(){
+    service.generateReport();
+    assertFalse(Files.exists(Path.of("/tmp/test_report.csv")));
+  }
+
+  @Test
+  void willNotGenerateReportIfReportNotScheduledToRun() {
+    TestReportService service = new TestReportService(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, false);
 
     service.generateReport();
-
-    assertFalse(Files.exists(Path.of("/tmp/test_report.csv")));
-
+    verify(csvCreationService, times(0)).buildCsvFromData(any(), any(), any());
   }
 
 }

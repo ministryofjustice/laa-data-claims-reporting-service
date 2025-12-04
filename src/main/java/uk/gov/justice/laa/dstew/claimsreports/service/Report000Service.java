@@ -1,5 +1,7 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import java.time.Clock;
+import java.time.LocalDate;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -18,9 +20,13 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 @Service
 public class Report000Service extends AbstractReportService {
 
+  protected Clock clock;
+  private final int MONTHLY_REPORT_DATE = 21;
+
   public Report000Service(JdbcTemplate jdbcTemplate,
-                          S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService, MetricsHandler metricsHandler) {
+                          S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService, MetricsHandler metricsHandler, Clock clock) {
     super(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler);
+    this.clock = clock;
   }
 
   @Override
@@ -48,5 +54,11 @@ public class Report000Service extends AbstractReportService {
     return " to_char(to_date(\"Submission Period\", 'MON-YYYY'), 'YYYYMM') NULLS LAST,"
         + "    \"Office Account Number\","
         + "    \"Line Number\"";
+  }
+
+  // Monthly report
+  @Override
+  protected boolean runToday() {
+    return LocalDate.now(clock).getDayOfMonth() == MONTHLY_REPORT_DATE;
   }
 }
