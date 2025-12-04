@@ -51,4 +51,10 @@ public class Report013Service extends AbstractReportService {
   protected String getOrderByClause() {
     return " \"Provider Office Account Number\", \"Area of Law\"";
   }
+
+  // Daily report
+  @Override
+  protected boolean runToday() {
+    return true;
+  }
 }

@@ -73,6 +73,11 @@ public abstract class AbstractReportService {
    * Generates a CSV report.
    */
   public void generateReport() {
+    if (!runToday()) {
+      log.info("Report {} is not scheduled to run today", getReportName());
+      return;
+    }
+
     log.info("Generating report from {}", getClass().getSimpleName());
     File tempFile = new File("/tmp/" + getReportFileName());
     long startTime = System.currentTimeMillis();
@@ -107,4 +112,7 @@ public abstract class AbstractReportService {
       }
     }
   }
+
+  protected abstract boolean runToday();
+
 }
