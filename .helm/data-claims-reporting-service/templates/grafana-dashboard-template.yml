@@ -1537,7 +1537,7 @@
       },
       "timezone": "browser",
       "title": "LAA Data Claims Reporting Service dashboard - {{ .Release.Name }} / {{ .Release.Namespace }}",
-      "uid": "{{ .Chart.Name }}",
+      "uid": "{{ .Release.Name }}",
       "version": 4,
       "weekStart": ""
     }
