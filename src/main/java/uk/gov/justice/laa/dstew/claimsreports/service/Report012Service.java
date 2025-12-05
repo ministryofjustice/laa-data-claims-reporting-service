@@ -50,4 +50,9 @@ public class Report012Service extends AbstractReportService {
         + "    \"Area of law\"";
   }
 
+  // Daily report
+  @Override
+  protected boolean runToday() {
+    return true;
+  }
 }
