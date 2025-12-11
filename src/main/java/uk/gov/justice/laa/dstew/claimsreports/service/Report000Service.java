@@ -53,6 +53,11 @@ public class Report000Service extends AbstractReportService {
   }
 
   @Override
+  protected String getReportFolder() {
+    return "monthly";
+  }
+
+  @Override
   protected String getOrderByClause() {
     return " to_char(to_date(\"Submission Period\", 'MON-YYYY'), 'YYYYMM') NULLS LAST,"
         + "    \"Office Account Number\","

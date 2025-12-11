@@ -31,20 +31,20 @@ public class S3ClientWrapper {
    * NOTE: This has a file size limit of 5GB. Above this we'd need to write a multi-part upload.
    *
    * @param fileToUpload - the CSV file we have just generated
-   * @param desiredFileName - the file name to use on S3.
+   * @param desiredFileKey - the file key (folder + name) to use on S3.
    */
-  public void uploadFile(File fileToUpload, String desiredFileName) {
+  public void uploadFile(File fileToUpload, String desiredFileKey) {
 
-    if (!fileToUpload.getPath().endsWith(".csv") || !desiredFileName.endsWith(".csv")) {
+    if (!fileToUpload.getPath().endsWith(".csv") || !desiredFileKey.endsWith(".csv")) {
       throw new CsvUploadException("Attempting to upload file that is not a CSV file: " + fileToUpload.getPath());
     }
 
     var putRequest = PutObjectRequest.builder()
         .bucket(s3Bucket)
-        .key("reports/" + desiredFileName)
+        .key(desiredFileKey)
         .build();
 
-    log.info("Uploading {} to S3 bucket {} with filename {}", fileToUpload.getPath(), s3Bucket, desiredFileName);
+    log.info("Uploading {} to S3 bucket {} with filename {}", fileToUpload.getPath(), s3Bucket, desiredFileKey);
 
     long startTime = System.currentTimeMillis();
     // Response to this request is just metadata, if it errors it will throw an AwsServiceException
@@ -52,7 +52,7 @@ public class S3ClientWrapper {
     long endTime = System.currentTimeMillis();
     long durationMilliseconds = endTime - startTime;
 
-    log.info("Uploaded {} to S3 bucket {} with filename {} in {} ms", fileToUpload.getPath(), s3Bucket, desiredFileName, durationMilliseconds);
+    log.info("Uploaded {} to S3 bucket {} with filename {} in {} ms", fileToUpload.getPath(), s3Bucket, desiredFileKey, durationMilliseconds);
   }
 
 }

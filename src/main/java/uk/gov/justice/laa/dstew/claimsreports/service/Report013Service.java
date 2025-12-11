@@ -49,6 +49,11 @@ public class Report013Service extends AbstractReportService {
   }
 
   @Override
+  protected String getReportFolder() {
+    return "daily";
+  }
+
+  @Override
   protected String getOrderByClause() {
     return " \"Provider Office Account Number\", \"Area of Law\"";
   }

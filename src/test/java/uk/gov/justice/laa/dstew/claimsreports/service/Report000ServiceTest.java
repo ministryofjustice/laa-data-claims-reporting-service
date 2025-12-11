@@ -75,7 +75,7 @@ class Report000ServiceTest {
         any(BufferedWriter.class),
         any()
     );
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("report_000_2025-12-21.csv"));
+    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/monthly/report_000_2025-12-21.csv"));
   }
 
   @Test

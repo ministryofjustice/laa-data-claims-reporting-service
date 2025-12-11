@@ -81,13 +81,14 @@ class AbstractReportServiceTest {
 
     verify(csvCreationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_000 ORDER BY  test_order_by_column"),
         any(BufferedWriter.class), any());
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("test_report_2025-12-21.csv"));
+    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/daily/test_report_2025-12-21.csv"));
   }
 
+  @SneakyThrows
   @Test
   void generateReport_shouldDeleteTheTempFileWhenFinished(){
     service.generateReport();
-    assertFalse(Files.exists(Path.of("/tmp/test_report.csv")));
+    assertFalse(Files.list(Path.of("/tmp")).anyMatch(file -> file.getFileName().endsWith(".csv")));
   }
 
   @Test

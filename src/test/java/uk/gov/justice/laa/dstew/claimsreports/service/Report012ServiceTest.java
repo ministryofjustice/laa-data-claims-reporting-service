@@ -66,7 +66,7 @@ class Report012ServiceTest {
         any(BufferedWriter.class),
         any()
     );
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("report_012_2025-12-22.csv"));
+    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/daily/report_012_2025-12-22.csv"));
   }
 
 }
