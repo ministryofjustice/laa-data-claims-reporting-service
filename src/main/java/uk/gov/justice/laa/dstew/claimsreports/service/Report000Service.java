@@ -20,13 +20,11 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 @Service
 public class Report000Service extends AbstractReportService {
 
-  protected Clock clock;
   private static final int MONTHLY_REPORT_DATE = 21;
 
   public Report000Service(JdbcTemplate jdbcTemplate,
                           S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService, MetricsHandler metricsHandler, Clock clock) {
-    super(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler);
-    this.clock = clock;
+    super(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, clock);
   }
 
   @Override
@@ -41,7 +39,7 @@ public class Report000Service extends AbstractReportService {
 
   @Override
   protected String getReportFileName() {
-    return "report_000.csv";
+    return "report_000";
   }
 
   @Override

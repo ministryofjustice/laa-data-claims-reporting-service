@@ -4,6 +4,10 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +29,7 @@ class AbstractReportServiceTest {
   private CsvCreationService csvCreationService;
   private S3ClientWrapper s3ClientWrapper;
   private MetricsHandler metricsHandler;
+  private Clock fixedClock;
 
   @BeforeEach
   void setUp() {
@@ -32,7 +37,10 @@ class AbstractReportServiceTest {
     s3ClientWrapper = mock(S3ClientWrapper.class);
     csvCreationService = mock(CsvCreationService.class);
     metricsHandler = mock(MetricsHandler.class);
-    service = new TestReportService(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, true);
+    Instant fixedNow = Instant.parse("2025-12-21T10:00:00Z");
+    fixedClock = Clock.fixed(fixedNow, ZoneOffset.UTC);
+
+    service = new TestReportService(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, true, fixedClock);
   }
 
   @Test
@@ -55,6 +63,7 @@ class AbstractReportServiceTest {
     verifyNoMoreInteractions(jdbcTemplate);
   }
 
+  @SneakyThrows
   @Test
   void willThrowCsvExceptionWhenCsvServiceThrows() {
     doThrow(new CsvCreationException("Simulated SQL error"))
@@ -63,7 +72,7 @@ class AbstractReportServiceTest {
     Assertions.assertThrows(CsvCreationException.class, () -> service.generateReport());
 
     // And ensure it cleans up after itself
-    assertFalse(Files.exists(Path.of("/tmp/test_report.csv")));
+    assertFalse(Files.list(Path.of("/tmp")).anyMatch(file -> file.getFileName().endsWith(".csv")));
   }
 
   @Test
@@ -72,7 +81,7 @@ class AbstractReportServiceTest {
 
     verify(csvCreationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_000 ORDER BY  test_order_by_column"),
         any(BufferedWriter.class), any());
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("test_report.csv"));
+    verify(s3ClientWrapper).uploadFile(any(File.class), eq("test_report_2025-12-21.csv"));
   }
 
   @Test
@@ -83,7 +92,7 @@ class AbstractReportServiceTest {
 
   @Test
   void willNotGenerateReportIfReportNotScheduledToRun() {
-    TestReportService service = new TestReportService(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, false);
+    TestReportService service = new TestReportService(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, false, fixedClock);
 
     service.generateReport();
     verify(csvCreationService, times(0)).buildCsvFromData(any(), any(), any());

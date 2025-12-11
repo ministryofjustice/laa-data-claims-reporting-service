@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Clock;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -28,6 +30,7 @@ public abstract class AbstractReportService {
   protected final S3ClientWrapper s3ClientWrapper;
   protected final CsvCreationService csvCreationService;
   protected MetricsHandler metricsHandler;
+  protected Clock clock;
 
   //Abstract methods (implemented by subclasses) to provide relevant details for individual reports
 
@@ -69,6 +72,14 @@ public abstract class AbstractReportService {
    */
   protected abstract String getReportFileName();
 
+  private String getReportFileExtension() {
+    return ".csv";
+  }
+
+  private String generateFileName() {
+    return getReportFileName() + "_" + LocalDate.now(clock) + getReportFileExtension();
+  }
+
   /**
    * Generates a CSV report.
    */
@@ -79,7 +90,7 @@ public abstract class AbstractReportService {
     }
 
     log.info("Generating report from {}", getClass().getSimpleName());
-    File tempFile = new File("/tmp/" + getReportFileName());
+    File tempFile = new File("/tmp/" + generateFileName());
     long startTime = System.currentTimeMillis();
 
     try {
@@ -89,9 +100,9 @@ public abstract class AbstractReportService {
       }
       long endTime = System.currentTimeMillis();
       long durationMilliseconds = endTime - startTime;
-      log.info("Created {} file with filename {} in {} ms", getReportName(), getReportFileName(), durationMilliseconds);
+      log.info("Created {} file with filename {} in {} ms", getReportName(), generateFileName(), durationMilliseconds);
 
-      s3ClientWrapper.uploadFile(tempFile, getReportFileName());
+      s3ClientWrapper.uploadFile(tempFile, generateFileName());
       metricsHandler.pushMetrics(getReportName());
 
     } catch (Exception e) {

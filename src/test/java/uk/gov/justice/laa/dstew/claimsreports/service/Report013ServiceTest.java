@@ -9,6 +9,9 @@ import static org.mockito.Mockito.verifyNoMoreInteractions;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.time.Clock;
+import java.time.Instant;
+import java.time.ZoneOffset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -25,6 +28,7 @@ class Report013ServiceTest {
   private CsvCreationService creationService;
   private S3ClientWrapper s3ClientWrapper;
   private MetricsHandler metricsHandler;
+  private Clock fixedClock;
 
   @BeforeEach
   void setUp() {
@@ -32,7 +36,11 @@ class Report013ServiceTest {
     creationService = mock(CsvCreationService.class);
     s3ClientWrapper = mock(S3ClientWrapper.class);
     metricsHandler = mock(MetricsHandler.class);
-    service = new Report013Service(jdbcTemplate, s3ClientWrapper, creationService, metricsHandler);
+
+    Instant fixedNow = Instant.parse("2025-12-22T10:00:00Z");
+    fixedClock = Clock.fixed(fixedNow, ZoneOffset.UTC);
+
+    service = new Report013Service(jdbcTemplate, s3ClientWrapper, creationService, metricsHandler, fixedClock);
   }
 
   @Test
@@ -56,7 +64,7 @@ class Report013ServiceTest {
         any(BufferedWriter.class),
         any()
     );
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("report_013.csv"));
+    verify(s3ClientWrapper).uploadFile(any(File.class), eq("report_013_2025-12-22.csv"));
   }
 
 }

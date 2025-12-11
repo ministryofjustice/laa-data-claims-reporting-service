@@ -1,4 +1,4 @@
-package uk.gov.justice.laa.dstew.claimreports.exception;
+package uk.gov.justice.laa.dstew.claimsreports.exception;
 
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
@@ -8,9 +8,6 @@ import org.junit.jupiter.api.Test;
 import org.springframework.http.ResponseEntity;
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
-import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
-import uk.gov.justice.laa.dstew.claimsreports.exception.GlobalExceptionHandler;
-import uk.gov.justice.laa.dstew.claimsreports.exception.ItemNotFoundException;
 
 class GlobalExceptionHandlerTest {
 

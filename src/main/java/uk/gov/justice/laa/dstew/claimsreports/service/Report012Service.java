@@ -1,5 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import java.time.Clock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -19,8 +20,8 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 public class Report012Service extends AbstractReportService {
 
   public Report012Service(JdbcTemplate jdbcTemplate,
-                          S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService, MetricsHandler metricsHandler) {
-    super(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler);
+                          S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService, MetricsHandler metricsHandler, Clock clock) {
+    super(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, clock);
   }
 
   @Override
@@ -35,7 +36,7 @@ public class Report012Service extends AbstractReportService {
 
   @Override
   protected String getReportFileName() {
-    return "report_012.csv";
+    return "report_012";
   }
 
   @Override
