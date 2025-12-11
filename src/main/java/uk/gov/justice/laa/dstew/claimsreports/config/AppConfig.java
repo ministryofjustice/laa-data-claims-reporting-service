@@ -83,4 +83,9 @@ public class AppConfig {
   public CsvMapper createCsvMapper() {
     return new CsvMapper();
   }
+
+  @Value("${feature.force-run-rep000:false}")
+  @Getter
+  private boolean forceRunReport000;
+
 }
