@@ -48,7 +48,7 @@ class S3ClientWrapperTest {
 
     when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class))).thenReturn(mockResponse);
 
-    s3ClientWrapper.uploadFile(testReport, "filename.csv");
+    s3ClientWrapper.uploadFile(testReport, "reports/filename.csv");
 
     // Check wrapper builds up the correct request to S3
     var captorPutObjectRequest = ArgumentCaptor.forClass(PutObjectRequest.class);
