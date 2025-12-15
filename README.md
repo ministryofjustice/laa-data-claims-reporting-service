@@ -43,10 +43,24 @@ kubectl get all
 kubectl logs <pod-name>
 ```
 
+### Run locally using docker-compose
+This will spin up an instance of postgres and localstack to enable fuller testing
+```
+docker-compose up
+```
+
+This will spin down the service and delete volumes if you e.g. need to rebuild the database
+```
+docker compose down -v
+```
+
 ### To view the files uploaded to the localstack S3 bucket you can use commands such as the follows:
 ```
 aws --endpoint-url=http://localhost:4566 s3 ls s3://test-bucket/reports/
 ```
+
+If it asks you to run `aws configure`, just set the config keys to any value, localstack will ignore them. They just have to be non-empty.
+
 ### Updating Helm
 When making updates to Helm, it is possible to lint your changes to ensure no errors
 ```
