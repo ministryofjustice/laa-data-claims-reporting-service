@@ -74,4 +74,14 @@ helm install my-app ./.helm/data-claims-reporting-service -f .helm/data-claims-r
 - The Helm version must be bumped to trigger a redeploy, because Helm uses that version to determine whether a release has changed.
 
 ### CronJob
-- The application runs via a CronJob. This job is currently scheduled to run once per day, at 9am.
+- The application runs via a CronJob. This job is currently scheduled to run once per day, at 5am.
+- Not all reports run every day.
+- To manually run a CronJob at another time - if you have permission to access kubernetes - run
+```
+kubectl -n {namespace} create job {give a job name here} --from=cronjob/{cronjob to copy}
+```
+where `namespace` is the Kubernetes namespace, `give a job name here` is some memorable unique name, 
+and `cronjob to copy` is one of the entries from the list of cronjobs - on `uat` there should be one for each active pull request branch. 
+On other systems it should just be `laa-data-claims-reporting-service`
+
+If you need to run REP000 on a date that is not the 21st of the month, you should create a cronjob with the `FORCE_RUN_REP000` flag set to true.

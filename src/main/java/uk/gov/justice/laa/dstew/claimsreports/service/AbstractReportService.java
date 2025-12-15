@@ -4,6 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.time.Clock;
+import java.time.LocalDate;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -28,6 +30,7 @@ public abstract class AbstractReportService {
   protected final S3ClientWrapper s3ClientWrapper;
   protected final CsvCreationService csvCreationService;
   protected MetricsHandler metricsHandler;
+  protected Clock clock;
 
   //Abstract methods (implemented by subclasses) to provide relevant details for individual reports
 
@@ -64,10 +67,49 @@ public abstract class AbstractReportService {
   /**
    * Gets the intended file name of the report.
    * This method is intended to be implemented by subclasses to define the file name expected
+   * It is used to build the full file name which includes date and extension.
    *
    * @return the report's expected file name
    */
   protected abstract String getReportFileName();
+
+  /**
+   * Gets the "folder" of the report.
+   * S3 doesn't really have folders, but it's easier to think of the path as containing folders and that is how
+   * it is often visualised in the Console.
+   * This will be appended onto the "reports/" folder.
+   *
+   * @return the report's expected path in S3
+   */
+  protected abstract String getReportFolder();
+
+  /**
+   * Gets the intended file extension of the report.
+   * At present every report is a csv
+   *
+   * @return the report's expected file extension
+   */
+  private String getReportFileExtension() {
+    return ".csv";
+  }
+
+  /**
+   * Builds the final filename of the report, including the generation date.
+   *
+   * @return the report's file name
+   */
+  private String getFullReportFileName() {
+    return getReportFileName() + "_" + LocalDate.now(clock) + getReportFileExtension();
+  }
+
+  /**
+   * Builds the key to use for file upload to s3 - "folders" as well as filename.
+   *
+   * @return the report's file name
+   */
+  private String generateS3FileKey() {
+    return "reports/" + getReportFolder() + "/" + getFullReportFileName();
+  }
 
   /**
    * Generates a CSV report.
@@ -79,7 +121,7 @@ public abstract class AbstractReportService {
     }
 
     log.info("Generating report from {}", getClass().getSimpleName());
-    File tempFile = new File("/tmp/" + getReportFileName());
+    File tempFile = new File("/tmp/" + getFullReportFileName());
     long startTime = System.currentTimeMillis();
 
     try {
@@ -89,9 +131,9 @@ public abstract class AbstractReportService {
       }
       long endTime = System.currentTimeMillis();
       long durationMilliseconds = endTime - startTime;
-      log.info("Created {} file with filename {} in {} ms", getReportName(), getReportFileName(), durationMilliseconds);
+      log.info("Created {} file with filename {} in {} ms", getReportName(), getFullReportFileName(), durationMilliseconds);
 
-      s3ClientWrapper.uploadFile(tempFile, getReportFileName());
+      s3ClientWrapper.uploadFile(tempFile, generateS3FileKey());
       metricsHandler.pushMetrics(getReportName());
 
     } catch (Exception e) {
