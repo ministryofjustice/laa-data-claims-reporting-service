@@ -8,7 +8,7 @@ INSERT INTO bulk_submission (
              NULL,
              NULL,
              'test_user',
-             '2025-11-03 05:00:00',
+             '2025-11-21 05:00:00',
              NULL,
              NULL,
              'OfficeA,OfficeB'
@@ -22,7 +22,7 @@ INSERT INTO bulk_submission (
              NULL,
              NULL,
              'test_user',
-             '2025-11-03 05:00:00',
+             '2025-11-21 05:00:00',
              NULL,
              NULL,
              'OfficeA,OfficeB'
@@ -45,7 +45,7 @@ INSERT INTO submission (
              1,
              NULL,
              'test_user',
-             '2025-11-03 05:00:00',
+             '2025-11-21 05:00:00',
           'test provider user'
          );
 
@@ -66,7 +66,7 @@ INSERT INTO submission (
              1,
              NULL,
              'test_user',
-             '2025-11-03 05:00:00',
+             '2025-11-21 05:00:00',
              'test provider user'
          );
 
@@ -85,7 +85,7 @@ INSERT INTO submission (
              FALSE,
              1,
              'test_user',
-             '2025-11-03 05:00:00',
+             '2025-11-21 05:00:00',
              'test provider user'
          );
 
@@ -99,8 +99,8 @@ INSERT INTO claim (
              1,
              'MT001',
              'test_user',
-             TIMESTAMP '2025-11-03 05:00:00' - interval '1 day',
-             TIMESTAMP '2025-11-03 05:00:00' - interval '1 day'
+             TIMESTAMP '2025-11-21 05:00:00' - interval '1 day',
+             TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          );
 
 INSERT INTO claim (
@@ -112,7 +112,7 @@ INSERT INTO claim (
              1,
              'MT001',
              'test_user',
-             TIMESTAMP '2025-11-03 05:00:00' - interval '1 day'
+             TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          );
 
 -- Client
@@ -137,8 +137,8 @@ INSERT INTO client (
              'CLA001',
              'EX001',
              'test_user',
-             TIMESTAMP '2025-11-03 05:00:00' - interval '1 day',
-             TIMESTAMP '2025-11-03 05:00:00' - interval '1 day'
+             TIMESTAMP '2025-11-21 05:00:00' - interval '1 day',
+             TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          );
 
 INSERT INTO client (
@@ -162,7 +162,7 @@ INSERT INTO client (
              'CLA001',
              'EX001',
              'test_user',
-             TIMESTAMP '2025-11-03 05:00:00' - interval '1 day'
+             TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          );
 
 -- Claim Case
@@ -177,7 +177,7 @@ INSERT INTO claim_case (
              'REACHED1',
              'SUCCESS',
              'test_user',
-             TIMESTAMP '2025-11-03 05:00:00' - interval '1 day'
+             TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          );
 
 INSERT INTO claim_case (
@@ -191,7 +191,7 @@ INSERT INTO claim_case (
              'REACHED1',
              'SUCCESS',
              'test_user',
-             TIMESTAMP '2025-11-03 05:00:00' - interval '1 day'
+             TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          );
 
 -- Claim Summary Fee
@@ -205,7 +205,7 @@ INSERT INTO claim_summary_fee (
              60, 30, 15, 1000, 200,
              500, 100, 50, 20,
              TRUE, FALSE, 'test_user',
-             TIMESTAMP '2025-11-03 05:00:00' - interval '1 day', TIMESTAMP '2025-11-03 05:00:00' - interval '1 day'
+             TIMESTAMP '2025-11-21 05:00:00' - interval '1 day', TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          );
 
 INSERT INTO claim_summary_fee (
@@ -218,7 +218,7 @@ INSERT INTO claim_summary_fee (
              60, 30, 15, 1000, 200,
           500, 100, 50, 20,
           TRUE, FALSE, 'test_user',
-             TIMESTAMP '2025-11-03 05:00:00' - interval '2 day', TIMESTAMP '2025-11-03 05:00:00' - interval '1 day'
+             TIMESTAMP '2025-11-21 05:00:00' - interval '2 day', TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          );
 
 -- Calculated Fee Detail (3 rows)

@@ -48,7 +48,7 @@ public class TestConfig {
   @Primary
   public Clock fixedClock() {
     return Clock.fixed(
-        LocalDate.of(2025, 11, 3)
+        LocalDate.of(2025, 11, 21)
             .atTime(5, 0)                     // 5:00 AM
             .atZone(ZoneId.systemDefault())   // apply your timezone
             .toInstant(),
