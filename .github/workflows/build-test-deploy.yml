@@ -37,7 +37,7 @@ jobs:
 
 #        Add run of integration tests when these are added to the repo
       - name: Run integration tests
-        run: ./gradlew integrationTests
+        run: ./gradlew integrationTest
 
       - name: Upload service JAR artifact
         uses: actions/upload-artifact@v6
