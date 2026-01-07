@@ -25,11 +25,19 @@ updates:
       internal-packages:
         patterns:
           - "uk.gov.laa.dstew.claimsreports*"
+      minor:
+        update-types:
+          - "minor"
+          - "patch"
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
       interval: "weekly"
     groups:
+      minor:
+        update-types:
+          - "minor"
+          - "patch"
       github-actions:
         patterns:
           - "**"
