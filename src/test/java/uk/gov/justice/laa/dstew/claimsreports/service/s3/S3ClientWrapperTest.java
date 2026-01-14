@@ -1,6 +1,7 @@
 package uk.gov.justice.laa.dstew.claimsreports.service.s3;
 
 import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.io.File;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,6 +11,8 @@ import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
+import org.mockito.Mockito;
+import org.mockito.MockedStatic;
 import org.mockito.junit.jupiter.MockitoExtension;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -75,16 +78,12 @@ class S3ClientWrapperTest {
   }
 
   @Test
-  void uploadFile_shouldErrorIfTryingToSetFileNameToNotBeACsvFile() {
-    assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.exe"));
-  }
-
-  @Test
-  void uploadFile_shouldErrorIfTryingToUploadFileThatIsNotCsv() {
-    var badFile = mock(File.class);
-    when(badFile.getPath()).thenReturn("filename.exe");
-
-    assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(badFile, "filename.csv"));
+  void uploadFile_shouldThrowExceptionForNonCsvMimeType() throws Exception {
+      File fakeFile = new File("test.exe");
+      try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
+          filesMock.when(() -> Files.probeContentType(fakeFile.toPath())).thenReturn("application/octet-stream");
+          assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(fakeFile, "filename.exe"));
+      }
   }
 
   @SneakyThrows
@@ -94,4 +93,31 @@ class S3ClientWrapperTest {
     return outputStream.toString();
   }
 
+  @Test
+  void uploadFile_shouldErrorWhenMimeTypeIsNull() throws Exception {
+    File fakeFile = new File("test.unknown");
+
+    try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
+        filesMock.when(() -> Files.probeContentType(fakeFile.toPath()))
+                .thenReturn(null);
+
+        assertThrows(CsvUploadException.class,
+                () -> s3ClientWrapper.uploadFile(fakeFile, "filename.unknown")
+        );
+    }
+  }
+
+  @Test
+  void uploadFile_shouldWrapIOException() throws Exception {
+    File fakeFile = new File("test.csv");
+
+    try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
+        filesMock.when(() -> Files.probeContentType(fakeFile.toPath()))
+                .thenThrow(new IOException("IO"));
+
+        assertThrows(CsvUploadException.class,
+                () -> s3ClientWrapper.uploadFile(fakeFile, "filename.csv")
+        );
+    }
+  }
 }

@@ -1,6 +1,9 @@
 package uk.gov.justice.laa.dstew.claimsreports.service.s3;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -35,13 +38,21 @@ public class S3ClientWrapper {
    */
   public void uploadFile(File fileToUpload, String desiredFileKey) {
 
-    if (!fileToUpload.getPath().endsWith(".csv") || !desiredFileKey.endsWith(".csv")) {
-      throw new CsvUploadException("Attempting to upload file that is not a CSV file: " + fileToUpload.getPath());
+    String mimeType;
+    try {
+      mimeType = Files.probeContentType(fileToUpload.toPath());
+    } catch (IOException e) {
+      throw new CsvUploadException("Unable to determine MIME type for file: " + fileToUpload.getName(), e);
+    }
+
+    if (mimeType == null || !mimeType.equalsIgnoreCase("text/csv")) {
+      throw new CsvUploadException("Attempting to upload file that is not a CSV file. Detected MIME type: " + mimeType);
     }
 
     var putRequest = PutObjectRequest.builder()
         .bucket(s3Bucket)
         .key(desiredFileKey)
+        .contentType("text/csv")
         .build();
 
     log.info("Uploading {} to S3 bucket {} with filename {}", fileToUpload.getPath(), s3Bucket, desiredFileKey);
