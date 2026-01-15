@@ -204,4 +204,67 @@ class ReplicationHealthCheckServiceTest {
       when(metadataRepository.getSubscriptionWalStatus("claims_reporting_service_sub"))
           .thenReturn(healthyWalStatus);
   }
+
+  @Test
+  void testWalStatusMissingTriggersFailure() {
+    when(metadataRepository.getPublishedTables())
+        .thenReturn(List.of("claims.table1"));
+
+    when(metadataRepository.getSubscriptionWalStatus("claims_reporting_service_sub"))
+        .thenReturn(null);
+
+    ReplicationHealthReport report = service.checkReplicationHealth();
+
+    assertFalse(report.isHealthy());
+    assertTrue(report.summary().contains("No WAL progress information available"));
+  }
+
+  @Test
+  void testWalLatestEndLsnNullTriggersFailure() {
+    when(metadataRepository.getPublishedTables())
+        .thenReturn(List.of("claims.table1"));
+
+    SubscriptionWalStatus walStatus =
+        new SubscriptionWalStatus(
+            MID_WAL_LSN,
+            null,
+            Timestamp.from(clock.instant())
+        );
+
+    when(metadataRepository.getSubscriptionWalStatus("claims_reporting_service_sub"))
+        .thenReturn(walStatus);
+
+    ReplicationHealthReport report = service.checkReplicationHealth();
+
+    assertFalse(report.isHealthy());
+    assertTrue(report.summary().contains("No WAL progress information available"));
+  }
+
+  @Test
+  void testWalApplyStalledTriggersFailure() {
+    mockReplicationHealth(
+        List.of("claims.table1"),
+        MID_WAL_LSN,
+        MID_WAL_LSN,
+        600   // > 5 minutes
+    );
+
+    when(jdbcTemplate.query(
+        contains("WHERE created_on"),
+        any(ResultSetExtractor.class),
+        any(Object[].class)))
+        .thenReturn(TABLE1_RECORD_COUNT);
+
+    when(jdbcTemplate.query(
+        contains("WHERE updated_on"),
+        any(ResultSetExtractor.class),
+        any(Object[].class)))
+        .thenReturn(TABLE1_UPDATE_COUNT);
+
+    ReplicationHealthReport report = service.checkReplicationHealth();
+
+    assertFalse(report.isHealthy());
+    assertTrue(report.summary().contains("Replication apply has not progressed"));
+  }
+
 }

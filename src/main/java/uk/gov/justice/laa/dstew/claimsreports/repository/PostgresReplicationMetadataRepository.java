@@ -3,6 +3,7 @@ package uk.gov.justice.laa.dstew.claimsreports.repository;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
+import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
 import uk.gov.justice.laa.dstew.claimsreports.dto.SubscriptionWalStatus;
@@ -42,18 +43,22 @@ public class PostgresReplicationMetadataRepository
 
   @Override
   public SubscriptionWalStatus getSubscriptionWalStatus(String subscriptionName) {
-    return jdbcTemplate.queryForObject("""
-      SELECT received_lsn, latest_end_lsn, latest_end_time
-      FROM pg_stat_subscription
-      WHERE subname = ?
-      """,
-        (rs, rowNum) -> new SubscriptionWalStatus(
-            rs.getString("received_lsn"),
-            rs.getString("latest_end_lsn"),
-            rs.getTimestamp("latest_end_time")
-        ),
-        subscriptionName
-    );
+    try {
+      return jdbcTemplate.queryForObject("""
+        SELECT received_lsn, latest_end_lsn, latest_end_time
+        FROM pg_stat_subscription
+        WHERE subname = ?
+        """,
+          (rs, rowNum) -> new SubscriptionWalStatus(
+              rs.getString("received_lsn"),
+              rs.getString("latest_end_lsn"),
+              rs.getTimestamp("latest_end_time")
+          ),
+          subscriptionName
+      );
+    } catch (EmptyResultDataAccessException ex) {
+      return null;
+    }
   }
 
 }
