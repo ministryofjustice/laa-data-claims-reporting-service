@@ -38,16 +38,31 @@ public class S3ClientWrapper {
    */
   public void uploadFile(File fileToUpload, String desiredFileKey) {
 
+    String fileName = fileToUpload.getName();
     String mimeType;
     try {
       mimeType = Files.probeContentType(fileToUpload.toPath());
     } catch (IOException e) {
-      throw new CsvUploadException("Unable to determine MIME type for file: " + fileToUpload.getName(), e);
+      throw new CsvUploadException("Unable to determine MIME type for file: " + fileName, e);
     }
 
-    if (mimeType == null || !mimeType.equalsIgnoreCase("text/csv")
-            || !fileToUpload.getPath().endsWith(".csv") || !desiredFileKey.endsWith(".csv")) {
-      throw new CsvUploadException("Attempting to upload file that is not a CSV file. Detected MIME type: " + mimeType);
+    // 1. MIME type check
+    if (mimeType == null) {
+      throw new CsvUploadException("Could not detect MIME type for file: " + fileName);
+    }
+
+    if (!mimeType.equalsIgnoreCase("text/csv")) {
+      throw new CsvUploadException("File '" + fileName + "' has invalid MIME type: " + mimeType + ". Expected 'text/csv'.");
+    }
+
+    // 2. File extension check
+    if (!fileName.toLowerCase().endsWith(".csv")) {
+      throw new CsvUploadException("File '" + fileName + "' does not have a .csv extension.");
+    }
+
+    // 3. Desired key extension check
+    if (!desiredFileKey.toLowerCase().endsWith(".csv")) {
+      throw new CsvUploadException("Target key '" + desiredFileKey + "' must end with .csv.");
     }
 
     var putRequest = PutObjectRequest.builder()
