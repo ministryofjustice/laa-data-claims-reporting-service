@@ -65,7 +65,7 @@ public class ClaimsReportingServiceRunner  implements ApplicationRunner {
    * <p>@throws IllegalStateException if the replication health check fails
    */
   private boolean ensureReplicationHealthy() {
-    log.info("Checking replication health before generating reports...");
+    log.info("Checking replication health before generating reports..");
 
     ReplicationHealthReport report = replicationHealthCheckService.checkReplicationHealth();
 
