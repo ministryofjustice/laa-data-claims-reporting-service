@@ -78,6 +78,11 @@ class S3ClientWrapperTest {
   }
 
   @Test
+  void uploadFile_shouldErrorIfTryingToSetFileNameToNotBeACsvFile() {
+    assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.exe"));
+  }
+
+  @Test
   void uploadFile_shouldThrowExceptionForNonCsvMimeType() throws Exception {
       File fakeFile = new File("test.exe");
       try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {

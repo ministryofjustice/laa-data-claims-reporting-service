@@ -45,7 +45,8 @@ public class S3ClientWrapper {
       throw new CsvUploadException("Unable to determine MIME type for file: " + fileToUpload.getName(), e);
     }
 
-    if (mimeType == null || !mimeType.equalsIgnoreCase("text/csv")) {
+    if (mimeType == null || !mimeType.equalsIgnoreCase("text/csv")
+            || !fileToUpload.getPath().endsWith(".csv") || !desiredFileKey.endsWith(".csv")) {
       throw new CsvUploadException("Attempting to upload file that is not a CSV file. Detected MIME type: " + mimeType);
     }
 
