@@ -3,14 +3,12 @@ package uk.gov.justice.laa.dstew.claimsreports.config;
 import io.micrometer.core.instrument.config.MeterFilter;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import io.micrometer.prometheusmetrics.PrometheusRenameFilter;
-import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 /**
  * Prometheus Registry allowing for integration with pushgateway.
  */
-@Slf4j
 @Configuration
 public class PrometheusConfiguration {
 
@@ -20,8 +18,7 @@ public class PrometheusConfiguration {
   }
 
   /*
-    This is due to micrometer, but without fixing it we get multiple infos a second,
-    which is obviously unideal and masks any actual issues.
+    This updates the help message associated with micrometers messages, so that we don't get 3 infos a second clogging up the logs
    */
   @Bean
   MeterFilter fixInfoLogsAboutStartTimeMessage() {
