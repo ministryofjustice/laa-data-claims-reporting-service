@@ -83,6 +83,15 @@ class S3ClientWrapperTest {
   }
 
   @Test
+  void uploadFile_shouldErrorIfTryingToUploadFileThatIsNotCsv() {
+    var badFile = new File("test.exe");
+    try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
+        filesMock.when(() -> Files.probeContentType(badFile.toPath())).thenReturn("text/csv");
+        assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(badFile, "filename.csv"));
+    }
+  }
+
+  @Test
   void uploadFile_shouldThrowExceptionForNonCsvMimeType() throws Exception {
       File fakeFile = new File("test.exe");
       try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
