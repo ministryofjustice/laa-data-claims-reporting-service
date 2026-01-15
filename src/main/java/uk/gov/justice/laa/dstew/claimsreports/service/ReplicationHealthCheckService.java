@@ -3,6 +3,8 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Clock;
+import java.time.Duration;
+import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -13,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
+import uk.gov.justice.laa.dstew.claimsreports.dto.SubscriptionWalStatus;
+import uk.gov.justice.laa.dstew.claimsreports.repository.ReplicationMetadataRepository;
 
 /**
  * The {@code ReplicationHealthCheckService} class provides functionality to evaluate
@@ -32,8 +36,12 @@ import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
 @Slf4j
 public class ReplicationHealthCheckService {
 
+  public static final String REPLICATION = "replication";
+  public static final int TOLERABLE_REPLICATION_DELAY_SECONDS = 300;
   private final JdbcTemplate jdbcTemplate;
+  private final ReplicationMetadataRepository metadataRepository;
   private final Clock clock; //This is the system clock for normal prod use, overridden by a static one for tests.
+  private static final String SUBSCRIPTION_NAME = "claims_reporting_service_sub";
   /**
    * Checks the replication health for a specific date, typically the previous day.
    * This method evaluates various metrics and conditions such as missing tables,
@@ -51,14 +59,32 @@ public class ReplicationHealthCheckService {
 
     log.info("Checking replication health for {}", summaryDate);
 
-    List<String> publicationTables = getPublishedTables();
+    ReplicationHealthReport report = new ReplicationHealthReport(summaryDate);
+    List<String> publicationTables = metadataRepository.getPublishedTables();
+
+    if (publicationTables == null || publicationTables.isEmpty()) {
+      report.setTableSummaryOk(false);
+      report.addFailure(
+          "publication",
+          "No tables found for publication claims_reporting_service_pub"
+      );
+    } else {
+      report.setTableSummaryOk(true); //OK so far, i.e. at least publication tables exist.
+    }
+
     Map<String, ReplicationSummary> summaries = getReplicationSummaries(summaryDate);
 
-    ReplicationHealthReport report = new ReplicationHealthReport(summaryDate);
+    if (summaries == null || summaries.isEmpty()) {
+      report.setTableSummaryOk(false);
+      report.addFailure("replication_summary",
+          "No replication summary found for " + summaryDate);
+    }
 
-    checkWalProgress(summaries, report);
-    checkMissingTables(publicationTables, summaries, report);
-    checkCounts(summaries, startOfDay, endOfDay, report);
+    checkWalProgress(report);
+    if (report.isTableSummaryOk()) {
+      checkMissingTables(publicationTables, summaries, report);
+      checkCounts(summaries, startOfDay, endOfDay, report);
+    }
 
     report.setHealthy(report.isWalLsnOk() && report.isTableSummaryOk() && report.isTableCountsOk());
 
@@ -72,16 +98,6 @@ public class ReplicationHealthCheckService {
   }
 
   // --- Private helpers ---
-
-  private List<String> getPublishedTables() {
-    String sql = """
-            SELECT schemaname || '.' || tablename AS full_table_name
-            FROM pg_publication_tables
-            WHERE pubname = 'claims_reporting_service_pub'
-              AND tablename != 'replication_summary'
-            """;
-    return jdbcTemplate.queryForList(sql, String.class);
-  }
 
   private Map<String, ReplicationSummary> getReplicationSummaries(LocalDate summaryDate) {
     String sql = """
@@ -103,10 +119,10 @@ public class ReplicationHealthCheckService {
     }, summaryDate);
   }
 
-  private void checkMissingTables(List<String> tables, Map<String, ReplicationSummary> summaries,
+  private void checkMissingTables(List<String> publishedTables, Map<String, ReplicationSummary> summaries,
       ReplicationHealthReport report) {
     report.setTableSummaryOk(true);
-    for (String table : tables) {
+    for (String table : publishedTables) {
       if (!summaries.containsKey(table)) {
         report.addFailure(table, "Missing replication summary for table");
         report.setTableSummaryOk(false);
@@ -114,20 +130,56 @@ public class ReplicationHealthCheckService {
     }
   }
 
-  private void checkWalProgress(Map<String, ReplicationSummary> summaries,
-      ReplicationHealthReport report) {
-    String currentWal = jdbcTemplate.queryForObject(
-        "SELECT latest_end_lsn FROM pg_stat_subscription WHERE subname = 'claims_reporting_service_sub'",
-        String.class);
-    ReplicationSummary summary = summaries.values().stream().findFirst().orElse(null);
-    if (summary != null && compareWal(summary.walLsn(), currentWal) > 0) {
+  private void checkWalProgress(
+      ReplicationHealthReport report
+  ) {
+    SubscriptionWalStatus wal =
+        metadataRepository.getSubscriptionWalStatus(SUBSCRIPTION_NAME);
+
+    if (wal == null || wal.latestEndLsn() == null) {
       report.setWalLsnOk(false);
-      report.addFailure(summary.tableName(),
-          String.format("WAL LSN in summary (%s) is ahead of current WAL (%s)",
-              summary.walLsn(), currentWal));
-    } else {
-      report.setWalLsnOk(true);
+      report.addFailure(REPLICATION, "No WAL progress information available");
+      return;
     }
+
+    Instant now = clock.instant();
+    Instant lastApplied =
+        wal.latestEndTime() != null ? wal.latestEndTime().toInstant() : null;
+
+    // Check that apply is not lagging behind receive for too long
+    if (compareWal(wal.receivedLsn(), wal.latestEndLsn()) > 0
+        && (lastApplied == null || lastApplied.isBefore(now.minusSeconds(TOLERABLE_REPLICATION_DELAY_SECONDS)))) {
+
+      report.setWalLsnOk(false);
+      report.addFailure(
+          REPLICATION,
+          String.format(
+              "Replication lag detected — received WAL %s but only applied %s",
+              wal.receivedLsn(), wal.latestEndLsn()
+          )
+      );
+      return;
+    }
+
+    // Check that replication is recent (not stalled)
+    if (lastApplied != null
+        && lastApplied.isBefore(now.minusSeconds(TOLERABLE_REPLICATION_DELAY_SECONDS))) {
+
+      long lagMinutes =
+          Duration.between(lastApplied, now).toMinutes();
+
+      report.setWalLsnOk(false);
+      report.addFailure(
+          REPLICATION,
+          String.format(
+              "Replication apply has not progressed for %d minutes",
+              lagMinutes
+          )
+      );
+      return;
+    }
+
+    report.setWalLsnOk(true);
   }
 
   private int compareWal(String wal1, String wal2) {

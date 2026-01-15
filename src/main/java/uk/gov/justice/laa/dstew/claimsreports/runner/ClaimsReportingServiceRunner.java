@@ -41,23 +41,20 @@ public class ClaimsReportingServiceRunner  implements ApplicationRunner {
 
   @Value("${feature.ignore-replication-rowcount-mismatch:false}")
   private boolean ignoreRowCountMismatch;
-
-  @Value("${feature.replicationCheckEnabled:true}")
-  private boolean replicationCheckEnabled;
-
   private final ReplicationHealthCheckService replicationHealthCheckService;
   //Spring will auto-inject all services that implement the AbstractReportService
   private final List<AbstractReportService> reportServices;
 
   @Override
   public void run(ApplicationArguments args) {
-    ensureReplicationHealthy();
-    generateReports();
+    if (ensureReplicationHealthy()) {
+      generateReports();
+    }
   }
 
   /**
    * Ensures the health of the replication system before proceeding with report generation.
-   * This check can be toggled via the {@code replicationCheckEnabled} configuration property (e.g. for local testing).
+   *
    * <p>This method performs a replication health check by utilizing the
    * {@code replicationHealthCheckService}. If the replication is determined to be
    * unhealthy, an {@code IllegalStateException} is thrown to abort the operation.
@@ -67,31 +64,25 @@ public class ClaimsReportingServiceRunner  implements ApplicationRunner {
    *
    * <p>@throws IllegalStateException if the replication health check fails
    */
-  private void ensureReplicationHealthy() {
-    if (replicationCheckEnabled) {
-      log.info("Checking replication health before generating reports...");
+  private boolean ensureReplicationHealthy() {
+    log.info("Checking replication health before generating reports...");
 
-      ReplicationHealthReport report = replicationHealthCheckService.checkReplicationHealth();
+    ReplicationHealthReport report = replicationHealthCheckService.checkReplicationHealth();
 
-      if (!report.isHealthy()) {
-        log.error("Replication health check failed:\n{}", report.summary());
+    if (!report.isHealthy()) {
+      log.error("Replication health check failed:\n{}", report.summary());
 
-        //Even if the overall replication is unhealthy, we want to continue if ignoreRowCountMismatch is set and basic WAL check passed.
-        if (ignoreRowCountMismatch && report.isWalLsnOk()) {
-          log.info(
-              "Ignoring Row Count Mismatch because ignoreRowCountMismatch is set to true and WAL LSN check has passed ");
-        } else {
-          throw new IllegalStateException(
-              "Replication health check failed — aborting report generation");
-        }
+      //Even if the overall replication is unhealthy, we want to continue if ignoreRowCountMismatch is set and basic WAL check passed.
+      if (ignoreRowCountMismatch && report.isWalLsnOk()) {
+        log.info("Ignoring Row Count Mismatch because ignoreRowCountMismatch is set to true and WAL LSN check has passed ");
+      } else {
+        return false;
       }
-
-      log.info("Replication health confirmed — proceeding with report generation.");
-    } else {
-      log.warn("Replication health check is disabled via configuration. Proceeding without check.");
     }
 
-    }
+    log.info("Replication health confirmed — proceeding with report generation.");
+    return true;
+  }
 
   /**
    * Generates reports by iterating through a list of report services, performing the following tasks:
