@@ -99,26 +99,6 @@ public class ReplicationHealthCheckService {
   }
 
   // --- Private helpers ---
-//
-//  private Map<String, ReplicationSummary> getReplicationSummaries(LocalDate summaryDate) {
-//    String sql = """
-//            SELECT table_name, record_count, updated_count, wal_lsn
-//            FROM claims.replication_summary
-//            WHERE summary_date = ?
-//            """;
-//    return jdbcTemplate.query(sql, rs -> {
-//      Map<String, ReplicationSummary> map = new HashMap<>();
-//      while (rs.next()) {
-//        map.put(rs.getString("table_name"),
-//            new ReplicationSummary(
-//                rs.getString("table_name"),
-//                rs.getLong("record_count"),
-//                rs.getLong("updated_count"),
-//                rs.getString("wal_lsn")));
-//      }
-//      return map;
-//    }, summaryDate);
-//  }
 
   private void checkMissingTables(List<String> publishedTables, Map<String, ReplicationSummary> summaries,
       ReplicationHealthReport report) {
