@@ -435,13 +435,6 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
       OffsetDateTime now,
       Map<String, Pair<Integer, Integer>> tableCounts) {
 
-    jdbcTemplate.update("""
-        INSERT INTO mock_pg_catalog.pg_publication_tables (pubname, schemaname, tablename)
-            VALUES
-                ('claims_reporting_service_pub', 'claims', 'client'),
-                ('claims_reporting_service_pub', 'claims', 'claim');
-        """);
-
     jdbcTemplate.update(DELETE_FROM_REPLICATION_SUMMARY);
 
     jdbcTemplate.update("DELETE FROM mock_pg_catalog.pg_stat_subscription");
