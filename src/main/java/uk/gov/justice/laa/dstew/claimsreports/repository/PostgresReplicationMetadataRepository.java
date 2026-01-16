@@ -1,11 +1,15 @@
 package uk.gov.justice.laa.dstew.claimsreports.repository;
 
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Profile;
 import org.springframework.dao.EmptyResultDataAccessException;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Repository;
+import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationSummary;
 import uk.gov.justice.laa.dstew.claimsreports.dto.SubscriptionWalStatus;
 
 /**
@@ -63,4 +67,25 @@ public class PostgresReplicationMetadataRepository
     }
   }
 
+  @Override
+  public Map<String, ReplicationSummary> getReplicationSummaries(LocalDate summaryDate) {
+    String sql = """
+        SELECT table_name, record_count, updated_count, wal_lsn
+        FROM claims.replication_summary
+        WHERE summary_date = ?
+        """;
+
+    return jdbcTemplate.query(sql, rs -> {
+      Map<String, ReplicationSummary> map = new HashMap<>();
+      while (rs.next()) {
+        map.put(rs.getString("table_name"),
+            new ReplicationSummary(
+                rs.getString("table_name"),
+                rs.getLong("record_count"),
+                rs.getLong("updated_count"),
+                rs.getString("wal_lsn")));
+      }
+      return map;
+    }, summaryDate);
+  }
 }

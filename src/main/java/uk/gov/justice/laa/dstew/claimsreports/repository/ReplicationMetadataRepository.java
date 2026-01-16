@@ -1,6 +1,9 @@
 package uk.gov.justice.laa.dstew.claimsreports.repository;
 
+import java.time.LocalDate;
 import java.util.List;
+import java.util.Map;
+import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationSummary;
 import uk.gov.justice.laa.dstew.claimsreports.dto.SubscriptionWalStatus;
 
 /**
@@ -21,4 +24,6 @@ public interface ReplicationMetadataRepository {
   List<String> getPublishedTables();
 
   SubscriptionWalStatus getSubscriptionWalStatus(String subscriptionName);
+
+  Map<String, ReplicationSummary> getReplicationSummaries(LocalDate summaryDate);
 }

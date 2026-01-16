@@ -2,10 +2,14 @@ package uk.gov.justice.laa.dstew.claimsreports.repository;
 
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.context.annotation.Profile;
 import org.springframework.stereotype.Repository;
+import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationSummary;
 import uk.gov.justice.laa.dstew.claimsreports.dto.SubscriptionWalStatus;
 
 /**
@@ -62,6 +66,31 @@ public class LocalReplicationMetadataRepository
         "2CE/FFFFFFE0", // latest_end_lsn (fully caught up)
         Timestamp.from(Instant.now().minusSeconds(30)) // applied recently
     );
+  }
+
+  @Override
+  public Map<String, ReplicationSummary> getReplicationSummaries(LocalDate summaryDate) {
+    log.info("Using local mock replication summaries for {}", summaryDate);
+
+    Map<String, ReplicationSummary> map = new HashMap<>();
+
+    map.put("claims.claim",
+        new ReplicationSummary(
+            "claims.claim",
+            4L,
+            0L,
+            "2CE/FFFFFFE0"
+        ));
+
+    map.put("claims.assessment",
+        new ReplicationSummary(
+            "claims.assessment",
+            7L,
+            0L,
+            "2CE/FFFFFFE0"
+        ));
+
+    return map;
   }
 
 }

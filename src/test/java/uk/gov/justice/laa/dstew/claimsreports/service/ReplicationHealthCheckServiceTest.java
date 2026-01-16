@@ -16,9 +16,9 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.ResultSetExtractor;
 import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
+import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationSummary;
 import uk.gov.justice.laa.dstew.claimsreports.dto.SubscriptionWalStatus;
 import uk.gov.justice.laa.dstew.claimsreports.repository.ReplicationMetadataRepository;
-import uk.gov.justice.laa.dstew.claimsreports.service.ReplicationHealthCheckService.ReplicationSummary;
 
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertTrue;
@@ -69,20 +69,11 @@ class ReplicationHealthCheckServiceTest {
   @Test
   void testHealthyReplication() {
     // Given
-    List<String> publicationTables = List.of("claims.table1", "claims.table2");
-
-    Map<String, ReplicationSummary> summaries = Map.of(
-        "claims.table1", new ReplicationSummary("claims.table1", TABLE1_RECORD_COUNT, TABLE1_UPDATE_COUNT, MID_WAL_LSN),
-        "claims.table2", new ReplicationSummary("claims.table2", TABLE2_RECORD_COUNT, TABLE2_UPDATE_COUNT, OLD_WAL_LSN)
-    );
 
     // Mock get tables
+    List<String> publicationTables = List.of("claims.table1", "claims.table2");
     when(metadataRepository.getPublishedTables())
         .thenReturn(publicationTables);
-
-    // Mock getReplicationSummaries() -> returns Map<String, ReplicationSummary>
-    when(jdbcTemplate.query(anyString(), any(ResultSetExtractor.class), any(Object[].class)))
-        .thenReturn(summaries);
 
     // Mock actual WAL LSN to be a recent one to indicate that the replication has caught up with previous changes.
     SubscriptionWalStatus healthyWalStatus =
@@ -94,9 +85,13 @@ class ReplicationHealthCheckServiceTest {
     when(metadataRepository.getSubscriptionWalStatus("claims_reporting_service_sub"))
         .thenReturn(healthyWalStatus);
 
-// Stub for replication summary query
-    when(jdbcTemplate.query(contains("FROM claims.replication_summary"),
-        any(ResultSetExtractor.class), any(Object[].class)))
+    // Stub for replication summary query
+    Map<String, ReplicationSummary> summaries = Map.of(
+        "claims.table1", new ReplicationSummary("claims.table1", TABLE1_RECORD_COUNT, TABLE1_UPDATE_COUNT, MID_WAL_LSN),
+        "claims.table2", new ReplicationSummary("claims.table2", TABLE2_RECORD_COUNT, TABLE2_UPDATE_COUNT, OLD_WAL_LSN)
+    );
+
+    when(metadataRepository.getReplicationSummaries(any()))
         .thenReturn(summaries);
 
 // Stub for count queries
@@ -129,6 +124,13 @@ class ReplicationHealthCheckServiceTest {
   @Test
   void testMissingTableDetected() {
     mockReplicationHealth(List.of("claims.table1", "claims.table2"), MID_WAL_LSN, MID_WAL_LSN, 30);
+
+    Map<String, ReplicationSummary> partialSummary = Map.of(
+        "claims.table1", new ReplicationSummary("claims.table1", TABLE1_RECORD_COUNT, TABLE1_UPDATE_COUNT, MID_WAL_LSN));
+
+    // Stub for replication summary query
+    when(metadataRepository.getReplicationSummaries(any()))
+        .thenReturn(partialSummary);
 
     when(jdbcTemplate.queryForObject(anyString(), eq(Long.class), any())).thenReturn(TABLE1_RECORD_COUNT);
     when(jdbcTemplate.queryForObject(anyString(), eq(Long.class), any(), any())).thenReturn(TABLE1_UPDATE_COUNT);
@@ -163,6 +165,14 @@ class ReplicationHealthCheckServiceTest {
   @Test
   void testCountMismatchDetected() {
     mockReplicationHealth(List.of("claims.table1"), MID_WAL_LSN, MID_WAL_LSN, 30);
+    // Stub for replication summary query
+    Map<String, ReplicationSummary> summaries = Map.of(
+        "claims.table1", new ReplicationSummary("claims.table1", TABLE1_RECORD_COUNT, TABLE1_UPDATE_COUNT, MID_WAL_LSN),
+        "claims.table2", new ReplicationSummary("claims.table2", TABLE2_RECORD_COUNT, TABLE2_UPDATE_COUNT, OLD_WAL_LSN)
+    );
+
+    when(metadataRepository.getReplicationSummaries(any()))
+        .thenReturn(summaries);
 
     // mismatch: actual counts differ
     when(jdbcTemplate.queryForObject(startsWith("SELECT count(*) FROM claims.table1"), eq(Long.class), any()))

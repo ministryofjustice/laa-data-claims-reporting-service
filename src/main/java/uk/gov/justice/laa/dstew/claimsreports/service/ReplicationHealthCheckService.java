@@ -15,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
+import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationSummary;
 import uk.gov.justice.laa.dstew.claimsreports.dto.SubscriptionWalStatus;
 import uk.gov.justice.laa.dstew.claimsreports.repository.ReplicationMetadataRepository;
 
@@ -72,7 +73,7 @@ public class ReplicationHealthCheckService {
       report.setTableSummaryOk(true); //OK so far, i.e. at least publication tables exist.
     }
 
-    Map<String, ReplicationSummary> summaries = getReplicationSummaries(summaryDate);
+    Map<String, ReplicationSummary> summaries = metadataRepository.getReplicationSummaries(summaryDate);
 
     if (summaries == null || summaries.isEmpty()) {
       report.setTableSummaryOk(false);
@@ -98,26 +99,26 @@ public class ReplicationHealthCheckService {
   }
 
   // --- Private helpers ---
-
-  private Map<String, ReplicationSummary> getReplicationSummaries(LocalDate summaryDate) {
-    String sql = """
-            SELECT table_name, record_count, updated_count, wal_lsn
-            FROM claims.replication_summary
-            WHERE summary_date = ?
-            """;
-    return jdbcTemplate.query(sql, rs -> {
-      Map<String, ReplicationSummary> map = new HashMap<>();
-      while (rs.next()) {
-        map.put(rs.getString("table_name"),
-            new ReplicationSummary(
-                rs.getString("table_name"),
-                rs.getLong("record_count"),
-                rs.getLong("updated_count"),
-                rs.getString("wal_lsn")));
-      }
-      return map;
-    }, summaryDate);
-  }
+//
+//  private Map<String, ReplicationSummary> getReplicationSummaries(LocalDate summaryDate) {
+//    String sql = """
+//            SELECT table_name, record_count, updated_count, wal_lsn
+//            FROM claims.replication_summary
+//            WHERE summary_date = ?
+//            """;
+//    return jdbcTemplate.query(sql, rs -> {
+//      Map<String, ReplicationSummary> map = new HashMap<>();
+//      while (rs.next()) {
+//        map.put(rs.getString("table_name"),
+//            new ReplicationSummary(
+//                rs.getString("table_name"),
+//                rs.getLong("record_count"),
+//                rs.getLong("updated_count"),
+//                rs.getString("wal_lsn")));
+//      }
+//      return map;
+//    }, summaryDate);
+//  }
 
   private void checkMissingTables(List<String> publishedTables, Map<String, ReplicationSummary> summaries,
       ReplicationHealthReport report) {
@@ -208,6 +209,7 @@ public class ReplicationHealthCheckService {
         }
         return 0L;
       }, startOfDay, endOfDay);
+      log.info("StartOfDay: {}, endOfDay: {}", startOfDay, endOfDay);
 
       if (!Objects.equals(actualRecordCount, summary.recordCount())
           || !Objects.equals(actualUpdatedCount, summary.updatedCount())) {
@@ -220,7 +222,4 @@ public class ReplicationHealthCheckService {
     }
   }
 
-  // --- DTOs ---
-
-  record ReplicationSummary(String tableName, long recordCount, long updatedCount, String walLsn) {}
 }
