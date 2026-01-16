@@ -50,7 +50,7 @@ class PostgresReplicationMetadataRepositoryTest {
         .containsExactlyElementsOf(expectedTables);
 
     verify(jdbcTemplate).queryForList(
-        contains("FROM pg_publication_tables"),
+        contains("FROM pg_subscription_rel"),
         eq(String.class)
     );
   }
