@@ -32,12 +32,25 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
+      - name: DEBUG – List JARs after build
+        run: |
+          echo "PWD=$(pwd)"
+          ls -lh build/libs || true
+          echo "---- sha256 ----"
+          sha256sum build/libs/*.jar || true
+
       - name: Test coverage verification
         run: ./gradlew jacocoTestCoverageVerification
 
 #        Add run of integration tests when these are added to the repo
       - name: Run integration tests
         run: ./gradlew integrationTest
+
+      - name: DEBUG – JARs going into artifact
+        run: |
+          echo "About to upload:"
+          ls -lh build/libs || true
+          sha256sum build/libs/*.jar || true
 
       - name: Upload service JAR artifact
         uses: actions/upload-artifact@v6
@@ -132,11 +145,24 @@ jobs:
 
       - uses: actions/checkout@v6
 
+      - name: DEBUG – build/libs BEFORE artifact download
+        run: |
+          echo "Before download:"
+          ls -lh build || true
+          ls -lh build/libs || true
+
       - name: Download JAR artifact
         uses: actions/download-artifact@v7
         with:
           name: service-jar
           path: build/libs/
+
+      - name: DEBUG – build/libs AFTER artifact download
+        run: |
+          echo "After download:"
+          ls -lh build || true
+          ls -lh build/libs || true
+          sha256sum build/libs/*.jar || true
 
         # ---------- AWS auth (OIDC) ----------
       - name: Configure AWS creds
@@ -145,17 +171,38 @@ jobs:
           role-to-assume: ${{ secrets.ECR_ROLE_TO_ASSUME }}
           aws-region: ${{  vars.ECR_REGION }}
 
+      - name: DEBUG – Docker build context view
+        run: |
+          echo "PWD=$(pwd)"
+          echo "Top-level files:"
+          ls -lh .
+          echo "build/libs:"
+          ls -lh build/libs || true
+          sha256sum build/libs/*.jar || true
+
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
         id: login-ecr
       - name: Build and push a Docker image for claims-reporting
         run: |
+          echo "=== DEBUG Files in build/libs before docker build ==="
+          ls -lh build/libs || true
+          sha256sum build/libs/*.jar || true
+          echo "=== DEBUG Building image ==="
           DOCKER_BUILDKIT=0 docker build --no-cache -t $REGISTRY/$REPOSITORY:$IMAGE_TAG ./
+          echo "=== DEBUG Inspecting JAR inside image ==="
+          docker run --rm $REGISTRY/$REPOSITORY:$IMAGE_TAG \
+          sh -c 'ls -lh app.jar && sha256sum app.jar'
+          echo "=== DEBUG Pushing image ==="
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: ${{ vars.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ github.sha }}
+
+      - name: DEBUG – Image digest
+        run: |
+          docker inspect --format='{{.Id}}' $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
   deploy-uat:
     runs-on: ubuntu-latest
