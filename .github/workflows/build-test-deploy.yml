@@ -195,14 +195,12 @@ jobs:
           sh -c 'ls -lh app.jar && sha256sum app.jar'
           echo "=== DEBUG Pushing image ==="
           docker push $REGISTRY/$REPOSITORY:$IMAGE_TAG
+          echo "=== DEBUG Docker Inspect Image Digest ==="
+          docker inspect --format='{{.Id}}' $REGISTRY/$REPOSITORY:$IMAGE_TAG
         env:
           REGISTRY: ${{ steps.login-ecr.outputs.registry }}
           REPOSITORY: ${{ vars.ECR_REPOSITORY }}
           IMAGE_TAG: ${{ github.sha }}
-
-      - name: DEBUG – Image digest
-        run: |
-          docker inspect --format='{{.Id}}' $REGISTRY/$REPOSITORY:$IMAGE_TAG
 
   deploy-uat:
     runs-on: ubuntu-latest
