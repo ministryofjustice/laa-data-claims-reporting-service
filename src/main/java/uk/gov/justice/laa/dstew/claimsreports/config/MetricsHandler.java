@@ -3,7 +3,6 @@ package uk.gov.justice.laa.dstew.claimsreports.config;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import io.prometheus.metrics.exporter.pushgateway.PushGateway;
 import jakarta.annotation.PreDestroy;
-import java.util.Arrays;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
@@ -32,8 +31,6 @@ public class MetricsHandler {
           .push();
     } catch (Exception e) {
       System.err.println("Failed to push metrics: " + e.getMessage());
-      System.err.println("Cause: " + e.getCause());
-      System.err.println("Stacktrace: " + Arrays.toString(e.getStackTrace()));
     }
   }
 
