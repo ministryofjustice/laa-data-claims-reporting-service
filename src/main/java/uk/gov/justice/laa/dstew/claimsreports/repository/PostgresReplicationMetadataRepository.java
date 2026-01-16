@@ -34,10 +34,12 @@ public class PostgresReplicationMetadataRepository
   @Override
   public List<String> getPublishedTables() {
     return jdbcTemplate.queryForList("""
-        SELECT schemaname || '.' || tablename
-        FROM pg_publication_tables
-        WHERE pubname = 'claims_reporting_service_pub'
-          AND tablename != 'replication_summary'
+        SELECT n.nspname || '.' || c.relname
+          FROM pg_subscription_rel sr
+          JOIN pg_class c ON sr.srrelid = c.oid
+          JOIN pg_namespace n ON c.relnamespace = n.oid
+         WHERE sr.srsubid = (SELECT oid FROM pg_subscription WHERE subname = 'claims_reporting_service_sub')
+           AND c.relname != 'replication_summary'
         """, String.class);
   }
 
