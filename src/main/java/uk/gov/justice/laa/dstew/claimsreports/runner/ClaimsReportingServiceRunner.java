@@ -49,6 +49,8 @@ public class ClaimsReportingServiceRunner  implements ApplicationRunner {
   public void run(ApplicationArguments args) {
     if (ensureReplicationHealthy()) {
       generateReports();
+    } else {
+      log.error("Replication health check failed, reports not generated.");
     }
   }
 

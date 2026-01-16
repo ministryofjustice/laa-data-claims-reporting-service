@@ -138,7 +138,7 @@ public class ReplicationHealthCheckService {
 
     if (wal == null || wal.latestEndLsn() == null) {
       report.setWalLsnOk(false);
-      report.addFailure(REPLICATION, "No WAL progress information available");
+      report.addFailure(REPLICATION, "No WAL progress information available, replication is failing. Please check RDS logs for more details.");
       return;
     }
 
