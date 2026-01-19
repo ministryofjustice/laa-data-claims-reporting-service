@@ -6,7 +6,6 @@ import java.time.Clock;
 import java.time.Duration;
 import java.time.Instant;
 import java.time.LocalDate;
-import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
@@ -114,52 +113,48 @@ public class ReplicationHealthCheckService {
   private void checkWalProgress(
       ReplicationHealthReport report
   ) {
-    SubscriptionWalStatus wal =
-        metadataRepository.getSubscriptionWalStatus(SUBSCRIPTION_NAME);
+    Instant now = clock.instant();
+    SubscriptionWalStatus wal = metadataRepository.getSubscriptionWalStatus(SUBSCRIPTION_NAME);
 
     if (wal == null || wal.latestEndLsn() == null) {
       report.setWalLsnOk(false);
       report.addFailure(REPLICATION, "No WAL progress information available, replication is failing. Please check RDS logs for more details.");
-      return;
-    }
+    } else {
+      Instant lastApplied =
+          wal.latestEndTime() != null ? wal.latestEndTime().toInstant() : null;
 
-    Instant now = clock.instant();
-    Instant lastApplied =
-        wal.latestEndTime() != null ? wal.latestEndTime().toInstant() : null;
+      // Check that apply is not lagging behind receive for too long
+      if (compareWal(wal.receivedLsn(), wal.latestEndLsn()) > 0
+          && (lastApplied == null || lastApplied.isBefore(now.minusSeconds(TOLERABLE_REPLICATION_DELAY_SECONDS)))) {
 
-    // Check that apply is not lagging behind receive for too long
-    if (compareWal(wal.receivedLsn(), wal.latestEndLsn()) > 0
-        && (lastApplied == null || lastApplied.isBefore(now.minusSeconds(TOLERABLE_REPLICATION_DELAY_SECONDS)))) {
-
-      report.setWalLsnOk(false);
-      report.addFailure(
-          REPLICATION,
-          String.format(
-              "Replication lag detected — received WAL %s but only applied %s",
-              wal.receivedLsn(), wal.latestEndLsn()
-          )
-      );
-      return;
-    }
-
+        report.setWalLsnOk(false);
+        report.addFailure(
+            REPLICATION,
+            String.format(
+                "Replication lag detected — received WAL %s but only applied %s",
+                wal.receivedLsn(), wal.latestEndLsn()
+            )
+        );
+      }
     // Check that replication is recent (not stalled)
-    if (lastApplied != null
-        && lastApplied.isBefore(now.minusSeconds(TOLERABLE_REPLICATION_DELAY_SECONDS))) {
-
-      long lagMinutes =
-          Duration.between(lastApplied, now).toMinutes();
-
+    else if (lastApplied == null) {
       report.setWalLsnOk(false);
-      report.addFailure(
-          REPLICATION,
-          String.format(
-              "Replication apply has not progressed for %d minutes",
-              lagMinutes
-          )
+      report.addFailure(REPLICATION, "WAL latest end time is null"
       );
-      return;
-    }
+    } else if (lastApplied.isBefore(now.minusSeconds(TOLERABLE_REPLICATION_DELAY_SECONDS))) {
 
+        long lagMinutes = Duration.between(lastApplied, now).toMinutes();
+
+        report.setWalLsnOk(false);
+        report.addFailure(
+            REPLICATION,
+            String.format(
+                "Replication apply has not progressed for %d minutes",
+                lagMinutes
+            )
+        );
+      }
+    }
     report.setWalLsnOk(true);
   }
 
