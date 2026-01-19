@@ -62,7 +62,7 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
   private static final String CLAIM_TABLE_NAME = "claims.claim";
   private static final String CLIENT_TABLE_NAME = "claims.client";
   private static final String CLAIM_SUMMARY_FEE_TABLE_NAME= "claims.claim_summary_fee";
-  private static final int NUMBER_OF_REPORTS = 4;
+  private static final int NUMBER_OF_REPORTS = 5;
 
   // -------------------- Containers --------------------
   @Container

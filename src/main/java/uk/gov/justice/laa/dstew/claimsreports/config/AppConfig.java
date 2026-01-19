@@ -88,4 +88,8 @@ public class AppConfig {
   @Getter
   private boolean forceRunReport000;
 
+  @Value("${feature.force-run-rep000v2:false}")
+  @Getter
+  private boolean forceRunReport000v2;
+
 }
