@@ -120,12 +120,11 @@ public class ReplicationHealthCheckService {
       report.setWalLsnOk(false);
       report.addFailure(REPLICATION, "No WAL progress information available, replication is failing. Please check RDS logs for more details.");
     } else {
-      Instant lastApplied =
-          wal.latestEndTime() != null ? wal.latestEndTime().toInstant() : null;
-
+      Instant lastApplied = wal.latestEndTime() != null ? wal.latestEndTime().toInstant() : null;
+      boolean lagExceedsTolerance = lastApplied == null || lastApplied.isBefore(now.minusSeconds(TOLERABLE_REPLICATION_DELAY_SECONDS));
       // Check that apply is not lagging behind receive for too long
       if (compareWal(wal.receivedLsn(), wal.latestEndLsn()) > 0
-          && (lastApplied == null || lastApplied.isBefore(now.minusSeconds(TOLERABLE_REPLICATION_DELAY_SECONDS)))) {
+          && lagExceedsTolerance) {
 
         report.setWalLsnOk(false);
         report.addFailure(
@@ -135,13 +134,11 @@ public class ReplicationHealthCheckService {
                 wal.receivedLsn(), wal.latestEndLsn()
             )
         );
-      }
-    // Check that replication is recent (not stalled)
-    else if (lastApplied == null) {
-      report.setWalLsnOk(false);
-      report.addFailure(REPLICATION, "WAL latest end time is null"
-      );
-    } else if (lastApplied.isBefore(now.minusSeconds(TOLERABLE_REPLICATION_DELAY_SECONDS))) {
+      } else if (lastApplied == null) {
+        report.setWalLsnOk(false);
+        report.addFailure(REPLICATION, "WAL latest end time is null"
+        );
+      } else if (lagExceedsTolerance) {
 
         long lagMinutes = Duration.between(lastApplied, now).toMinutes();
 
