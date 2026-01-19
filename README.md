@@ -85,3 +85,4 @@ and `cronjob to copy` is one of the entries from the list of cronjobs - on `uat`
 On other systems it should just be `laa-data-claims-reporting-service`
 
 If you need to run REP000 on a date that is not the 21st of the month, you should create a cronjob with the `FORCE_RUN_REP000` flag set to true.
+If you need to run REP000v2 on a date that is not the 21st of the month, you should create a cronjob with the `FORCE_RUN_REP000V2` flag set to true.
