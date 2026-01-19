@@ -121,27 +121,14 @@ public class ReplicationHealthCheckService {
       report.addFailure(REPLICATION, "No WAL progress information available, replication is failing. Please check RDS logs for more details.");
     } else {
       Instant lastApplied = wal.latestEndTime() != null ? wal.latestEndTime().toInstant() : null;
-      boolean lagExceedsTolerance = lastApplied == null || lastApplied.isBefore(now.minusSeconds(TOLERABLE_REPLICATION_DELAY_SECONDS));
-      // Check that apply is not lagging behind receive for too long
-      if (compareWal(wal.receivedLsn(), wal.latestEndLsn()) > 0
-          && lagExceedsTolerance) {
-
-        report.setWalLsnOk(false);
-        report.addFailure(
-            REPLICATION,
-            String.format(
-                "Replication lag detected — received WAL %s but only applied %s",
-                wal.receivedLsn(), wal.latestEndLsn()
-            )
-        );
-      } else if (lastApplied == null) {
+      boolean lagExceedsTolerance = lastApplied == null || lastApplied.isBefore(
+          now.minusSeconds(TOLERABLE_REPLICATION_DELAY_SECONDS));
+      if (lastApplied == null) {
         report.setWalLsnOk(false);
         report.addFailure(REPLICATION, "WAL latest end time is null"
         );
       } else if (lagExceedsTolerance) {
-
         long lagMinutes = Duration.between(lastApplied, now).toMinutes();
-
         report.setWalLsnOk(false);
         report.addFailure(
             REPLICATION,
@@ -150,9 +137,20 @@ public class ReplicationHealthCheckService {
                 lagMinutes
             )
         );
+        if (compareWal(wal.receivedLsn(), wal.latestEndLsn()) > 0) {
+          report.setWalLsnOk(false);
+          report.addFailure(
+              REPLICATION,
+              String.format(
+                  "Replication lag detected — received WAL %s but only applied %s",
+                  wal.receivedLsn(), wal.latestEndLsn()
+              )
+          );
+        }
+      } else {
+        report.setWalLsnOk(true);
       }
     }
-    report.setWalLsnOk(true);
   }
 
   private int compareWal(String wal1, String wal2) {
