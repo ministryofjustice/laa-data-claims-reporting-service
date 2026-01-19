@@ -4,11 +4,14 @@ import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.contains;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
+import java.sql.ResultSet;
 import java.sql.Timestamp;
 import java.time.Instant;
+import java.time.LocalDate;
 import java.util.List;
 
 import org.junit.jupiter.api.Test;
@@ -107,5 +110,36 @@ class PostgresReplicationMetadataRepositoryTest {
 
     // Then
     assertThat(result).isNull();
+  }
+
+  @Test
+  void getSubscriptionWalStatus_returnsStatus_whenRowExists() {
+    // Given
+    String subscriptionName = "claims_reporting_service_sub";
+
+    when(jdbcTemplate.queryForObject(
+        anyString(),
+        any(RowMapper.class),
+        eq(subscriptionName)))
+        .thenAnswer(invocation -> {
+          RowMapper<SubscriptionWalStatus> mapper = invocation.getArgument(1);
+          ResultSet rs = mock(ResultSet.class);
+
+          when(rs.getString("received_lsn")).thenReturn("0/16B6C50");
+          when(rs.getString("latest_end_lsn")).thenReturn("0/16B6C40");
+          when(rs.getTimestamp("latest_end_time"))
+              .thenReturn(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
+
+          return mapper.mapRow(rs, 1);
+        });
+
+    // When
+    SubscriptionWalStatus result =
+        repository.getSubscriptionWalStatus(subscriptionName);
+
+    // Then
+    assertThat(result).isNotNull();
+    assertThat(result.receivedLsn()).isEqualTo("0/16B6C50");
+    assertThat(result.latestEndLsn()).isEqualTo("0/16B6C40");
   }
 }
