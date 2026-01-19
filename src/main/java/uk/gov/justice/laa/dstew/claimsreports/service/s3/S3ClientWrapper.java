@@ -1,6 +1,9 @@
 package uk.gov.justice.laa.dstew.claimsreports.service.s3;
 
 import java.io.File;
+import java.io.IOException;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -35,13 +38,37 @@ public class S3ClientWrapper {
    */
   public void uploadFile(File fileToUpload, String desiredFileKey) {
 
-    if (!fileToUpload.getPath().endsWith(".csv") || !desiredFileKey.endsWith(".csv")) {
-      throw new CsvUploadException("Attempting to upload file that is not a CSV file: " + fileToUpload.getPath());
+    String fileName = fileToUpload.getName();
+    String mimeType;
+    try {
+      mimeType = Files.probeContentType(fileToUpload.toPath());
+    } catch (IOException e) {
+      throw new CsvUploadException("Unable to determine MIME type for file: " + fileName, e);
+    }
+
+    // 1. MIME type check
+    if (mimeType == null) {
+      throw new CsvUploadException("Could not detect MIME type for file: " + fileName);
+    }
+
+    if (!mimeType.equalsIgnoreCase("text/csv")) {
+      throw new CsvUploadException("File '" + fileName + "' has invalid MIME type: " + mimeType + ". Expected 'text/csv'.");
+    }
+
+    // 2. File extension check
+    if (!fileName.toLowerCase().endsWith(".csv")) {
+      throw new CsvUploadException("File '" + fileName + "' does not have a .csv extension.");
+    }
+
+    // 3. Desired key extension check
+    if (!desiredFileKey.toLowerCase().endsWith(".csv")) {
+      throw new CsvUploadException("Target key '" + desiredFileKey + "' must end with .csv.");
     }
 
     var putRequest = PutObjectRequest.builder()
         .bucket(s3Bucket)
         .key(desiredFileKey)
+        .contentType("text/csv")
         .build();
 
     log.info("Uploading {} to S3 bucket {} with filename {}", fileToUpload.getPath(), s3Bucket, desiredFileKey);
