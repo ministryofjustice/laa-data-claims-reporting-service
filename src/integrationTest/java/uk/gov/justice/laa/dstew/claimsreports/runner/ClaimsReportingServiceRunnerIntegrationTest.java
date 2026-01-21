@@ -29,9 +29,12 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.utility.DockerImageName;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.Delete;
+import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.S3Object;
 import uk.gov.justice.laa.dstew.claimsreports.config.TestConfig;
 import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
@@ -57,6 +60,7 @@ import uk.gov.justice.laa.dstew.claimsreports.service.ReplicationHealthCheckServ
 @Testcontainers
 public class ClaimsReportingServiceRunnerIntegrationTest {
 
+  public static final String DELETE_FROM_REPLICATION_SUMMARY = "DELETE FROM claims.replication_summary";
   @Value("${S3_REPORT_STORE}")
   private String bucketName;
   private static final String CLAIM_TABLE_NAME = "claims.claim";
@@ -121,7 +125,9 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
 
   @BeforeEach
   void setup() {
-    jdbcTemplate.update("DELETE FROM claims.replication_summary");
+    // Reset replication summary
+    jdbcTemplate.update(DELETE_FROM_REPLICATION_SUMMARY);
+    insertHealthyReplicationData();
   }
 
   // ------------------------------------------------------------
@@ -173,6 +179,147 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
     assertThat(report.getFailedChecks()).isEqualTo(expectedFailures);
   }
 
+  @Test
+  void healthCheckFailsWhenPublishedTablesNotFound() {
+    // Given
+    LocalDate yesterday = LocalDate.now(staticClock).minusDays(1);
+    OffsetDateTime now = OffsetDateTime.now(staticClock);
+
+    Map<String, Pair<Integer, Integer>> tableCounts = Map.of(
+        CLAIM_TABLE_NAME, Pair.of(3, 1)
+    );
+
+    createReplicationSummaryTestData(yesterday, now, tableCounts);
+
+    // When
+    ReplicationHealthReport report = replicationHealthCheckService.checkReplicationHealth();
+
+    // Then
+    assertThat(report.isHealthy()).isFalse();
+    assertThat(report.isTableSummaryOk()).isFalse();
+
+    assertThat(report.summary())
+        .contains("claims.client: Missing replication summary for table");
+  }
+
+  @Test
+  void healthCheckFailsWhenYesterdaySummaryIsMissing() {
+    // Given
+    LocalDate yesterday = LocalDate.now(staticClock).minusDays(1);
+
+    // Ensure table is empty (or only has other dates)
+    jdbcTemplate.update(DELETE_FROM_REPLICATION_SUMMARY);
+
+    // When
+    ReplicationHealthReport report =
+        replicationHealthCheckService.checkReplicationHealth();
+
+    // Then
+    assertThat(report.isHealthy()).isFalse();
+    assertThat(report.isTableSummaryOk()).isFalse();
+
+    assertThat(report.summary())
+        .contains("No replication summary found")
+        .contains(yesterday.toString());
+  }
+
+  @Test
+  void healthCheckFailsWhenReplicationLagDetected() {
+    // Given
+
+    OffsetDateTime staleTime =
+        OffsetDateTime.now(staticClock).minusMinutes(10);
+
+    jdbcTemplate.update("""
+      UPDATE mock_pg_catalog.pg_stat_subscription
+      SET received_lsn = '2CE/0000FFF0',
+          latest_end_lsn = '2CE/00000010',
+          latest_end_time = ?
+      WHERE subname = 'claims_reporting_service_sub'
+      """, staleTime);
+
+    // When
+    ReplicationHealthReport report =
+        replicationHealthCheckService.checkReplicationHealth();
+
+    // Then
+    assertThat(report.isHealthy()).isFalse();
+    assertThat(report.isWalLsnOk()).isFalse();
+
+    assertThat(report.summary())
+        .contains("Replication lag detected");
+  }
+
+  @Test
+  void healthCheckFailsWhenLatestEndTimeIsTooOld() {
+    // Given
+    OffsetDateTime staleTime =
+        OffsetDateTime.now(staticClock).minusHours(2);
+
+    jdbcTemplate.update("""
+      UPDATE mock_pg_catalog.pg_stat_subscription
+      SET received_lsn = '2CE/0000FFF0',
+          latest_end_lsn = '2CE/0000FFF0',
+          latest_end_time = ?
+      WHERE subname = 'claims_reporting_service_sub'
+      """, staleTime);
+
+    // When
+    ReplicationHealthReport report =
+        replicationHealthCheckService.checkReplicationHealth();
+
+    // Then
+    assertThat(report.isHealthy()).isFalse();
+    assertThat(report.isWalLsnOk()).isFalse();
+
+    assertThat(report.summary())
+        .contains("Replication apply has not progressed");
+  }
+
+  @Test
+  void healthCheckPassesWhenSubscriptionIsUpToDate() {
+    // Given
+    OffsetDateTime recentTime =
+        OffsetDateTime.now(staticClock).minusSeconds(10);
+
+    jdbcTemplate.update("""
+      UPDATE mock_pg_catalog.pg_stat_subscription
+      SET received_lsn = '2CE/0000FFF0',
+          latest_end_lsn = '2CE/0000FFF0',
+          latest_end_time = ?
+      WHERE subname = 'claims_reporting_service_sub'
+      """, recentTime);
+
+    // When
+    ReplicationHealthReport report =
+        replicationHealthCheckService.checkReplicationHealth();
+
+    // Then
+    assertThat(report.isHealthy()).isTrue();
+  }
+
+  @Test
+  void healthCheckFailsWhenOnlyOlderSummaryExists() {
+    // Given
+    jdbcTemplate.update(DELETE_FROM_REPLICATION_SUMMARY);
+
+    LocalDate twoDaysAgo = LocalDate.now(staticClock).minusDays(2);
+
+    jdbcTemplate.update("""
+      INSERT INTO claims.replication_summary
+      (table_name, summary_date, record_count, updated_count, wal_lsn, created_on)
+      VALUES ('claims.claim', ?, 10, 2, '2CE/0000FFF0'::pg_lsn, now())
+      """, twoDaysAgo);
+
+    // When
+    ReplicationHealthReport report =
+        replicationHealthCheckService.checkReplicationHealth();
+
+    // Then
+    assertThat(report.isHealthy()).isFalse();
+    assertThat(report.isTableSummaryOk()).isFalse();
+  }
+  
   // ------------------------------------------------------------
   // Report Generation Tests (with real S3 uploads)
   // ------------------------------------------------------------
@@ -189,9 +336,6 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
     assertThat(reportServices)
         .isNotEmpty()
         .hasSize(NUMBER_OF_REPORTS);
-
-    // Make replication healthy
-    insertHealthyReplicationData();
 
     // Run report generation end-to-end
     serviceRunner.run(null);
@@ -230,6 +374,44 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
 
       log.info("CSV file '{}' matches expected content.", uploadedKey);
     }
+
+    //Clean up S3 bucket
+
+    if (listResponse.hasContents()) {
+      List<ObjectIdentifier> objects = listResponse.contents().stream()
+          .map(o -> ObjectIdentifier.builder().key(o.key()).build())
+          .toList();
+
+      s3Client.deleteObjects(DeleteObjectsRequest.builder()
+          .bucket(bucketName)
+          .delete(d -> d.objects(objects))
+          .build());
+    }
+  }
+
+  @Test
+  void shouldNotGenerateReportsAndUploadCSVsToS3WhenReplicationNotHealthy() {
+
+    // Make replication unhealthy
+    jdbcTemplate.update(DELETE_FROM_REPLICATION_SUMMARY);
+
+    // Run report generation end-to-end
+    serviceRunner.run(null);
+
+    // Check uploads
+    ListObjectsV2Response listResponse = s3Client.listObjectsV2(ListObjectsV2Request.builder()
+        .bucket(bucketName)
+        .build());
+
+    List<String> uploadedFiles = listResponse.contents().stream()
+        .map(S3Object::key)
+        .toList();
+
+    log.info("Uploaded report files: {}", uploadedFiles);
+
+    //Assert that no reports were generated
+    assertThat(uploadedFiles)
+        .isEmpty();
   }
 
   // ------------------------------------------------------------
@@ -252,6 +434,14 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
       LocalDate yesterday,
       OffsetDateTime now,
       Map<String, Pair<Integer, Integer>> tableCounts) {
+
+    jdbcTemplate.update(DELETE_FROM_REPLICATION_SUMMARY);
+
+    jdbcTemplate.update("DELETE FROM mock_pg_catalog.pg_stat_subscription");
+    jdbcTemplate.update("""
+        INSERT INTO mock_pg_catalog.pg_stat_subscription(subname, received_lsn, latest_end_lsn, latest_end_time)
+        VALUES ('claims_reporting_service_sub', pg_current_wal_lsn()::text, pg_current_wal_lsn()::text, CURRENT_DATE);
+     """);
 
     for (Map.Entry<String, Pair<Integer, Integer>> entry : tableCounts.entrySet()) {
       String tableName = entry.getKey();

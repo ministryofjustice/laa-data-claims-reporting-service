@@ -47,8 +47,11 @@ public class ClaimsReportingServiceRunner  implements ApplicationRunner {
 
   @Override
   public void run(ApplicationArguments args) {
-    ensureReplicationHealthy();
-    generateReports();
+    if (ensureReplicationHealthy()) {
+      generateReports();
+    } else {
+      log.error("Replication health check failed, reports not generated.");
+    }
   }
 
   /**
@@ -63,7 +66,7 @@ public class ClaimsReportingServiceRunner  implements ApplicationRunner {
    *
    * <p>@throws IllegalStateException if the replication health check fails
    */
-  private void ensureReplicationHealthy() {
+  private boolean ensureReplicationHealthy() {
     log.info("Checking replication health before generating reports...");
 
     ReplicationHealthReport report = replicationHealthCheckService.checkReplicationHealth();
@@ -75,12 +78,12 @@ public class ClaimsReportingServiceRunner  implements ApplicationRunner {
       if (ignoreRowCountMismatch && report.isWalLsnOk()) {
         log.info("Ignoring Row Count Mismatch because ignoreRowCountMismatch is set to true and WAL LSN check has passed ");
       } else {
-        throw new IllegalStateException(
-            "Replication health check failed — aborting report generation");
+        return false;
       }
     }
 
     log.info("Replication health confirmed — proceeding with report generation.");
+    return true;
   }
 
   /**
