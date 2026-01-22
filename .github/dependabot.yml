@@ -17,7 +17,8 @@ updates:
     directory: "/"
     schedule:
       interval: "weekly"
-    registries: "*"
+    registries:
+      - spring-boot-common-github-packages
     groups:
       gradle-updates:
         exclude-patterns:
