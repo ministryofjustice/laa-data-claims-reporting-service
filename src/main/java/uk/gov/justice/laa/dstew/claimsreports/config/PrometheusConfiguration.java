@@ -55,7 +55,7 @@ public class PrometheusConfiguration {
     var reportSuccess = Gauge.builder()
         .withoutExemplars()
         .name("report_success")
-        .help("1 on success, 0 on failure, -1 on skipped")
+        .help("1 on success, -1 on failure, 0 if skipped")
         .register(registry);
 
     var dataRefreshTimeMs = Gauge.builder()
@@ -97,9 +97,9 @@ public class PrometheusConfiguration {
   public record CustomReportGauges(Gauge reportSuccessful, Gauge dataRefreshTimeMs, Gauge generatedTimeMs,
                                    Gauge rowsWritten, Gauge reportFileSize, Gauge uploadTimeMs) {
 
-    public static int REPORT_FAILED = 0;
+    public static int REPORT_FAILED = -1;
     public static int REPORT_SUCCESSFUL = 1;
-    public static int REPORT_SKIPPED = -1;
+    public static int REPORT_SKIPPED = 0;
 
     /**
      * Identifier for a custom metric.
