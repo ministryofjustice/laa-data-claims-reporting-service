@@ -19,12 +19,12 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
+import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 
@@ -34,13 +34,16 @@ class S3ClientWrapperTest {
   @Mock
   private S3Client s3Client;
 
+  @Mock
+  private MetricsHandler metricsHandler;
+
   private final String testFilePath = getClass().getClassLoader().getResource("testReport.csv").getPath();
   private final File testReport = new File(testFilePath);
   private S3ClientWrapper s3ClientWrapper;
 
   @BeforeEach
   void beforeEach() {
-    s3ClientWrapper = new S3ClientWrapper(s3Client, "bucket");
+    s3ClientWrapper = new S3ClientWrapper(s3Client, "bucket", metricsHandler);
   }
 
   @SneakyThrows
@@ -92,7 +95,7 @@ class S3ClientWrapperTest {
   }
 
   @Test
-  void uploadFile_shouldThrowExceptionForNonCsvMimeType() throws Exception {
+  void uploadFile_shouldThrowExceptionForNonCsvMimeType() {
       File fakeFile = new File("test.exe");
       try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
           filesMock.when(() -> Files.probeContentType(fakeFile.toPath())).thenReturn("application/octet-stream");
@@ -122,7 +125,7 @@ class S3ClientWrapperTest {
   }
 
   @Test
-  void uploadFile_shouldWrapIOException() throws Exception {
+  void uploadFile_shouldWrapIOException() {
     File fakeFile = new File("test.csv");
 
     try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {

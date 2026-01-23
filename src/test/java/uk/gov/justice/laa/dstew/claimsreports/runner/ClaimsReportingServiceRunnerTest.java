@@ -14,6 +14,7 @@ import org.mockito.MockitoAnnotations;
 import org.springframework.boot.ApplicationArguments;
 
 import org.springframework.test.util.ReflectionTestUtils;
+import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
 import uk.gov.justice.laa.dstew.claimsreports.service.AbstractReportService;
 import uk.gov.justice.laa.dstew.claimsreports.service.ReplicationHealthCheckService;
@@ -32,6 +33,9 @@ class ClaimsReportingServiceRunnerTest {
   @Mock
   private ApplicationArguments applicationArguments;
 
+  @Mock
+  private MetricsHandler metricsHandler;
+
   private ClaimsReportingServiceRunner runner;
 
   @BeforeEach
@@ -39,7 +43,7 @@ class ClaimsReportingServiceRunnerTest {
     MockitoAnnotations.openMocks(this);
 
     // Inject a list of mocked report services
-    runner = new ClaimsReportingServiceRunner(replicationHealthCheckService, List.of(reportService1, reportService2));
+    runner = new ClaimsReportingServiceRunner(replicationHealthCheckService, List.of(reportService1, reportService2), metricsHandler);
     // Default: replication is healthy
     ReplicationHealthReport healthyReport = new ReplicationHealthReport(LocalDate.now());
     healthyReport.setHealthy(true);
@@ -60,9 +64,22 @@ class ClaimsReportingServiceRunnerTest {
   }
 
   @Test
+  void shouldResetAndPushMetricsForEachReport() {
+
+    when(reportService1.getReportName()).thenReturn("report1");
+    when(reportService2.getReportName()).thenReturn("report2");
+
+    runner.run(applicationArguments);
+
+    verify(metricsHandler, times(2)).resetCustomMetrics();
+    verify(metricsHandler).pushReportMetrics("report1");
+    verify(metricsHandler).pushReportMetrics("report2");
+  }
+
+  @Test
   void shouldHandleEmptyServiceList() {
     // Create runner with empty list
-    ClaimsReportingServiceRunner emptyRunner = new ClaimsReportingServiceRunner(replicationHealthCheckService, List.of());
+    ClaimsReportingServiceRunner emptyRunner = new ClaimsReportingServiceRunner(replicationHealthCheckService, List.of(), metricsHandler);
 
     // Should not throw any exceptions
     assertThatCode(() -> emptyRunner.run(applicationArguments))
@@ -122,7 +139,8 @@ class ClaimsReportingServiceRunnerTest {
 
     runner = new ClaimsReportingServiceRunner(
         replicationHealthCheckService,
-        List.of(reportService1, reportService2)
+        List.of(reportService1, reportService2),
+        metricsHandler
     );
     // use reflection to set the private @Value field
     ReflectionTestUtils.setField(runner, "ignoreRowCountMismatch", true);
@@ -148,7 +166,8 @@ class ClaimsReportingServiceRunnerTest {
 
     runner = new ClaimsReportingServiceRunner(
         replicationHealthCheckService,
-        List.of(reportService1, reportService2)
+        List.of(reportService1, reportService2),
+        metricsHandler
     );
     ReflectionTestUtils.setField(runner, "ignoreRowCountMismatch", true);
 

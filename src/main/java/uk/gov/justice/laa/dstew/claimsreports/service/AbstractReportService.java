@@ -1,5 +1,8 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_SKIPPED;
+import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_SUCCESSFUL;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -11,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
+import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
@@ -19,7 +23,6 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
  * with support for operations on materialized views. This class provides a framework for
  * refreshing materialized views and generating reports. Subclasses should provide specific
  * implementations for the abstract methods as needed.
- *
  */
 @Slf4j
 @Transactional
@@ -54,6 +57,7 @@ public abstract class AbstractReportService {
     long endTime = System.currentTimeMillis();
     long durationMilliseconds = endTime - startTime;
     log.info("Refresh complete for {} in {} ms", getReportName(), durationMilliseconds);
+    metricsHandler.setCustomMetric(CustomReportMetric.DATA_REFRESH_TIME_MS, durationMilliseconds);
   }
 
   /**
@@ -62,7 +66,7 @@ public abstract class AbstractReportService {
    *
    * @return the report's expected name
    */
-  protected abstract String getReportName();
+  public abstract String getReportName();
 
   /**
    * Gets the intended file name of the report.
@@ -117,6 +121,7 @@ public abstract class AbstractReportService {
   public void generateReport() {
     if (!runToday()) {
       log.info("Report {} is not scheduled to run today", getReportName());
+      metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_SKIPPED);
       return;
     }
 
@@ -132,9 +137,9 @@ public abstract class AbstractReportService {
       long endTime = System.currentTimeMillis();
       long durationMilliseconds = endTime - startTime;
       log.info("Created {} file with filename {} in {} ms", getReportName(), getFullReportFileName(), durationMilliseconds);
-
+      metricsHandler.setCustomMetric(CustomReportMetric.GENERATED_TIME_MS, durationMilliseconds);
       s3ClientWrapper.uploadFile(tempFile, generateS3FileKey());
-      metricsHandler.pushMetrics(getReportName());
+      metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_SUCCESSFUL);
 
     } catch (Exception e) {
       log.error("Failed to generate {}: {}", getReportName(), e.getMessage());

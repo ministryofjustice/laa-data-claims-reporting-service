@@ -1,5 +1,7 @@
 package uk.gov.justice.laa.dstew.claimsreports.runner;
 
+import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_FAILED;
+
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -7,6 +9,8 @@ import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
+import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
+import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric;
 import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
 import uk.gov.justice.laa.dstew.claimsreports.service.AbstractReportService;
 import uk.gov.justice.laa.dstew.claimsreports.service.ReplicationHealthCheckService;
@@ -37,13 +41,15 @@ import uk.gov.justice.laa.dstew.claimsreports.service.ReplicationHealthCheckServ
 @Slf4j
 @Component
 @RequiredArgsConstructor
-public class ClaimsReportingServiceRunner  implements ApplicationRunner {
+public class ClaimsReportingServiceRunner implements ApplicationRunner {
 
   @Value("${feature.ignore-replication-rowcount-mismatch:false}")
   private boolean ignoreRowCountMismatch;
   private final ReplicationHealthCheckService replicationHealthCheckService;
   //Spring will auto-inject all services that implement the AbstractReportService
   private final List<AbstractReportService> reportServices;
+
+  private final MetricsHandler metricsHandler;
 
   @Override
   public void run(ApplicationArguments args) {
@@ -98,12 +104,16 @@ public class ClaimsReportingServiceRunner  implements ApplicationRunner {
   private void generateReports() {
     log.info("Generating {} reports...", reportServices.size());
     for (AbstractReportService service : reportServices) {
+      metricsHandler.resetCustomMetrics();
       try {
         service.refreshDataSource();
         service.generateReport();
       } catch (Exception e) {
         log.error("Report generation failed for {}: {}",
             service.getClass().getSimpleName(), e.getMessage(), e);
+        metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
+      } finally {
+        metricsHandler.pushReportMetrics(service.getReportName());
       }
     }
   }

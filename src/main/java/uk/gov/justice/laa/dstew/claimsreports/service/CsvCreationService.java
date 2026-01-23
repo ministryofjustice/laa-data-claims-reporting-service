@@ -15,6 +15,8 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import tools.jackson.dataformat.csv.CsvMapper;
 import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
+import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
+import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 
 /**
@@ -28,6 +30,7 @@ public class CsvCreationService {
   private final DataSource dataSource;
   protected AppConfig appConfig;
   private final CsvMapper csvMapper;
+  private final MetricsHandler metricsHandler;
 
   /**
    * Builds CSV from data retrieved from SQL query
@@ -56,7 +59,9 @@ public class CsvCreationService {
 
       writer.flush();
       log.info("CSV creation completed for {}", reportName);
-      log.info("Rows written for {}: " + handler.getRowCount(), reportName);
+      var rowsWritten = handler.getRowCount();
+      log.info("Rows written for {}: " + rowsWritten, reportName);
+      metricsHandler.setCustomMetric(CustomReportMetric.ROWS_WRITTEN, rowsWritten);
 
     } catch (IOException ex) {
       throw new CsvCreationException("Failure to write to file for " + reportName, ex);
