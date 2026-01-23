@@ -16,8 +16,9 @@ updates:
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
-      interval: "weekly"
-    registries: "*"
+      interval: "daily"
+    registries:
+      - spring-boot-common-github-packages
     groups:
       gradle-updates:
         exclude-patterns:
@@ -32,7 +33,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekly"
+      interval: "daily"
     groups:
       minor:
         update-types:

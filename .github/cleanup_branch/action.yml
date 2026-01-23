@@ -31,5 +31,8 @@ runs:
         kube-namespace: ${{ inputs.kube-namespace }}
 
     - name: Delete preview release
+      env:
+        RELEASE_NAME: ${{ steps.extract_release_name_to_delete.outputs.release-name-to-delete }}
+        KUBE_NAMESPACE: ${{ inputs.kube-namespace }}
       shell: bash
-      run: helm uninstall ${{ steps.extract_release_name_to_delete.outputs.release-name-to-delete }} --namespace ${{ inputs.kube-namespace }}
+      run: helm uninstall ${RELEASE_NAME} --namespace ${KUBE_NAMESPACE}

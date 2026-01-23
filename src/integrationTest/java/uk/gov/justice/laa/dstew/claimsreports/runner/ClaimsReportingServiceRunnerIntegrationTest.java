@@ -6,7 +6,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
-import java.time.Clock;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -18,25 +17,15 @@ import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-import org.springframework.boot.test.context.SpringBootTest;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.test.context.ActiveProfiles;
-import org.springframework.test.context.DynamicPropertyRegistry;
-import org.springframework.test.context.DynamicPropertySource;
-import org.testcontainers.containers.localstack.LocalStackContainer;
-import org.testcontainers.junit.jupiter.Container;
-import org.testcontainers.junit.jupiter.Testcontainers;
-import org.testcontainers.containers.PostgreSQLContainer;
-import org.testcontainers.utility.DockerImageName;
 import software.amazon.awssdk.services.s3.S3Client;
+import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Request;
 import software.amazon.awssdk.services.s3.model.ListObjectsV2Response;
+import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.S3Object;
-import uk.gov.justice.laa.dstew.claimsreports.config.TestConfig;
-import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
+import uk.gov.justice.laa.dstew.claimsreports.IntegrationTestBase;
 import uk.gov.justice.laa.dstew.claimsreports.service.AbstractReportService;
-import uk.gov.justice.laa.dstew.claimsreports.service.ReplicationHealthCheckService;
 
 /**
  * Integration tests for the ClaimsReportingServiceRunner.
@@ -52,36 +41,11 @@ import uk.gov.justice.laa.dstew.claimsreports.service.ReplicationHealthCheckServ
  * - Verifies that report files are generated, uploaded to the S3 bucket, and match expected content.
  */
 @Slf4j
-@SpringBootTest(classes = {TestConfig.class})
-@ActiveProfiles("test")
-@Testcontainers
-public class ClaimsReportingServiceRunnerIntegrationTest {
+class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
 
   @Value("${S3_REPORT_STORE}")
   private String bucketName;
-  private static final String CLAIM_TABLE_NAME = "claims.claim";
-  private static final String CLIENT_TABLE_NAME = "claims.client";
-  private static final String CLAIM_SUMMARY_FEE_TABLE_NAME= "claims.claim_summary_fee";
   private static final int NUMBER_OF_REPORTS = 3;
-
-  // -------------------- Containers --------------------
-  @Container
-  static final PostgreSQLContainer<?> postgres = new PostgreSQLContainer<>("postgres:17")
-      .withUsername("postgres")  // default superuser
-      .withPassword("password")
-      .withInitScript("init_extensions.sql") // <-- preload extensions
-      .withExposedPorts(5432);
-
-  @Container
-  static final LocalStackContainer localstack =
-      new LocalStackContainer(DockerImageName.parse("localstack/localstack:3.4"))
-          .withServices(LocalStackContainer.Service.S3);
-
-  @Autowired
-  private JdbcTemplate jdbcTemplate;
-
-  @Autowired
-  private ReplicationHealthCheckService replicationHealthCheckService;
 
   @Autowired
   private ClaimsReportingServiceRunner serviceRunner;
@@ -92,90 +56,13 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
   @Autowired
   private S3Client s3Client;
 
-  @Autowired
-  private Clock staticClock;
-
-  static {
-    // Ensure both containers are fully started before Spring initializes the context
-    postgres.start();
-    localstack.start();
-    //Following can be used for checking the database contents if required (after setting a debug breakpoint).
-    log.info("JDBC URL: {}, Username: {}, Password: {}", postgres.getJdbcUrl(), postgres.getUsername(), postgres.getPassword()
-    );
-  }
-
-  @DynamicPropertySource
-  static void registerProperties(DynamicPropertyRegistry registry) {
-    // Postgres
-    registry.add("spring.datasource.url", postgres::getJdbcUrl);
-    registry.add("spring.datasource.username", postgres::getUsername);
-    registry.add("spring.datasource.password", postgres::getPassword);
-
-    // LocalStack (S3)
-    registry.add("aws.region", localstack::getRegion);
-    registry.add("aws.accessKeyId", localstack::getAccessKey);
-    registry.add("aws.secretAccessKey", localstack::getSecretKey);
-    registry.add("aws.s3.endpoint",
-        () -> localstack.getEndpointOverride(LocalStackContainer.Service.S3).toString());
-  }
 
   @BeforeEach
   void setup() {
-    jdbcTemplate.update("DELETE FROM claims.replication_summary");
+    // Reset replication summary
+    jdbcTemplate.update(DELETE_FROM_REPLICATION_SUMMARY);
+    insertHealthyReplicationData();
   }
-
-  // ------------------------------------------------------------
-  // Replication Health Tests
-  // ------------------------------------------------------------
-
-  @Test
-  void shouldReportHealthyReplicationWhenCountsMatch() {
-    LocalDate yesterday = LocalDate.now(staticClock).minusDays(1);
-    OffsetDateTime now = OffsetDateTime.now(staticClock);
-
-    Map<String, Pair<Integer, Integer>> tableCounts = Map.of(
-        CLAIM_TABLE_NAME, Pair.of(2, 1),
-        CLIENT_TABLE_NAME, Pair.of(2, 1),
-        CLAIM_SUMMARY_FEE_TABLE_NAME, Pair.of(2, 2)
-    );
-
-    createReplicationSummaryTestData(yesterday, now, tableCounts);
-
-    ReplicationHealthReport report = replicationHealthCheckService.checkReplicationHealth();
-
-    assertThat(report).isNotNull();
-    assertThat(report.isHealthy()).isTrue();
-  }
-
-  @Test
-  void shouldReportUnhealthyReplicationWhenCountsDiffer() {
-    LocalDate yesterday = LocalDate.now(staticClock).minusDays(1);
-    OffsetDateTime now = OffsetDateTime.now(staticClock);
-
-    Map<String, Pair<Integer, Integer>> tableCounts = Map.of(
-        CLAIM_TABLE_NAME, Pair.of(3, 1),
-        CLIENT_TABLE_NAME, Pair.of(2, 2),
-        CLAIM_SUMMARY_FEE_TABLE_NAME, Pair.of(1, 2)
-    );
-
-    createReplicationSummaryTestData(yesterday, now, tableCounts);
-
-    ReplicationHealthReport report = replicationHealthCheckService.checkReplicationHealth();
-
-    assertThat(report).isNotNull();
-    assertThat(report.isHealthy()).isFalse();
-    Map<String, String> expectedFailures = Map.of(
-        CLAIM_TABLE_NAME, "Count mismatch — expected (3/1), actual (2/1)",
-        CLIENT_TABLE_NAME, "Count mismatch — expected (2/2), actual (2/1)",
-        CLAIM_SUMMARY_FEE_TABLE_NAME, "Count mismatch — expected (1/2), actual (2/2)"
-    );
-
-    assertThat(report.getFailedChecks()).isEqualTo(expectedFailures);
-  }
-
-  // ------------------------------------------------------------
-  // Report Generation Tests (with real S3 uploads)
-  // ------------------------------------------------------------
 
   @Test
   void shouldGenerateAllReportsAndUploadCSVsToS3() throws Exception {
@@ -189,9 +76,6 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
     assertThat(reportServices)
         .isNotEmpty()
         .hasSize(NUMBER_OF_REPORTS);
-
-    // Make replication healthy
-    insertHealthyReplicationData();
 
     // Run report generation end-to-end
     serviceRunner.run(null);
@@ -230,6 +114,44 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
 
       log.info("CSV file '{}' matches expected content.", uploadedKey);
     }
+
+    //Clean up S3 bucket
+
+    if (listResponse.hasContents()) {
+      List<ObjectIdentifier> objects = listResponse.contents().stream()
+          .map(o -> ObjectIdentifier.builder().key(o.key()).build())
+          .toList();
+
+      s3Client.deleteObjects(DeleteObjectsRequest.builder()
+          .bucket(bucketName)
+          .delete(d -> d.objects(objects))
+          .build());
+    }
+  }
+
+  @Test
+  void shouldNotGenerateReportsAndUploadCSVsToS3WhenReplicationNotHealthy() {
+
+    // Make replication unhealthy
+    jdbcTemplate.update(DELETE_FROM_REPLICATION_SUMMARY);
+
+    // Run report generation end-to-end
+    serviceRunner.run(null);
+
+    // Check uploads
+    ListObjectsV2Response listResponse = s3Client.listObjectsV2(ListObjectsV2Request.builder()
+        .bucket(bucketName)
+        .build());
+
+    List<String> uploadedFiles = listResponse.contents().stream()
+        .map(S3Object::key)
+        .toList();
+
+    log.info("Uploaded report files: {}", uploadedFiles);
+
+    //Assert that no reports were generated
+    assertThat(uploadedFiles)
+        .isEmpty();
   }
 
   // ------------------------------------------------------------
@@ -248,29 +170,4 @@ public class ClaimsReportingServiceRunnerIntegrationTest {
     );
   }
 
-  private void createReplicationSummaryTestData(
-      LocalDate yesterday,
-      OffsetDateTime now,
-      Map<String, Pair<Integer, Integer>> tableCounts) {
-
-    for (Map.Entry<String, Pair<Integer, Integer>> entry : tableCounts.entrySet()) {
-      String tableName = entry.getKey();
-      Integer recordCount = entry.getValue().getLeft();
-      Integer updatedCount = entry.getValue().getRight();
-
-      //latest_end_lsn (Log Sequence Number) is a marker which indicates how far the subsription has reached.
-      //We set up the test summary data so that it looks like the subscription has reached the LSN recorded in the summary
-      String mockLsn = jdbcTemplate.queryForObject(
-          "SELECT latest_end_lsn FROM pg_stat_subscription WHERE subname = 'claims_reporting_service_sub'",
-          String.class);
-
-      jdbcTemplate.update(
-          """
-              INSERT INTO claims.replication_summary
-              (table_name, summary_date, record_count, updated_count, wal_lsn, created_on)
-              VALUES (?, ?, ?, ?, ?::pg_lsn, ?)
-              """,
-          tableName, yesterday, recordCount, updatedCount, mockLsn, now);
-    }
-  }
 }
