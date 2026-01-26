@@ -48,7 +48,7 @@ public class Report000Service extends AbstractReportService {
   }
 
   @Override
-  protected String getReportName() {
+  public String getReportName() {
     return "REPORT000";
   }
 

@@ -70,8 +70,9 @@ public class AppConfig {
   private int dataChunkSize;
 
   @Bean
-  public S3ClientWrapper createS3ClientWrapper(@Value("${AWS_REGION}") String awsRegion, @Value("${S3_REPORT_STORE}") String bucketName) {
-    return new S3ClientWrapper(awsRegion, bucketName);
+  public S3ClientWrapper createS3ClientWrapper(@Value("${AWS_REGION}") String awsRegion, @Value("${S3_REPORT_STORE}") String bucketName,
+                                               MetricsHandler metricsHandler) {
+    return new S3ClientWrapper(awsRegion, bucketName, metricsHandler);
   }
 
   /**

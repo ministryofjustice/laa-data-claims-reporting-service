@@ -17,6 +17,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
+import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 
 import java.io.BufferedWriter;
@@ -39,6 +40,9 @@ public class CsvCreationServiceTest {
 
   @Mock
   private PreparedStatement statement;
+
+  @Mock
+  private MetricsHandler metricsHandler;
 
   @Mock
   Connection connection;

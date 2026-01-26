@@ -70,7 +70,8 @@ public class LocalstackS3Config {
   @Bean
   public S3ClientWrapper s3ClientWrapper(
       S3Client localstackS3Client,
-      @Value("${S3_REPORT_STORE}") String bucketName) {
+      @Value("${S3_REPORT_STORE}") String bucketName,
+      MetricsHandler metricsHandler) {
 
     // create bucket if it doesn't exist
     try {
@@ -79,7 +80,7 @@ public class LocalstackS3Config {
       // ignore
     }
 
-    return new S3ClientWrapper(localstackS3Client, bucketName);
+    return new S3ClientWrapper(localstackS3Client, bucketName, metricsHandler);
   }
 
 }
