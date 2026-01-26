@@ -179,7 +179,6 @@ public class ReplicationHealthCheckService {
         }
         return 0L;
       }, startOfDay, endOfDay);
-      log.info("StartOfDay: {}, endOfDay: {}", startOfDay, endOfDay);
 
       if (!Objects.equals(actualRecordCount, summary.recordCount())
           || !Objects.equals(actualUpdatedCount, summary.updatedCount())) {

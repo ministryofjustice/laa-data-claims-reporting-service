@@ -37,6 +37,8 @@ public class Report000IntegrationTest extends IntegrationTestBase {
         new BigDecimal(row.get("Total Current Claim Value").toString());
     assertThat(claimValue)
         .isEqualByComparingTo("2000.00");
+    assertThat(row.get("Assessed Total Inc VAT"))
+        .isEqualTo("");
   }
 
   @Test
