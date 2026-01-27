@@ -13,6 +13,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -62,6 +63,27 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
     // Reset replication summary
     jdbcTemplate.update(DELETE_FROM_REPLICATION_SUMMARY);
     insertHealthyReplicationData();
+  }
+
+  @AfterEach
+  void emptyS3Bucket() {
+
+    log.info("Emptying bucket");
+
+    ListObjectsV2Response listResponse = s3Client.listObjectsV2(ListObjectsV2Request.builder()
+        .bucket(bucketName)
+        .build());
+
+    if (listResponse.hasContents()) {
+      List<ObjectIdentifier> objects = listResponse.contents().stream()
+          .map(o -> ObjectIdentifier.builder().key(o.key()).build())
+          .toList();
+
+      s3Client.deleteObjects(DeleteObjectsRequest.builder()
+          .bucket(bucketName)
+          .delete(d -> d.objects(objects))
+          .build());
+    }
   }
 
   @Test
@@ -115,18 +137,6 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
       log.info("CSV file '{}' matches expected content.", uploadedKey);
     }
 
-    //Clean up S3 bucket
-
-    if (listResponse.hasContents()) {
-      List<ObjectIdentifier> objects = listResponse.contents().stream()
-          .map(o -> ObjectIdentifier.builder().key(o.key()).build())
-          .toList();
-
-      s3Client.deleteObjects(DeleteObjectsRequest.builder()
-          .bucket(bucketName)
-          .delete(d -> d.objects(objects))
-          .build());
-    }
   }
 
   @Test
@@ -163,9 +173,9 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
         LocalDate.now(staticClock).minusDays(1),
         OffsetDateTime.now(staticClock),
         Map.of(
-            CLAIM_TABLE_NAME, Pair.of(2, 1),
+            CLAIM_TABLE_NAME, Pair.of(3, 1),
             CLIENT_TABLE_NAME, Pair.of(2, 1),
-            CLAIM_SUMMARY_FEE_TABLE_NAME, Pair.of(2, 2)
+            CLAIM_SUMMARY_FEE_TABLE_NAME, Pair.of(3, 2)
         )
     );
   }

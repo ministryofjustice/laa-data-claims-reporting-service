@@ -24,9 +24,9 @@ class ReplicationHealthCheckServiceIntegrationTest extends IntegrationTestBase {
     OffsetDateTime now = OffsetDateTime.now(staticClock);
 
     Map<String, Pair<Integer, Integer>> tableCounts = Map.of(
-        CLAIM_TABLE_NAME, Pair.of(2, 1),
+        CLAIM_TABLE_NAME, Pair.of(3, 1),
         CLIENT_TABLE_NAME, Pair.of(2, 1),
-        CLAIM_SUMMARY_FEE_TABLE_NAME, Pair.of(2, 2)
+        CLAIM_SUMMARY_FEE_TABLE_NAME, Pair.of(3, 2)
     );
 
     createReplicationSummaryTestData(yesterday, now, tableCounts);
@@ -55,9 +55,8 @@ class ReplicationHealthCheckServiceIntegrationTest extends IntegrationTestBase {
     assertThat(report).isNotNull();
     assertThat(report.isHealthy()).isFalse();
     Map<String, String> expectedFailures = Map.of(
-        CLAIM_TABLE_NAME, "Count mismatch — expected (3/1), actual (2/1)",
         CLIENT_TABLE_NAME, "Count mismatch — expected (2/2), actual (2/1)",
-        CLAIM_SUMMARY_FEE_TABLE_NAME, "Count mismatch — expected (1/2), actual (2/2)"
+        CLAIM_SUMMARY_FEE_TABLE_NAME, "Count mismatch — expected (1/2), actual (3/2)"
     );
 
     assertThat(report.getFailedChecks()).isEqualTo(expectedFailures);
