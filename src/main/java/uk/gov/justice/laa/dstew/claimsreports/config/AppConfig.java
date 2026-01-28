@@ -10,6 +10,7 @@ import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
 import tools.jackson.dataformat.csv.CsvMapper;
+import uk.gov.justice.laa.dstew.claimsreports.service.CsvFileValidator;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
@@ -71,8 +72,8 @@ public class AppConfig {
 
   @Bean
   public S3ClientWrapper createS3ClientWrapper(@Value("${AWS_REGION}") String awsRegion, @Value("${S3_REPORT_STORE}") String bucketName,
-                                               MetricsHandler metricsHandler) {
-    return new S3ClientWrapper(awsRegion, bucketName, metricsHandler);
+                                               MetricsHandler metricsHandler, CsvFileValidator csvFileValidator) {
+    return new S3ClientWrapper(awsRegion, bucketName, metricsHandler, csvFileValidator);
   }
 
   /**

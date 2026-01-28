@@ -12,6 +12,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
 import software.amazon.awssdk.services.s3.model.BucketAlreadyOwnedByYouException;
 import software.amazon.awssdk.services.s3.model.CreateBucketRequest;
+import uk.gov.justice.laa.dstew.claimsreports.service.CsvFileValidator;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
@@ -71,7 +72,9 @@ public class LocalstackS3Config {
   public S3ClientWrapper s3ClientWrapper(
       S3Client localstackS3Client,
       @Value("${S3_REPORT_STORE}") String bucketName,
-      MetricsHandler metricsHandler) {
+      MetricsHandler metricsHandler,
+      CsvFileValidator csvFileValidator
+  ) {
 
     // create bucket if it doesn't exist
     try {
@@ -80,7 +83,7 @@ public class LocalstackS3Config {
       // ignore
     }
 
-    return new S3ClientWrapper(localstackS3Client, bucketName, metricsHandler);
+    return new S3ClientWrapper(localstackS3Client, bucketName, metricsHandler, csvFileValidator);
   }
 
 }

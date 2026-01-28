@@ -1,8 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.service.s3;
 
 import java.io.File;
-import java.io.IOException;
-import java.nio.file.Files;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -10,6 +8,7 @@ import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
+import uk.gov.justice.laa.dstew.claimsreports.service.CsvFileValidator;
 
 /**
  * Class that wraps around the default {@link S3Client}, allowing us to set default behaviours.
@@ -20,6 +19,7 @@ public class S3ClientWrapper {
   private final S3Client s3Client;
   private final String s3Bucket;
   private final MetricsHandler metricsHandler;
+  private final CsvFileValidator csvFileValidator;
 
   /**
    * Create S3ClientWrapper based on AWS region.
@@ -28,10 +28,11 @@ public class S3ClientWrapper {
    * @param s3Bucket       Bucket name
    * @param metricsHandler Prometheus metric handler
    */
-  public S3ClientWrapper(String awsRegion, String s3Bucket, MetricsHandler metricsHandler) {
+  public S3ClientWrapper(String awsRegion, String s3Bucket, MetricsHandler metricsHandler, CsvFileValidator csvFileValidator) {
     this.s3Client = new S3ClientFactory().createS3Client(awsRegion);
     this.s3Bucket = s3Bucket;
     this.metricsHandler = metricsHandler;
+    this.csvFileValidator = csvFileValidator;
   }
 
   /**
@@ -41,10 +42,11 @@ public class S3ClientWrapper {
    * @param s3Bucket       Bucket name
    * @param metricsHandler Prometheus metric handler
    */
-  public S3ClientWrapper(S3Client s3Client, String s3Bucket, MetricsHandler metricsHandler) {
+  public S3ClientWrapper(S3Client s3Client, String s3Bucket, MetricsHandler metricsHandler, CsvFileValidator csvFileValidator) {
     this.s3Client = s3Client;
     this.s3Bucket = s3Bucket;
     this.metricsHandler = metricsHandler;
+    this.csvFileValidator = csvFileValidator;
   }
 
   /**
@@ -55,33 +57,24 @@ public class S3ClientWrapper {
    * @param desiredFileKey - the file key (folder + name) to use on S3.
    */
   public void uploadFile(File fileToUpload, String desiredFileKey) {
-
     String fileName = fileToUpload.getName();
-    String mimeType;
-    try {
-      mimeType = Files.probeContentType(fileToUpload.toPath());
-    } catch (IOException e) {
-      throw new CsvUploadException("Unable to determine MIME type for file: " + fileName, e);
+
+    if (!csvFileValidator.checkMimeTypeIsCsv(fileToUpload)) {
+      throw new CsvUploadException("Failed to check MIME type for file: " + fileName);
     }
 
-    // 1. MIME type check
-    if (mimeType == null) {
-      throw new CsvUploadException("Could not detect MIME type for file: " + fileName);
+    if (!csvFileValidator.checkFileExtension(fileName, desiredFileKey)) {
+      throw new CsvUploadException("Failed to check file extension is valid CSV for file " + fileName + " being upload to " + desiredFileKey);
     }
 
-    if (!mimeType.equalsIgnoreCase("text/csv")) {
-      throw new CsvUploadException("File '" + fileName + "' has invalid MIME type: " + mimeType + ". Expected 'text/csv'.");
+    log.info("Checking {} is UTF-8 encoded", fileName);
+    long encodingCheckStart = System.currentTimeMillis();
+    if (!csvFileValidator.checkUtf8Encoded(fileToUpload)) {
+      throw new CsvUploadException("File '" + fileName + "' is not UTF-8 encoded");
     }
-
-    // 2. File extension check
-    if (!fileName.toLowerCase().endsWith(".csv")) {
-      throw new CsvUploadException("File '" + fileName + "' does not have a .csv extension.");
-    }
-
-    // 3. Desired key extension check
-    if (!desiredFileKey.toLowerCase().endsWith(".csv")) {
-      throw new CsvUploadException("Target key '" + desiredFileKey + "' must end with .csv.");
-    }
+    long encodingDuration = System.currentTimeMillis() - encodingCheckStart;
+    log.info("File {} is valid UTF-8. Check took {} ms", fileName, encodingDuration);
+    metricsHandler.setCustomMetric(CustomReportMetric.ENCODING_CHECK_TIME_MS, encodingDuration);
 
     var putRequest = PutObjectRequest.builder()
         .bucket(s3Bucket)
