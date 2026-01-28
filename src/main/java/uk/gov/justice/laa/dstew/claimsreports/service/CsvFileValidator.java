@@ -46,7 +46,7 @@ public class CsvFileValidator {
         // Decoder needs a byte buffer not a byte array
         var byteBuffer = ByteBuffer.wrap(readingBuffer, 0, bytesRead);
 
-        // No error = utf-8 was decoded successfully.
+        // No error = utf-8 encoded bytes.
         // We don't actually care about the output, just that it doesn't throw an error. So don't save output
         decoder.decode(byteBuffer);
       }
@@ -61,7 +61,6 @@ public class CsvFileValidator {
       log.error("Failed to decode in UTF-8 with exception {}, {}", e.getClass().getName(), e.getMessage());
       return false;
     } catch (IOException e) {
-      // Either IOException from the read or CharacterCodingException from decoding
       log.error("Failed to read generated CSV file {} with exception {}", fileToUpload.getPath(), e.getMessage());
       return false;
     }
