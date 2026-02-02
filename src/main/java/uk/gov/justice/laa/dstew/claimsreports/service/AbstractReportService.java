@@ -9,7 +9,6 @@ import java.io.IOException;
 import java.nio.file.Files;
 import java.time.Clock;
 import java.time.LocalDate;
-import java.util.Objects;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -17,7 +16,6 @@ import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
-import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
@@ -136,15 +134,11 @@ public abstract class AbstractReportService {
       try (BufferedWriter writer = Files.newBufferedWriter(tempFile.toPath())) {
         csvCreationService.buildCsvFromData(sql, writer, getReportName());
       }
-      wait(720001);
       long endTime = System.currentTimeMillis();
       long durationMilliseconds = endTime - startTime;
       log.info("Created {} file with filename {} in {} ms", getReportName(), getFullReportFileName(), durationMilliseconds);
       metricsHandler.setCustomMetric(CustomReportMetric.GENERATED_TIME_MS, durationMilliseconds);
       s3ClientWrapper.uploadFile(tempFile, generateS3FileKey());
-      if (Objects.equals(getReportName(), "REPORT012")){
-        throw new CsvUploadException("testing");
-      }
       metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_SUCCESSFUL);
 
     } catch (Exception e) {
