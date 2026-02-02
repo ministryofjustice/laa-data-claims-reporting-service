@@ -64,7 +64,7 @@ public class S3ClientWrapper {
     }
 
     if (!csvFileValidator.checkFileExtension(fileName, desiredFileKey)) {
-      throw new CsvUploadException("Failed to check file extension is valid CSV for file " + fileName + " being upload to " + desiredFileKey);
+      throw new CsvUploadException("Failed to check file extension is valid CSV for file " + fileName + " being uploaded to " + desiredFileKey);
     }
 
     log.info("Checking {} is UTF-8 encoded", fileName);

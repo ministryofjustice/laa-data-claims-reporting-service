@@ -91,7 +91,7 @@ public class PrometheusConfiguration {
     var encodingCheckTimeMs = Gauge.builder()
         .withoutExemplars()
         .name("report_encoding_check_time_ms")
-        .help("How long checking the generated file is UTF-8 encoded took in milliseconds")
+        .help("Time taken to verify that the generated file is UTF-8 encoded (ms)")
         .register(registry);
 
     return new CustomReportGauges(reportSuccess, dataRefreshTimeMs, generatedTimeMs, rowsWritten, reportFileSize,
