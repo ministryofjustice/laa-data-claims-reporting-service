@@ -23,13 +23,13 @@
             "type": "dashboard"
           }
         ]
-        },
-        "editable": true,
-        "fiscalYearStartMonth": 0,
-        "graphTooltip": 0,
-        "id": 145,
-        "links": [],
-        "panels": [
+      },
+      "editable": true,
+      "fiscalYearStartMonth": 0,
+      "graphTooltip": 0,
+      "id": 145,
+      "links": [],
+      "panels": [
         {
           "collapsed": false,
           "gridPos": {
@@ -948,7 +948,7 @@
                 "uid": "prometheus"
               },
               "editorMode": "builder",
-              "expr": "sum(kube_pod_container_info{namespace='laa-data-claims-reporting-service-uat',pod=~'main-data-claims-reporting-service.*'})",
+              "expr": "sum(kube_pod_container_info{namespace='{{ .Release.Namespace }}',pod=~'main-data-claims-reporting-service.*'})",
               "legendFormat": "Total",
               "range": true,
               "refId": "A"
@@ -1093,7 +1093,7 @@
               },
               "disableTextWrap": false,
               "editorMode": "code",
-              "expr": "sort_desc(avg(sum by (pod_name) (rate(container_network_transmit_bytes_total{namespace='laa-data-claims-reporting-service-uat'}[5m]))))",
+              "expr": "sort_desc(avg(sum by (pod_name) (rate(container_network_transmit_bytes_total{namespace='{{ .Release.Namespace }}'}[5m]))))",
               "fullMetaSearch": false,
               "hide": false,
               "includeNullMetadata": true,
