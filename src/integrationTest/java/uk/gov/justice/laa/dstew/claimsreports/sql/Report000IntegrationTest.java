@@ -34,7 +34,7 @@ public class Report000IntegrationTest extends IntegrationTestBase {
     assertThat(row.get("Claim ID"))
         .isEqualTo(CLAIM_ID_WITH_SINGLE_FEE_AND_NO_ASSESSMENTS);
     BigDecimal claimValue =
-        new BigDecimal(row.get("Total Current Claim Value").toString());
+        new BigDecimal(row.get("Initial Calculated Claim Value").toString());
     assertThat(claimValue)
         .isEqualByComparingTo("2000.00");
     assertThat(row.get("Assessed Total Inc VAT"))
@@ -51,7 +51,7 @@ public class Report000IntegrationTest extends IntegrationTestBase {
     assertThat(row.get("Claim ID"))
         .isEqualTo(CLAIM_ID_WITH_MULTIPLE_FEES_AND_NO_ASSESSMENTS);
     BigDecimal claimValue =
-        new BigDecimal(row.get("Total Current Claim Value").toString());
+        new BigDecimal(row.get("Initial Calculated Claim Value").toString());
     assertThat(claimValue)
         .isEqualByComparingTo("2100.00");
     assertThat(row.get("Assessed Total Inc VAT"))
@@ -77,7 +77,7 @@ public class Report000IntegrationTest extends IntegrationTestBase {
     assertThat(row.get("Claim ID"))
         .isEqualTo(CLAIM_ID_WITH_MULTIPLE_FEES_AND_NO_ASSESSMENTS);
     BigDecimal claimValue =
-        new BigDecimal(row.get("Total Current Claim Value").toString());
+        new BigDecimal(row.get("Initial Calculated Claim Value").toString());
     assertThat(claimValue)
         .isEqualByComparingTo("2100.00");
     BigDecimal claimAssessedValue =
@@ -115,13 +115,98 @@ public class Report000IntegrationTest extends IntegrationTestBase {
     assertThat(row.get("Claim ID"))
         .isEqualTo(CLAIM_ID_WITH_MULTIPLE_FEES_AND_NO_ASSESSMENTS);
     BigDecimal claimValue =
-        new BigDecimal(row.get("Total Current Claim Value").toString());
+        new BigDecimal(row.get("Initial Calculated Claim Value").toString());
     assertThat(claimValue)
         .isEqualByComparingTo("2100.00");
     BigDecimal claimAssessedValue =
         new BigDecimal(row.get("Assessed Total Inc VAT").toString());
     assertThat(claimAssessedValue)
         .isEqualByComparingTo("1300.00");
+  }
+
+  @Test
+  void claimTotalValueIsReturnedAsFinalValueIfNoAssessmentDataPresent() {
+    // When
+    List<Map<String, Object>> rows = getDataForClaimId(CLAIM_ID_WITH_SINGLE_FEE_AND_NO_ASSESSMENTS);
+    // Then
+    assertThat(rows).hasSize(1);
+    BigDecimal finalClaimValue1 =
+        new BigDecimal(rows.getFirst().get("Final Claim Value").toString());
+    assertThat(finalClaimValue1)
+        .isEqualByComparingTo("2000.00");
+    var row = rows.getFirst();
+    BigDecimal totalCurrentClaimValue1 =
+        new BigDecimal(row.get("Initial Calculated Claim Value").toString());
+    assertThat(totalCurrentClaimValue1)
+        .isEqualByComparingTo("2000.00");
+    // When
+    rows = getDataForClaimId(CLAIM_ID_WITH_MULTIPLE_FEES_AND_NO_ASSESSMENTS);
+    // Then
+    assertThat(rows).hasSize(1);
+    BigDecimal finalClaimValue2 =
+        new BigDecimal(rows.getFirst().get("Final Claim Value").toString());
+    assertThat(finalClaimValue2)
+        .isEqualByComparingTo("2100.00");
+    BigDecimal totalCurrentClaimValue2 =
+        new BigDecimal(rows.getFirst().get("Initial Calculated Claim Value").toString());
+    assertThat(totalCurrentClaimValue2)
+        .isEqualByComparingTo("2100.00");
+  }
+
+  @Test
+  void allowedTotalValueIsReturnedAsFinalValueIfAssessmentDataPresent() {
+    // When
+    jdbcTemplate.update(
+        """
+            INSERT INTO claims.assessment
+            (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
+             allowed_total_vat, allowed_total_incl_vat, created_by_user_id, created_on)
+            VALUES ('AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAA', ?::uuid, '66666666-6666-6666-6666-666666666667', 'REDUCED_STILL_ESCAPED', 200.00,
+                    1400.00, 210.00, 1990.00, 'Test Assessor', now() )
+            """,
+        CLAIM_ID_WITH_SINGLE_FEE_AND_NO_ASSESSMENTS);
+    jdbcTemplate.update(
+        """
+            INSERT INTO claims.assessment
+            (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
+             allowed_total_vat, allowed_total_incl_vat, created_by_user_id, created_on)
+            VALUES ('AAAAAAAA-AAAA-AAAA-AAAA-AAAAAAAAAAAB', ?::uuid, '66666666-6666-6666-6666-666666666666', 'REDUCED_STILL_ESCAPED', 200.00,
+                    1400.00, 210.00, 2080.00, 'Test Assessor', now() )
+            """,
+        CLAIM_ID_WITH_MULTIPLE_FEES_AND_NO_ASSESSMENTS);
+
+    // When
+    List<Map<String, Object>> rows = getDataForClaimId(CLAIM_ID_WITH_SINGLE_FEE_AND_NO_ASSESSMENTS);
+    // Then
+    assertThat(rows).hasSize(1);
+    BigDecimal totalCurrentClaimValue1 =
+        new BigDecimal(rows.getFirst().get("Initial Calculated Claim Value").toString());
+    assertThat(totalCurrentClaimValue1)
+        .isEqualByComparingTo("2000.00");
+    BigDecimal allowedTotalIncVat1 =
+        new BigDecimal(rows.getFirst().get("Allowed Total Inc VAT").toString());
+    assertThat(allowedTotalIncVat1)
+        .isEqualByComparingTo("1990.00");
+    BigDecimal finalClaimValue1 =
+        new BigDecimal(rows.getFirst().get("Final Claim Value").toString());
+    assertThat(finalClaimValue1)
+        .isEqualByComparingTo("1990.00");
+    // When
+    rows = getDataForClaimId(CLAIM_ID_WITH_MULTIPLE_FEES_AND_NO_ASSESSMENTS);
+    // Then
+    assertThat(rows).hasSize(1);
+    BigDecimal totalCurrentClaimValue2 =
+        new BigDecimal(rows.getFirst().get("Initial Calculated Claim Value").toString());
+    assertThat(totalCurrentClaimValue2)
+        .isEqualByComparingTo("2100.00");
+    BigDecimal allowedTotalIncVat2 =
+        new BigDecimal(rows.getFirst().get("Allowed Total Inc VAT").toString());
+    assertThat(allowedTotalIncVat2)
+        .isEqualByComparingTo("2080.00");
+    BigDecimal finalClaimValue2 =
+        new BigDecimal(rows.getFirst().get("Final Claim Value").toString());
+    assertThat(finalClaimValue2)
+        .isEqualByComparingTo("2080.00");
   }
 
   private @NotNull List<Map<String, Object>> getDataForClaimId(String claimId) {
