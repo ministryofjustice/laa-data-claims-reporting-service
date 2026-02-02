@@ -88,14 +88,21 @@ public class PrometheusConfiguration {
         .help("How long report upload to S3 took in milliseconds")
         .register(registry);
 
-    return new CustomReportGauges(reportSuccess, dataRefreshTimeMs, generatedTimeMs, rowsWritten, reportFileSize, uploadTimeMs);
+    var encodingCheckTimeMs = Gauge.builder()
+        .withoutExemplars()
+        .name("report_encoding_check_time_ms")
+        .help("Time taken to verify that the generated file is UTF-8 encoded (ms)")
+        .register(registry);
+
+    return new CustomReportGauges(reportSuccess, dataRefreshTimeMs, generatedTimeMs, rowsWritten, reportFileSize,
+        uploadTimeMs, encodingCheckTimeMs);
   }
 
   /**
    * This class defines some custom metrics we push to Prometheus.
    */
   public record CustomReportGauges(Gauge reportSuccessful, Gauge dataRefreshTimeMs, Gauge generatedTimeMs,
-                                   Gauge rowsWritten, Gauge reportFileSize, Gauge uploadTimeMs) {
+                                   Gauge rowsWritten, Gauge reportFileSize, Gauge uploadTimeMs, Gauge encodingCheckTimeMs) {
 
     public static int REPORT_FAILED = -1;
     public static int REPORT_SUCCESSFUL = 1;
@@ -110,7 +117,8 @@ public class PrometheusConfiguration {
       GENERATED_TIME_MS,
       ROWS_WRITTEN,
       REPORT_FILE_SIZE,
-      UPLOAD_TIME_MS
+      UPLOAD_TIME_MS,
+      ENCODING_CHECK_TIME_MS
     }
 
     /**
@@ -123,6 +131,7 @@ public class PrometheusConfiguration {
       rowsWritten.set(0);
       reportFileSize.set(0);
       uploadTimeMs.set(0);
+      encodingCheckTimeMs.set(0);
     }
   }
 }

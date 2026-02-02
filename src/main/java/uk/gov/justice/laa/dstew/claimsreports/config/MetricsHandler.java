@@ -53,6 +53,7 @@ public class MetricsHandler {
       case DATA_REFRESH_TIME_MS -> customReportGauges.dataRefreshTimeMs().set(value);
       case UPLOAD_TIME_MS -> customReportGauges.uploadTimeMs().set(value);
       case GENERATED_TIME_MS -> customReportGauges.generatedTimeMs().set(value);
+      case ENCODING_CHECK_TIME_MS -> customReportGauges.encodingCheckTimeMs().set(value);
       default -> throw new EnumConstantNotPresentException(CustomReportMetric.class, metric.name());
     }
   }

@@ -27,6 +27,7 @@ class PrometheusConfigurationTest {
     var customMetrics = prometheusConfiguration.createReportGauges(prometheusMeterRegistry);
 
     assertNotNull(customMetrics.dataRefreshTimeMs());
+    assertNotNull(customMetrics.encodingCheckTimeMs());
     assertNotNull(customMetrics.generatedTimeMs());
     assertNotNull(customMetrics.reportFileSize());
     assertNotNull(customMetrics.reportSuccessful());
@@ -42,6 +43,7 @@ class PrometheusConfigurationTest {
 
     // Set some test metrics
     customMetrics.dataRefreshTimeMs().set(1);
+    customMetrics.encodingCheckTimeMs().set(7);
     customMetrics.generatedTimeMs().set(2);
     customMetrics.reportFileSize().set(3);
     customMetrics.reportSuccessful().set(4);
@@ -51,6 +53,7 @@ class PrometheusConfigurationTest {
     customMetrics.reset();
 
     assertEquals(0, customMetrics.dataRefreshTimeMs().get());
+    assertEquals(0, customMetrics.encodingCheckTimeMs().get());
     assertEquals(0, customMetrics.generatedTimeMs().get());
     assertEquals(0, customMetrics.reportFileSize().get());
     assertEquals(0, customMetrics.reportSuccessful().get());
