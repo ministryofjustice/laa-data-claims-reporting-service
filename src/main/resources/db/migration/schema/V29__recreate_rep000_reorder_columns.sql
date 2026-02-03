@@ -44,7 +44,7 @@ SELECT
     COALESCE(sp.office_account_number, '')                                  AS "Office Account Number",
     COALESCE(c.procurement_area_code, '')                                   AS "Procurement Area Code",
     COALESCE(c.access_point_code, '')                                       AS "Access Point Code",
-    COALESCE(c.delivery_location, '')                                      AS "Delivery Location",
+    COALESCE(c.delivery_location, '')                                       AS "Delivery Location",
     -- CLIENT INFORMATION
     COALESCE(cl.client_forename, '')                                        AS "Client Forename",
     COALESCE(cl.client_surname, '')                                         AS "Client Surname",
@@ -62,7 +62,7 @@ SELECT
     COALESCE(cl.client_2_gender_code, '')                                   AS "Second Client Gender",
     COALESCE(cl.client_2_ethnicity_code, '')                                AS "Second Client Ethnicity",
     COALESCE(cl.client_2_disability_code, '')                               AS "Second Client Disability",
-    COALESCE(cl.client_2_ucn::text, '')                			  	     AS "Second Client Unique Client Number",
+    COALESCE(cl.client_2_ucn::text, '')                                     AS "Second Client Unique Client Number",
     COALESCE(cl.client_2_postcode, '')                                      AS "Second Client Postcode",
     COALESCE(CASE WHEN cl.client_2_is_legally_aided IS TRUE THEN 'Yes' WHEN cl.client_2_is_legally_aided IS FALSE THEN 'No' END, '') AS "Second Client Legally Aided",
     COALESCE(sp.area_of_law, '')                                            AS "Area of Law",
@@ -97,25 +97,25 @@ SELECT
              COALESCE(cc.exceptional_case_funding_reference, '') <> ''
              THEN 'Y'
          ELSE 'N'
-        END		 															 AS "Is Exceptional Claim",
+        END                                                                 AS "Is Exceptional Claim",
     COALESCE(CASE WHEN cc.is_postal_application_accepted IS TRUE THEN 'Yes' WHEN cc.is_postal_application_accepted IS FALSE THEN 'No' END, '') AS "Postal Application Accepted",
     COALESCE(cl.home_office_client_number, '')                              AS "Home Office Client Number",
     COALESCE(csf.prior_authority_reference, '')                             AS "Immigration Prior Authority Number",
     COALESCE(csf.ait_hearing_centre_code, '')                               AS "AIT Hearing Centre Code",
     COALESCE(CASE WHEN cc.is_legacy_case IS TRUE THEN 'Yes' WHEN cc.is_legacy_case IS FALSE THEN 'No' END, '') AS "Legacy Case Flag",
     COALESCE(CASE WHEN csf.is_irc_surgery IS TRUE THEN 'Yes' WHEN csf.is_irc_surgery IS FALSE THEN 'No' END, '') AS "IRC Surgery",
-    COALESCE(csf.surgery_date::text, '')                     				 AS "Surgery Date",
-    COALESCE(csf.surgery_clients_count::text, '')							 AS "Number Of Clients Seen At The Surgery",
-    COALESCE(csf.surgery_matters_count::text, '')                         	 AS "Number Of Surgery Clients Resulting In Legal Help Matter Opened",
+    COALESCE(csf.surgery_date::text, '')                                     AS "Surgery Date",
+    COALESCE(csf.surgery_clients_count::text, '')                            AS "Number Of Clients Seen At The Surgery",
+    COALESCE(csf.surgery_matters_count::text, '')                            AS "Number Of Surgery Clients Resulting In Legal Help Matter Opened",
     COALESCE(CASE WHEN cc.is_nrm_advice IS TRUE THEN 'Yes' WHEN cc.is_nrm_advice IS FALSE THEN 'No' END, '') AS "NRM Advice",
-    COALESCE(cc.follow_on_work::text, '')                   			     AS "PRN Follow On Work",
+    COALESCE(cc.follow_on_work::text, '')                                    AS "PRN Follow On Work",
     COALESCE(c.scheme_id, '')                                               AS "Scheme ID",
-    COALESCE(c.police_station_court_prison_id, '')                         AS "Police Station Court Prison ID",
+    COALESCE(c.police_station_court_prison_id, '')                          AS "Police Station Court Prison ID",
     COALESCE(CASE WHEN c.is_youth_court IS TRUE THEN 'Yes' WHEN c.is_youth_court IS FALSE THEN 'No' END, '') AS "Is Youth Court",
     COALESCE(c.police_station_court_attendances_count::text, '')            AS "Police Station Court Attendances Count",
     COALESCE(c.suspects_defendants_count::text, '')                         AS "Suspects Defendants Count",
-    COALESCE(TO_CHAR(c.representation_order_date, 'DD/MM/YYYY'), '')       AS "Representation Order Date",
-    COALESCE(c.maat_id, '')                                         		 AS "MAAT ID",
+    COALESCE(TO_CHAR(c.representation_order_date, 'DD/MM/YYYY'), '')        AS "Representation Order Date",
+    COALESCE(c.maat_id, '')                                                 AS "MAAT ID",
     COALESCE(CASE WHEN c.is_duty_solicitor IS TRUE THEN 'Yes' WHEN c.is_duty_solicitor IS FALSE THEN 'No' END, '') AS "Is Duty Solicitor",
     COALESCE(c.mediation_sessions_count::text, '')                          AS "Mediation Sessions Count",
     COALESCE(csf.medical_reports_count::text, '')                           AS "Medical Reports Count",
@@ -154,7 +154,7 @@ SELECT
                 WHEN calc.vat_rate_applied IS NOT NULL AND calc.bolt_on_total_fee_amount IS NOT NULL
                     THEN ROUND(calc.bolt_on_total_fee_amount * calc.vat_rate_applied / 100, 2)::text
                 ELSE NULL
-                END, '')                                                            AS "Current Bolt On Fees VAT",
+                END, '')                                                    AS "Current Bolt On Fees VAT",
     COALESCE(calc.bolt_on_home_office_interview_fee::text, '')              AS "Current Bolt On Home Office Interview Fee",
     COALESCE(calc.bolt_on_home_office_interview_count::text, '')            AS "Current Bolt On Home Office Interview Count",
     COALESCE(calc.fixed_fee_amount::text, '')                               AS "Current Fixed Fee Amount",
@@ -164,7 +164,7 @@ SELECT
     COALESCE(calc.disbursement_amount::text, '')                            AS "Current Disbursement Amount",
     COALESCE(csf.disbursements_vat_amount::text, '')                        AS "Disbursement VAT Costs",
     COALESCE(calc.travel_and_waiting_costs_amount::text, '')                AS "Current Travel And Waiting Costs Amount",
-    COALESCE(calc.detention_travel_and_waiting_costs_amount::text, '')             AS "Current Detention And Waiting Costs Amount",
+    COALESCE(calc.detention_travel_and_waiting_costs_amount::text, '')      AS "Current Detention And Waiting Costs Amount",
     COALESCE(calc.jr_form_filling_amount::text, '')                         AS "Current JR Form Filling Amount",
     COALESCE(CASE WHEN calc.vat_indicator IS TRUE THEN 'Yes' WHEN calc.vat_indicator IS FALSE THEN 'No' END, '') AS "Current VAT Indicator",
     COALESCE(
@@ -172,37 +172,37 @@ SELECT
                 WHEN calc.vat_rate_applied IS NOT NULL AND calc.fixed_fee_amount IS NOT NULL
                     THEN ROUND(calc.fixed_fee_amount * calc.vat_rate_applied / 100, 2)::text
                 ELSE NULL
-                END, '')                                                            AS "Current Fixed Fee VAT",
+                END, '')                                                    AS "Current Fixed Fee VAT",
     COALESCE(
             CASE
                 WHEN calc.vat_rate_applied IS NOT NULL AND calc.net_profit_costs_amount IS NOT NULL
                     THEN ROUND(calc.net_profit_costs_amount * calc.vat_rate_applied / 100, 2)::text
                 ELSE NULL
-                END, '')                                                            AS "Current Profit Costs VAT",
+                END, '')                                                    AS "Current Profit Costs VAT",
     COALESCE(
             CASE
                 WHEN calc.vat_rate_applied IS NOT NULL AND calc.net_cost_of_counsel_amount IS NOT NULL
                     THEN ROUND(calc.net_cost_of_counsel_amount * calc.vat_rate_applied / 100, 2)::text
                 ELSE NULL
-                END, '')                                                            AS "Current Counsel Costs VAT",
+                END, '')                                                    AS "Current Counsel Costs VAT",
     COALESCE(
             CASE
                 WHEN calc.vat_rate_applied IS NOT NULL AND calc.net_travel_costs_amount IS NOT NULL
                     THEN ROUND(calc.net_travel_costs_amount * calc.vat_rate_applied / 100, 2)::text
                 ELSE NULL
-                END, '')                                                            AS "Current Travel Costs VAT",
+                END, '')                                                    AS "Current Travel Costs VAT",
     COALESCE(
             CASE
                 WHEN calc.vat_rate_applied IS NOT NULL AND calc.net_waiting_costs_amount IS NOT NULL
                     THEN ROUND(calc.net_waiting_costs_amount * calc.vat_rate_applied / 100, 2)::text
                 ELSE NULL
-                END, '')                                                            AS "Current Waiting Costs VAT",
+                END, '')                                                    AS "Current Waiting Costs VAT",
     COALESCE(
             CASE
                 WHEN calc.vat_rate_applied IS NOT NULL AND calc.jr_form_filling_amount IS NOT NULL
                     THEN ROUND(calc.jr_form_filling_amount * calc.vat_rate_applied / 100, 2)::text
                 ELSE NULL
-                END, '')                                                            AS "Current JR / Form Filling Costs VAT",
+                END, '')                                                    AS "Current JR / Form Filling Costs VAT",
     COALESCE(a.fixed_fee_amount::text, '')                                  AS "Fixed Fee Amount",
     COALESCE(a.net_profit_costs_amount::text, '')                           AS "Net Profit Costs Amount",
     COALESCE(a.net_cost_of_counsel_amount::text, '')                        AS "Net Cost Of Counsel Amount",
@@ -218,12 +218,12 @@ SELECT
     (CASE WHEN c.matched_claim_id IS NOT NULL
               THEN 'Y'
           ELSE 'N' END, 'N'
-    ) 																	 AS "Is Duplicate Claim",
+    )                                                                       AS "Is Duplicate Claim",
     COALESCE(CASE WHEN c.is_amended IS TRUE THEN 'Yes' WHEN c.is_amended IS FALSE THEN 'No' END, '') AS "Amended Flag",
     -- will be populated after FSP adds this field
     COALESCE(
             CASE WHEN cc.stage_reached_code = 'VOID' THEN 'Y' ELSE 'N' END, 'N'
-    ) 																 AS "Is Void",
+    )                                                                       AS "Is Void",
     ''                                                                      AS "Has Post Submission Change",
     COALESCE(CASE WHEN c.has_assessment IS TRUE THEN 'Yes' WHEN c.has_assessment IS FALSE THEN 'No' END, '') AS "Assessed Flag",
     COALESCE(a.created_by_user_id, '')                                      AS "Assessed By User ID",
@@ -235,7 +235,7 @@ SELECT
             CASE
                 WHEN calc.total_amount::text ~ '^[\s+-]?\d+(\.\d+)?$' THEN ROUND(calc.total_amount, 2)::text
                 ELSE NULL
-                END, '')                                                            AS "Initial Calculated Claim Value",
+                END, '')                                                    AS "Initial Calculated Claim Value",
     COALESCE(a.allowed_total_vat::text, '')                                 AS "Allowed Total VAT",
     COALESCE(a.allowed_total_incl_vat::text, '')                            AS "Allowed Total Inc VAT",
     COALESCE(a.assessed_total_vat::text, '')                                AS "Assessed Total VAT",
@@ -247,7 +247,7 @@ SELECT
                     WHEN calc.total_amount::text ~ '^[\s+-]?\d+(\.\d+)?$' THEN ROUND(calc.total_amount, 2)::text
                     ELSE NULL
                     END, '')
-        END AS "Final Claim Value"
+        END                                                                 AS "Final Claim Value"
 FROM submission_periods AS sp
          JOIN claims.bulk_submission AS bs
               ON bs.id = sp.bulk_submission_id
