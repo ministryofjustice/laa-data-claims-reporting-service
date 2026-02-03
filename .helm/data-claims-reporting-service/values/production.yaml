@@ -33,3 +33,7 @@ s3:
   bucketName: laa-get-payments-finance-data-prod-report-store
 
 pushgatewayAddress: laa-data-claims-reporting-service-prod-pushgateway-prometheus-p:9091
+
+alerting:
+  grafanaDashboard: "https://grafana.live.cloud-platform.service.justice.gov.uk/d/laa-data-claims-reporting-service-prod"
+  severity: "laa-data-claims-reporting-service-prod"
