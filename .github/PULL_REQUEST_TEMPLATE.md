@@ -1,6 +1,6 @@
 ## What
 
-[Link to story](https://dsdmoj.atlassian.net/browse/LASB-XXX)
+[Link to ticket](https://dsdmoj.atlassian.net/browse/LPF-XXX)
 
 Describe what you did and why.
 
