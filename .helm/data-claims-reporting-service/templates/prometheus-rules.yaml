@@ -72,7 +72,7 @@ spec:
             message: Report {{ "{{" }} $labels.exported_job {{ "}}" }} failed to generate
             dashboard_url: {{ .Values.alerting.grafanaDashboard }}
           expr: |-
-            report_success{namespace="{{ .Release.Namespace }}"} < 2
+            report_success{namespace="{{ .Release.Namespace }}"} < 0
           for: 30s
           labels:
             severity: {{ .Values.alerting.severity }}
@@ -80,7 +80,7 @@ spec:
           annotations:
             message: Data refresh for report {{ "{{" }} $labels.exported_job {{ "}}" }} has taken more than 5 minutes
             dashboard_url: {{ .Values.alerting.grafanaDashboard }}
-          expr: last_over_time(report_data_refresh_duration_ms{namespace="laa-data-claims-reporting-service-uat"}[5m]) > 10
+          expr: last_over_time(report_data_refresh_duration_ms{namespace="laa-data-claims-reporting-service-uat"}[5m]) > 300000
           for: 30s
           labels:
             severity: {{ .Values.alerting.severity }}
