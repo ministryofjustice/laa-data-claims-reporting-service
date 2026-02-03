@@ -47,11 +47,6 @@ dependencies {
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:sts'
 
-    // Override version used by AWS to avoid vulnerability
-    // Can be removed when AWS upgrades their netty.
-    implementation 'io.netty:netty-codec-http:4.1.125.Final'
-    implementation 'io.netty:netty-codec-http2:4.1.125.Final'
-
     implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation 'io.prometheus:prometheus-metrics-exporter-pushgateway:1.3.1'
 
