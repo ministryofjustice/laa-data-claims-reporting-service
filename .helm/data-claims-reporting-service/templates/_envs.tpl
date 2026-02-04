@@ -60,4 +60,5 @@ Extract other environment variables from laa-data-claims-reporting-service-secre
     secretKeyRef:
       name: laa-data-claims-reporting-service-secrets
       key: feature-force-run-rep000
+      optional: true
 {{- end }}
