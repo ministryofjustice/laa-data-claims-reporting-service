@@ -55,4 +55,9 @@ Extract other environment variables from laa-data-claims-reporting-service-secre
     secretKeyRef:
       name: laa-data-claims-reporting-service-secrets
       key: feature-ignore-replication-rowcount-mismatch
+- name: FORCE_RUN_REP000
+  valueFrom:
+    secretKeyRef:
+      name: laa-data-claims-reporting-service-secrets
+      key: feature-force-run-rep000
 {{- end }}
