@@ -67,6 +67,11 @@ public class Report000Service extends AbstractReportService {
   // Monthly report
   @Override
   protected boolean runToday() {
+    if (appConfig.isForceRunReport000()) {
+      log.info("Force run for Report000 is enabled. Running report regardless of date.");
+    } else {
+      log.info("Force run for Report000 is disabled. Running report only if today is the {}th of the month.", MONTHLY_REPORT_DATE);
+    }
     return appConfig.isForceRunReport000() || LocalDate.now(clock).getDayOfMonth() == MONTHLY_REPORT_DATE;
   }
 }
