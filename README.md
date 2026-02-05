@@ -89,3 +89,10 @@ If you need to run REP000 on a date that is not the 21st of the month, you can f
 - Delete the existing K8s secret via kubectl so that the new value is picked up from the updated AWS secret.
 - The next time the CronJob runs, REP000 will run regardless of the date.
 - To reset this, delete the key from the AWS secret or set it to false and delete the K8s secret again.
+
+Or you can do this in Kubernetes form
+```
+kubectl -n {namespace} create job {give a job name here} --from=cronjob/{cronjob to copy} --dry-run=client -o yaml \
+| kubectl -n {namespace} set env --local -f - FORCE_RUN_REP000="true" -o yaml \
+| kubectl -n {namespace} apply -f -
+```
