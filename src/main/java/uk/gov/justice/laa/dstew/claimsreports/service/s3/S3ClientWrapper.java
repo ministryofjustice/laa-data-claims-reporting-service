@@ -27,6 +27,7 @@ public class S3ClientWrapper {
    * @param awsRegion      region the S3 is in
    * @param s3Bucket       Bucket name
    * @param metricsHandler Prometheus metric handler
+   * @param csvFileValidator CSV file validation service
    */
   public S3ClientWrapper(String awsRegion, String s3Bucket, MetricsHandler metricsHandler, CsvFileValidator csvFileValidator) {
     this.s3Client = new S3ClientFactory().createS3Client(awsRegion);
@@ -41,6 +42,7 @@ public class S3ClientWrapper {
    * @param s3Client       s3Client
    * @param s3Bucket       Bucket name
    * @param metricsHandler Prometheus metric handler
+   * @param csvFileValidator CSV file validation service
    */
   public S3ClientWrapper(S3Client s3Client, String s3Bucket, MetricsHandler metricsHandler, CsvFileValidator csvFileValidator) {
     this.s3Client = s3Client;
