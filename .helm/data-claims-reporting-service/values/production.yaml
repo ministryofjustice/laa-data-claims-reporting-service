@@ -36,4 +36,4 @@ pushgatewayAddress: laa-data-claims-reporting-service-prod-pushgateway-prometheu
 
 alerting:
   grafanaDashboard: "https://grafana.live.cloud-platform.service.justice.gov.uk/d/laa-data-claims-reporting-service-prod"
-  severity: "laa-data-claims-reporting-service-prod"
+  severity: "laa-get-payments-finance-data"
