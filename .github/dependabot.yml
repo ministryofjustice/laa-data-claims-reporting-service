@@ -10,7 +10,7 @@ registries:
     type: maven-repository
     url: https://maven.pkg.github.com/ministryofjustice/laa-spring-boot-common
     username: ${{ secrets.TOKEN_USER }}
-    password: ${{ secrets.REPO_TOKEN }}
+    password: ${{ secrets.DEPENDABOT_PAT }}
 
 updates:
   - package-ecosystem: "gradle"
