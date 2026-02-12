@@ -1,5 +1,5 @@
 plugins {
-    id 'io.freefair.lombok' version '9.2.0'
+    id 'io.freefair.lombok' version '8.14.2'
     id 'uk.gov.laa.springboot.laa-spring-boot-gradle-plugin'
 }
 
@@ -59,7 +59,7 @@ dependencies {
     testImplementation 'org.testcontainers:junit-jupiter'
     testImplementation 'org.springframework.boot:spring-boot-testcontainers'
     testImplementation 'org.testcontainers:postgresql'
-    testImplementation "org.testcontainers:localstack:1.20.1"
+    testImplementation "org.testcontainers:localstack:1.21.4"
 
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
