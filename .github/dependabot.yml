@@ -16,7 +16,7 @@ updates:
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
-      interval: "weekely"
+      interval: "weekly"
     registries:
       - spring-boot-common-github-packages
     groups:
@@ -33,7 +33,7 @@ updates:
   - package-ecosystem: "github-actions"
     directory: "/"
     schedule:
-      interval: "weekely"
+      interval: "weekly"
     groups:
       minor:
         update-types:
