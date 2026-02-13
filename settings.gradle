@@ -18,5 +18,3 @@ pluginManagement {
 }
 
 rootProject.name = 'laa-data-claims-reporting-service'
-
-include 'laa-data-claims-reporting-service'
