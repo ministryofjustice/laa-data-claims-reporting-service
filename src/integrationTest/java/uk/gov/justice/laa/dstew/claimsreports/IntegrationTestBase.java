@@ -22,10 +22,9 @@ import org.testcontainers.utility.DockerImageName;
 import uk.gov.justice.laa.dstew.claimsreports.config.TestConfig;
 
 @Slf4j
-@SpringBootTest
+@SpringBootTest(classes = {TestConfig.class})
 @ActiveProfiles("test")
 @Testcontainers
-@Import(TestConfig.class)
 public class IntegrationTestBase {
 
   // -------------------- Containers --------------------
