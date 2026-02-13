@@ -9,6 +9,7 @@ import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeAll;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.context.annotation.Import;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
@@ -21,9 +22,10 @@ import org.testcontainers.utility.DockerImageName;
 import uk.gov.justice.laa.dstew.claimsreports.config.TestConfig;
 
 @Slf4j
-@SpringBootTest(classes = {TestConfig.class})
+@SpringBootTest
 @ActiveProfiles("test")
 @Testcontainers
+@Import(TestConfig.class)
 public class IntegrationTestBase {
 
   // -------------------- Containers --------------------
