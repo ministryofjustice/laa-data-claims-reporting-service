@@ -37,6 +37,9 @@ jobs:
       - name: Test coverage verification
         run: ./gradlew jacocoTestCoverageVerification
 
+      # Enable Testcontainers Cloud -
+      - uses: testcontainers/testcontainers-cloud-setup-action@v1
+
 #        Add run of integration tests when these are added to the repo
       - name: Run integration tests
         run: ./gradlew integrationTest
