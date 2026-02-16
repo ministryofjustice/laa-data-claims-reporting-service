@@ -108,6 +108,7 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
     log.info("Generating {} reports...", reportServices.size());
     for (AbstractReportService service : reportServices) {
       metricsHandler.resetCustomMetrics();
+      var startTime = System.currentTimeMillis();
       try {
         service.refreshDataSource();
         service.generateReport();
@@ -116,6 +117,8 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
             service.getClass().getSimpleName(), e.getMessage(), e);
         metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
       } finally {
+        var endTime = System.currentTimeMillis();
+        metricsHandler.setCustomMetric(CustomReportMetric.REPORT_TOTAL_TIME_MS, endTime - startTime);
         metricsHandler.pushReportMetrics(service.getReportName());
       }
     }
