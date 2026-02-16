@@ -117,8 +117,9 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
             service.getClass().getSimpleName(), e.getMessage(), e);
         metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
       } finally {
-        var endTime = System.currentTimeMillis();
-        metricsHandler.setCustomMetric(CustomReportMetric.REPORT_TOTAL_TIME_MS, endTime - startTime);
+        var reportDuration = System.currentTimeMillis() - startTime;
+        metricsHandler.setCustomMetric(CustomReportMetric.REPORT_TOTAL_TIME_MS, reportDuration);
+        log.info("Report generation for report {} took {} ms ({} s)", service.getReportName(), reportDuration, reportDuration / 1000);
         metricsHandler.pushReportMetrics(service.getReportName());
       }
     }
