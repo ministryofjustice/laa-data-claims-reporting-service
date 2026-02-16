@@ -37,6 +37,11 @@ jobs:
       - name: Test coverage verification
         run: ./gradlew jacocoTestCoverageVerification
 
+      # This is a temporary workaround for https://github.com/testcontainers/testcontainers-java/issues/11212"
+      - name: Force docker-java API version (temporary workaround for testcontainers)
+        run: |
+          echo "api.version=1.44" > ~/.docker-java.properties
+
 #        Add run of integration tests when these are added to the repo
       - name: Run integration tests
         run: ./gradlew integrationTest
