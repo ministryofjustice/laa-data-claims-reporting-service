@@ -83,7 +83,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
     assertThat(secondAssessmentRow).isNotEmpty();
     assertThat(secondAssessmentRow).hasSize(1);
 
-    // Should have grabbed value from Calculated Fee Detail for before value
+    // Should have grabbed value from the first Assessment Row for before value
     var beforeValue = secondAssessmentRow.getFirst().get("Value before Amendment");
     assertThat(beforeValue).isEqualTo("2080.00");
 
