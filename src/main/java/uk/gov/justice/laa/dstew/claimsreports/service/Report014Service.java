@@ -52,8 +52,8 @@ public class Report014Service extends AbstractReportService {
   @Override
   protected String getOrderByClause() {
     return " \"Claim ID\","
-        + "    to_char(to_date(\"Amendment Date\", 'DD/MM/YYYY HH24:MI:SS'), 'YYYYMM'),"
-        + "    \"Assessment ID\"";
+        + " to_char(to_date(\"Amendment Date\", 'DD/MM/YYYY HH24:MI:SS'), 'YYYYMM'),"
+        + " \"Assessment ID\"";
   }
 
   // Daily report
