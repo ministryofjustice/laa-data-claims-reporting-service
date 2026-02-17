@@ -39,7 +39,7 @@ WITH submission_periods AS (
     	SELECT *
     	FROM claims.calculated_fee_detail cfd_inner
     	WHERE cfd_inner.claim_id = c.id
-    	ORDER BY cfd_inner.created_on DESC NULLS LAST
+        ORDER BY COALESCE(cfd_inner.updated_on, cfd_inner.created_on) DESC NULLS LAST
     	LIMIT 1
     ) calc_latest ON TRUE
 )
