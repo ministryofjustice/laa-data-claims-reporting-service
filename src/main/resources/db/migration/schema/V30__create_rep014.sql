@@ -1,3 +1,5 @@
+DROP MATERIALIZED VIEW IF EXISTS mvw_report_014;
+
 CREATE MATERIALIZED VIEW mvw_report_014 AS
 WITH submission_periods AS (
 	SELECT
