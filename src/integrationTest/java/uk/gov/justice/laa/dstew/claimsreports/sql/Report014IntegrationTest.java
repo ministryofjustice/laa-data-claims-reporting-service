@@ -93,7 +93,62 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
   }
 
+  @Test
+  void testSkipsAssessmentIfSubmissionStatusIsNotValidationSucceeded() {
+
+    insertFullSubmissionWithClaimsAndAssessments("VALIDATION_FAILED", "VALID");
+
+    List<Map<String, Object>> returnedRows = jdbcTemplate.queryForList("""
+        SELECT *
+        FROM claims.mvw_report_014
+        WHERE 'Submission ID' = 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB1'
+        """
+    );
+
+    assertThat(returnedRows).isNotNull();
+    assertThat(returnedRows).isEmpty();
+
+  }
+
+  @Test
+  void testSkipsAssessmentIfClaimStatusIsNotValid() {
+
+    insertFullSubmissionWithClaimsAndAssessments("VALIDATION_SUCCEEDED", "INVALID");
+
+    List<Map<String, Object>> returnedRows = jdbcTemplate.queryForList("""
+        SELECT *
+        FROM claims.mvw_report_014
+        WHERE 'Claim ID' = 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5'
+        """
+    );
+
+    assertThat(returnedRows).isNotNull();
+    assertThat(returnedRows).isEmpty();
+
+  }
+
   private void insertDataForFirstAssessmentTest() {
+    insertFullSubmissionWithClaimsAndAssessments("VALIDATION_SUCCEEDED", "VALID");
+  }
+
+  private void insertDataForSecondAssessmentTest() {
+
+    jdbcTemplate.update(
+        """
+            INSERT INTO claims.assessment
+            (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
+             allowed_total_vat, allowed_total_incl_vat, created_by_user_id, created_on)
+            VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaac', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'REDUCED_STILL_ESCAPED', 200.00,
+                    1400.00, 210.00, 2070.00, 'integration_test_user', now() )
+            """
+    );
+
+    jdbcTemplate.update("""
+      REFRESH MATERIALIZED VIEW claims.mvw_report_014
+      """);
+  }
+
+  private void insertFullSubmissionWithClaimsAndAssessments(String submissionStatus, String claimStatus) {
     jdbcTemplate.update("""
     INSERT INTO claims.submission (
         id, bulk_submission_id, office_account_number, submission_period, area_of_law, status, crime_lower_schedule_number,
@@ -104,7 +159,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
         'OA001',
         'MAR-2025',
         'LEGAL HELP',
-        'VALIDATION_SUCCEEDED',
+        '%s',
         'CSN001',
         NULL,
         FALSE,
@@ -113,7 +168,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
         'integration_test_user',
         '2025-11-21 05:00:00',
         'test provider user')
-    """);
+    """.formatted(submissionStatus));
 
     jdbcTemplate.update("""
       INSERT INTO claims.claim (
@@ -121,12 +176,12 @@ class Report014IntegrationTest extends IntegrationTestBase {
       ) VALUES (
           'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5',
           'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB1',
-          'VALID',
+          '%s',
           1,
           'MT001',
           'integration_test_user',
           TIMESTAMP '2025-11-21 05:00:00' - interval '1 day')
-      """);
+      """.formatted(claimStatus));
 
     jdbcTemplate.update("""
     INSERT INTO claims.claim_case (
@@ -175,28 +230,12 @@ class Report014IntegrationTest extends IntegrationTestBase {
             VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'REDUCED_STILL_ESCAPED', 200.00,
                     1400.00, 210.00, 2080.00, 'integration_test_user', now() )
             """
-        );
-
-    jdbcTemplate.update("""
-      REFRESH MATERIALIZED VIEW claims.mvw_report_014
-      """);
-  }
-
-  private void insertDataForSecondAssessmentTest() {
-
-    jdbcTemplate.update(
-        """
-            INSERT INTO claims.assessment
-            (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
-             allowed_total_vat, allowed_total_incl_vat, created_by_user_id, created_on)
-            VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaac', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'REDUCED_STILL_ESCAPED', 200.00,
-                    1400.00, 210.00, 2070.00, 'integration_test_user', now() )
-            """
     );
 
     jdbcTemplate.update("""
       REFRESH MATERIALIZED VIEW claims.mvw_report_014
       """);
+
   }
 
 }
