@@ -1,7 +1,10 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import java.time.Clock;
+import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
@@ -19,9 +22,13 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 @Service
 public class Report014Service extends AbstractReportService {
 
+  private Environment environment;
+
   public Report014Service(JdbcTemplate jdbcTemplate,
-                          S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService, MetricsHandler metricsHandler, Clock clock) {
+                          S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService, MetricsHandler metricsHandler, Clock clock,
+                          Environment environment) {
     super(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, clock);
+    this.environment = environment;
   }
 
   @Override
@@ -59,6 +66,8 @@ public class Report014Service extends AbstractReportService {
   // Daily report
   @Override
   protected boolean runToday() {
-    return true;
+    // Temporarily disable on Prod until confirmation of DPIA
+    System.out.println("ENV IS " + Arrays.toString(environment.getActiveProfiles()));
+    return !environment.acceptsProfiles(Profiles.of("prod"));
   }
 }

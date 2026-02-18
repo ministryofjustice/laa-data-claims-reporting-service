@@ -7,6 +7,8 @@ import java.time.Instant;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.springframework.core.env.Environment;
+import org.springframework.core.env.Profiles;
 import org.springframework.jdbc.core.JdbcTemplate;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
@@ -17,6 +19,7 @@ import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.verifyNoMoreInteractions;
+import static org.mockito.Mockito.when;
 
 /**
  * Unit tests for {@link Report014Service}.
@@ -29,6 +32,7 @@ class Report014ServiceTest {
   private S3ClientWrapper s3ClientWrapper;
   private MetricsHandler metricsHandler;
   private Clock fixedClock;
+  private Environment environment;
 
   @BeforeEach
   void setUp() {
@@ -36,11 +40,12 @@ class Report014ServiceTest {
     creationService = mock(CsvCreationService.class);
     s3ClientWrapper = mock(S3ClientWrapper.class);
     metricsHandler = mock(MetricsHandler.class);
+    environment = mock(Environment.class);
 
     Instant fixedNow = Instant.parse("2025-12-22T10:00:00Z");
     fixedClock = Clock.fixed(fixedNow, ZoneOffset.UTC);
 
-    service = new Report014Service(jdbcTemplate, s3ClientWrapper, creationService, metricsHandler, fixedClock);
+    service = new Report014Service(jdbcTemplate, s3ClientWrapper, creationService, metricsHandler, fixedClock, environment);
   }
 
   @Test
@@ -55,6 +60,7 @@ class Report014ServiceTest {
 
   @Test
   void generateReport_shouldCallTheRightServicesWithTheRightValues(){
+    when(environment.acceptsProfiles((Profiles) any())).thenReturn(false);
 
     service.generateReport();
 
@@ -65,6 +71,21 @@ class Report014ServiceTest {
         any()
     );
     verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/daily/report_014_2025-12-22.csv"));
+  }
+
+  @Test
+  void generateReport_shouldNotGenerateReportIfProd(){
+    when(environment.acceptsProfiles((Profiles) any())).thenReturn(true);
+
+    service.generateReport();
+
+    verify(creationService, times(0)).buildCsvFromData(
+        eq("SELECT * FROM claims.mvw_report_014"
+            + " ORDER BY  \"Claim ID\", to_char(to_date(\"Amendment Date\", 'DD/MM/YYYY HH24:MI:SS'), 'YYYYMM'), \"Assessment ID\""),
+        any(BufferedWriter.class),
+        any()
+    );
+    verify(s3ClientWrapper, times(0)).uploadFile(any(File.class), eq("reports/daily/report_014_2025-12-22.csv"));
   }
 
 }
