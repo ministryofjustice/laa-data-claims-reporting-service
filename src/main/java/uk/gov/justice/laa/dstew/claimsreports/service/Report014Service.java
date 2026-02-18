@@ -1,7 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import java.time.Clock;
-import java.util.Arrays;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
 import org.springframework.core.env.Profiles;
@@ -67,7 +66,6 @@ public class Report014Service extends AbstractReportService {
   @Override
   protected boolean runToday() {
     // Temporarily disable on Prod until confirmation of DPIA
-    System.out.println("ENV IS " + Arrays.toString(environment.getActiveProfiles()));
     return !environment.acceptsProfiles(Profiles.of("prod"));
   }
 }
