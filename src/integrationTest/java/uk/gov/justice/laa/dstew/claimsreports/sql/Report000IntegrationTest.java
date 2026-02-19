@@ -31,13 +31,13 @@ public class Report000IntegrationTest extends IntegrationTestBase {
     // Then
     assertThat(rows).hasSize(1);
     Map<String, Object> row = rows.getFirst();
-    assertThat(row.get("Claim ID"))
+    assertThat(row.get("Case Details - Claim ID"))
         .isEqualTo(CLAIM_ID_WITH_SINGLE_FEE_AND_NO_ASSESSMENTS);
     BigDecimal claimValue =
-        new BigDecimal(row.get("Initial Calculated Claim Value").toString());
+        new BigDecimal(row.get("SaBC Total Costing information - Initial Calculated Claim Value").toString());
     assertThat(claimValue)
         .isEqualByComparingTo("2000.00");
-    assertThat(row.get("Assessed Total Inc VAT"))
+    assertThat(row.get("SaBC Total Costing information - Assessed Total Inc VAT"))
         .isEqualTo("");
   }
 
@@ -48,13 +48,13 @@ public class Report000IntegrationTest extends IntegrationTestBase {
     // Then
     assertThat(rows).hasSize(1);
     Map<String, Object> row = rows.getFirst();
-    assertThat(row.get("Claim ID"))
+    assertThat(row.get("Case Details - Claim ID"))
         .isEqualTo(CLAIM_ID_WITH_MULTIPLE_FEES_AND_NO_ASSESSMENTS);
     BigDecimal claimValue =
-        new BigDecimal(row.get("Initial Calculated Claim Value").toString());
+        new BigDecimal(row.get("SaBC Total Costing information - Initial Calculated Claim Value").toString());
     assertThat(claimValue)
         .isEqualByComparingTo("2100.00");
-    assertThat(row.get("Assessed Total Inc VAT"))
+    assertThat(row.get("SaBC Total Costing information - Assessed Total Inc VAT"))
         .isEqualTo("");
   }
 
@@ -74,14 +74,14 @@ public class Report000IntegrationTest extends IntegrationTestBase {
     // Then
     assertThat(rows).hasSize(1);
     Map<String, Object> row = rows.getFirst();
-    assertThat(row.get("Claim ID"))
+    assertThat(row.get("Case Details - Claim ID"))
         .isEqualTo(CLAIM_ID_WITH_MULTIPLE_FEES_AND_NO_ASSESSMENTS);
     BigDecimal claimValue =
-        new BigDecimal(row.get("Initial Calculated Claim Value").toString());
+        new BigDecimal(row.get("SaBC Total Costing information - Initial Calculated Claim Value").toString());
     assertThat(claimValue)
         .isEqualByComparingTo("2100.00");
     BigDecimal claimAssessedValue =
-        new BigDecimal(row.get("Assessed Total Inc VAT").toString());
+        new BigDecimal(row.get("SaBC Total Costing information - Assessed Total Inc VAT").toString());
     assertThat(claimAssessedValue)
         .isEqualByComparingTo("1400.00");
   }
@@ -112,14 +112,14 @@ public class Report000IntegrationTest extends IntegrationTestBase {
     // Then
     assertThat(rows).hasSize(1);
     Map<String, Object> row = rows.getFirst();
-    assertThat(row.get("Claim ID"))
+    assertThat(row.get("Case Details - Claim ID"))
         .isEqualTo(CLAIM_ID_WITH_MULTIPLE_FEES_AND_NO_ASSESSMENTS);
     BigDecimal claimValue =
-        new BigDecimal(row.get("Initial Calculated Claim Value").toString());
+        new BigDecimal(row.get("SaBC Total Costing information - Initial Calculated Claim Value").toString());
     assertThat(claimValue)
         .isEqualByComparingTo("2100.00");
     BigDecimal claimAssessedValue =
-        new BigDecimal(row.get("Assessed Total Inc VAT").toString());
+        new BigDecimal(row.get("SaBC Total Costing information - Assessed Total Inc VAT").toString());
     assertThat(claimAssessedValue)
         .isEqualByComparingTo("1300.00");
   }
@@ -131,12 +131,12 @@ public class Report000IntegrationTest extends IntegrationTestBase {
     // Then
     assertThat(rows).hasSize(1);
     BigDecimal finalClaimValue1 =
-        new BigDecimal(rows.getFirst().get("Final Claim Value").toString());
+        new BigDecimal(rows.getFirst().get("SaBC Total Costing information - Final Claim Value").toString());
     assertThat(finalClaimValue1)
         .isEqualByComparingTo("2000.00");
     var row = rows.getFirst();
     BigDecimal totalCurrentClaimValue1 =
-        new BigDecimal(row.get("Initial Calculated Claim Value").toString());
+        new BigDecimal(row.get("SaBC Total Costing information - Initial Calculated Claim Value").toString());
     assertThat(totalCurrentClaimValue1)
         .isEqualByComparingTo("2000.00");
     // When
@@ -144,11 +144,11 @@ public class Report000IntegrationTest extends IntegrationTestBase {
     // Then
     assertThat(rows).hasSize(1);
     BigDecimal finalClaimValue2 =
-        new BigDecimal(rows.getFirst().get("Final Claim Value").toString());
+        new BigDecimal(rows.getFirst().get("SaBC Total Costing information - Final Claim Value").toString());
     assertThat(finalClaimValue2)
         .isEqualByComparingTo("2100.00");
     BigDecimal totalCurrentClaimValue2 =
-        new BigDecimal(rows.getFirst().get("Initial Calculated Claim Value").toString());
+        new BigDecimal(rows.getFirst().get("SaBC Total Costing information - Initial Calculated Claim Value").toString());
     assertThat(totalCurrentClaimValue2)
         .isEqualByComparingTo("2100.00");
   }
@@ -180,15 +180,15 @@ public class Report000IntegrationTest extends IntegrationTestBase {
     // Then
     assertThat(rows).hasSize(1);
     BigDecimal totalCurrentClaimValue1 =
-        new BigDecimal(rows.getFirst().get("Initial Calculated Claim Value").toString());
+        new BigDecimal(rows.getFirst().get("SaBC Total Costing information - Initial Calculated Claim Value").toString());
     assertThat(totalCurrentClaimValue1)
         .isEqualByComparingTo("2000.00");
     BigDecimal allowedTotalIncVat1 =
-        new BigDecimal(rows.getFirst().get("Allowed Total Inc VAT").toString());
+        new BigDecimal(rows.getFirst().get("SaBC Total Costing information - Allowed Total Inc VAT").toString());
     assertThat(allowedTotalIncVat1)
         .isEqualByComparingTo("1990.00");
     BigDecimal finalClaimValue1 =
-        new BigDecimal(rows.getFirst().get("Final Claim Value").toString());
+        new BigDecimal(rows.getFirst().get("SaBC Total Costing information - Final Claim Value").toString());
     assertThat(finalClaimValue1)
         .isEqualByComparingTo("1990.00");
     // When
@@ -196,15 +196,15 @@ public class Report000IntegrationTest extends IntegrationTestBase {
     // Then
     assertThat(rows).hasSize(1);
     BigDecimal totalCurrentClaimValue2 =
-        new BigDecimal(rows.getFirst().get("Initial Calculated Claim Value").toString());
+        new BigDecimal(rows.getFirst().get("SaBC Total Costing information - Initial Calculated Claim Value").toString());
     assertThat(totalCurrentClaimValue2)
         .isEqualByComparingTo("2100.00");
     BigDecimal allowedTotalIncVat2 =
-        new BigDecimal(rows.getFirst().get("Allowed Total Inc VAT").toString());
+        new BigDecimal(rows.getFirst().get("SaBC Total Costing information - Allowed Total Inc VAT").toString());
     assertThat(allowedTotalIncVat2)
         .isEqualByComparingTo("2080.00");
     BigDecimal finalClaimValue2 =
-        new BigDecimal(rows.getFirst().get("Final Claim Value").toString());
+        new BigDecimal(rows.getFirst().get("SaBC Total Costing information - Final Claim Value").toString());
     assertThat(finalClaimValue2)
         .isEqualByComparingTo("2080.00");
   }
@@ -219,7 +219,7 @@ public class Report000IntegrationTest extends IntegrationTestBase {
         jdbcTemplate.queryForList("""
         SELECT *
         FROM claims.mvw_report_000
-        WHERE "Claim ID" = ?
+        WHERE "Case Details - Claim ID" = ?
         """,
             claimId
         );
