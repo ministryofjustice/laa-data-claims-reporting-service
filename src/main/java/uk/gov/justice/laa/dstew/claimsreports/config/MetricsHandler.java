@@ -48,6 +48,7 @@ public class MetricsHandler {
   public void setCustomMetric(CustomReportMetric metric, long value) {
     switch (metric) {
       case ROWS_WRITTEN -> customReportGauges.rowsWritten().set(value);
+      case REPORT_TOTAL_TIME_MS -> customReportGauges.reportTotalTime().set(value);
       case REPORT_FILE_SIZE -> customReportGauges.reportFileSize().set(value);
       case REPORT_SUCCESSFUL -> customReportGauges.reportSuccessful().set(value);
       case DATA_REFRESH_TIME_MS -> customReportGauges.dataRefreshTimeMs().set(value);

@@ -31,6 +31,7 @@ class PrometheusConfigurationTest {
     assertNotNull(customMetrics.generatedTimeMs());
     assertNotNull(customMetrics.reportFileSize());
     assertNotNull(customMetrics.reportSuccessful());
+    assertNotNull(customMetrics.reportTotalTime());
     assertNotNull(customMetrics.rowsWritten());
     assertNotNull(customMetrics.uploadTimeMs());
   }
@@ -47,6 +48,7 @@ class PrometheusConfigurationTest {
     customMetrics.generatedTimeMs().set(2);
     customMetrics.reportFileSize().set(3);
     customMetrics.reportSuccessful().set(4);
+    customMetrics.reportTotalTime().set(123);
     customMetrics.rowsWritten().set(5);
     customMetrics.uploadTimeMs().set(6);
 
@@ -57,6 +59,7 @@ class PrometheusConfigurationTest {
     assertEquals(0, customMetrics.generatedTimeMs().get());
     assertEquals(0, customMetrics.reportFileSize().get());
     assertEquals(0, customMetrics.reportSuccessful().get());
+    assertEquals(0, customMetrics.reportTotalTime().get());
     assertEquals(0, customMetrics.rowsWritten().get());
     assertEquals(0, customMetrics.uploadTimeMs().get());
   }

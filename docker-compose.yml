@@ -9,6 +9,7 @@ services:
       SPRING_PROFILES_ACTIVE: local
       LOCALSTACK_HOST: localstack
       GATEWAY_ADDRESS: pushgateway:9091
+      feature_ignore-replication-rowcount-mismatch: true
   postgres:
     image: postgres:17
     container_name: data-claims-reporting-service-local-postgres

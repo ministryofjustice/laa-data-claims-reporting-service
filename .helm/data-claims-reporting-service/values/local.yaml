@@ -11,6 +11,7 @@ serviceAccount:
 service:
   type: ClusterIP
   port: 8080
+  profile: local
 
 resources:
   limits:
