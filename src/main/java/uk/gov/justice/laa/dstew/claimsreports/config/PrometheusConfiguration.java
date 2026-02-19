@@ -58,6 +58,12 @@ public class PrometheusConfiguration {
         .help("1 on success, -1 on failure, 0 if skipped")
         .register(registry);
 
+    var reportTotalTimeMs = Gauge.builder()
+        .withoutExemplars()
+        .name("report_total_time_ms")
+        .help("How long the report generation took in total")
+        .register(registry);
+
     var dataRefreshTimeMs = Gauge.builder()
         .withoutExemplars()
         .name("report_data_refresh_duration_ms")
@@ -94,14 +100,14 @@ public class PrometheusConfiguration {
         .help("Time taken to verify that the generated file is UTF-8 encoded (ms)")
         .register(registry);
 
-    return new CustomReportGauges(reportSuccess, dataRefreshTimeMs, generatedTimeMs, rowsWritten, reportFileSize,
+    return new CustomReportGauges(reportSuccess, reportTotalTimeMs, dataRefreshTimeMs, generatedTimeMs, rowsWritten, reportFileSize,
         uploadTimeMs, encodingCheckTimeMs);
   }
 
   /**
    * This class defines some custom metrics we push to Prometheus.
    */
-  public record CustomReportGauges(Gauge reportSuccessful, Gauge dataRefreshTimeMs, Gauge generatedTimeMs,
+  public record CustomReportGauges(Gauge reportSuccessful, Gauge reportTotalTime, Gauge dataRefreshTimeMs, Gauge generatedTimeMs,
                                    Gauge rowsWritten, Gauge reportFileSize, Gauge uploadTimeMs, Gauge encodingCheckTimeMs) {
 
     public static int REPORT_FAILED = -1;
@@ -113,6 +119,7 @@ public class PrometheusConfiguration {
      */
     public enum CustomReportMetric {
       REPORT_SUCCESSFUL,
+      REPORT_TOTAL_TIME_MS,
       DATA_REFRESH_TIME_MS,
       GENERATED_TIME_MS,
       ROWS_WRITTEN,
@@ -126,6 +133,7 @@ public class PrometheusConfiguration {
      */
     public void reset() {
       reportSuccessful.set(0);
+      reportTotalTime.set(0);
       dataRefreshTimeMs.set(0);
       generatedTimeMs.set(0);
       rowsWritten.set(0);

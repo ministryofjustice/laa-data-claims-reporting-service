@@ -4,6 +4,7 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.Map;
+import java.util.TimeZone;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.BeforeAll;
@@ -25,6 +26,12 @@ import uk.gov.justice.laa.dstew.claimsreports.config.TestConfig;
 @ActiveProfiles("test")
 @Testcontainers
 public class IntegrationTestBase {
+
+  @BeforeAll
+  static void forceUtc() {
+    // Resolves issue whereby some local machines would convert date to BST in report_014, and some didn't, causing failures
+    TimeZone.setDefault(TimeZone.getTimeZone("UTC"));
+  }
 
   // -------------------- Containers --------------------
   static final PostgreSQLContainer<?> POSTGRES = new PostgreSQLContainer<>("postgres:17")
