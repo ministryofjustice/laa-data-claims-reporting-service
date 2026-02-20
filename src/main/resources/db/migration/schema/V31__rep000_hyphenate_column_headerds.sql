@@ -110,7 +110,7 @@ SELECT
     COALESCE(CASE WHEN csf.is_irc_surgery IS TRUE THEN 'Yes' WHEN csf.is_irc_surgery IS FALSE THEN 'No' END, '') AS "Immigration - IRC Surgery",
     COALESCE(csf.surgery_date::text, '')                                     AS "Immigration - Surgery Date",
     COALESCE(csf.surgery_clients_count::text, '')                            AS "Immigration - No. Of Clients Seen At The Surgery",
-    COALESCE(csf.surgery_matters_count::text, '')                            AS "Immigration - No. Of Surgery Clients Resulting In Legal Help Matter Opened",
+    COALESCE(csf.surgery_matters_count::text, '')                            AS "Immigration - Surgery Clients Resulting in Legal Help Matters",
     COALESCE(CASE WHEN cc.is_nrm_advice IS TRUE THEN 'Yes' WHEN cc.is_nrm_advice IS FALSE THEN 'No' END, '') AS "Immigration - NRM Advice",
     COALESCE(cc.follow_on_work::text, '')                                    AS "Immigration - PRN Follow On Work",
     -- CRIME
@@ -132,98 +132,98 @@ SELECT
     COALESCE(csf.travel_time::text, '')                                     AS "Time reported - Travel Time",
     COALESCE(csf.waiting_time::text, '')                                    AS "Time reported - Waiting Time",
     -- REPORTED COSTS
-    COALESCE(calc.fee_type, '')                                             AS "Reported costs info. - Fee Type",
-    COALESCE(csf.net_profit_costs_amount::text, '')                         AS "Reported costs info. - Profit Costs",
-    COALESCE(csf.net_counsel_costs_amount::text, '')                        AS "Reported costs info. - Counsel Fees",
-    COALESCE(csf.net_disbursement_amount::text, '')                         AS "Reported costs info. - Disbursement Costs",
-    COALESCE(csf.travel_waiting_costs_amount::text, '')                     AS "Reported costs info. - Travel Waiting Costs",
-    COALESCE(calc.vat_rate_applied::text, '')                               AS "Reported costs info. - VAT Rate Applied",
-    COALESCE(CASE WHEN csf.is_vat_applicable IS TRUE THEN 'Yes' WHEN csf.is_vat_applicable IS FALSE THEN 'No' END, '') AS "Reported costs info. - VAT Indicator",
-    COALESCE(csf.jr_form_filling_amount::text, '')                          AS "Reported costs info. - JR Form Filling Costs",
-    COALESCE(a.disbursement_amount::text, '')                               AS "Reported costs info. - Disbursement Amount",
-    COALESCE(a.detention_travel_and_waiting_costs_amount::text, '')         AS "Reported costs info. - Detention Travel And Waiting Costs Amount",
-    COALESCE(a.jr_form_filling_amount::text, '')                            AS "Reported costs info. - JR Form Filling Amount",
-    COALESCE(csf.costs_damages_recovered_amount::text, '')                  AS "Reported costs info. - Cost / Damages Recovered",
-    COALESCE(csf.detention_travel_waiting_costs_amount::text, '')           AS "Reported costs info. - Detention Travel & Waiting Costs",
-    COALESCE(csf.adjourned_hearing_fee_amount::text, '')                    AS "Reported costs info. - Adjourned Hearing Fee Count",
-    COALESCE(csf.cmrh_oral_count::text, '')                                 AS "Reported costs info. - CMRH Oral Count",
-    COALESCE(csf.cmrh_telephone_count::text, '')                            AS "Reported costs info. - CMRH Telephone Count",
-    COALESCE(csf.ho_interview::text, '')                                    AS "Reported costs info. - HO Interview Count",
-    COALESCE(CASE WHEN csf.is_substantive_hearing IS TRUE THEN 'Yes' WHEN csf.is_substantive_hearing IS FALSE THEN 'No' END, '') AS "Reported costs info. - Substantive Hearing Flag",
-    COALESCE(CASE WHEN csf.is_additional_travel_payment IS TRUE THEN 'Yes' WHEN csf.is_additional_travel_payment IS FALSE THEN 'No' END, '') AS "Reported costs info. - Additional Travel Payment Flag",
+    COALESCE(calc.fee_type, '')                                             AS "Reported costs - Fee Type",
+    COALESCE(csf.net_profit_costs_amount::text, '')                         AS "Reported costs - Profit Costs",
+    COALESCE(csf.net_counsel_costs_amount::text, '')                        AS "Reported costs - Counsel Fees",
+    COALESCE(csf.net_disbursement_amount::text, '')                         AS "Reported costs - Disbursement Costs",
+    COALESCE(csf.travel_waiting_costs_amount::text, '')                     AS "Reported costs - Travel Waiting Costs",
+    COALESCE(calc.vat_rate_applied::text, '')                               AS "Reported costs - VAT Rate Applied",
+    COALESCE(CASE WHEN csf.is_vat_applicable IS TRUE THEN 'Yes' WHEN csf.is_vat_applicable IS FALSE THEN 'No' END, '') AS "Reported costs - VAT Indicator",
+    COALESCE(csf.jr_form_filling_amount::text, '')                          AS "Reported costs - JR Form Filling Costs",
+    COALESCE(a.disbursement_amount::text, '')                               AS "Reported costs - Disbursement Amount",
+    COALESCE(a.detention_travel_and_waiting_costs_amount::text, '')         AS "Reported costs - Detention Travel And Waiting Costs Amount",
+    COALESCE(a.jr_form_filling_amount::text, '')                            AS "Reported costs - JR Form Filling Amount",
+    COALESCE(csf.costs_damages_recovered_amount::text, '')                  AS "Reported costs - Cost / Damages Recovered",
+    COALESCE(csf.detention_travel_waiting_costs_amount::text, '')           AS "Reported costs - Detention Travel & Waiting Costs",
+    COALESCE(csf.adjourned_hearing_fee_amount::text, '')                    AS "Reported costs - Adjourned Hearing Fee Count",
+    COALESCE(csf.cmrh_oral_count::text, '')                                 AS "Reported costs - CMRH Oral Count",
+    COALESCE(csf.cmrh_telephone_count::text, '')                            AS "Reported costs - CMRH Telephone Count",
+    COALESCE(csf.ho_interview::text, '')                                    AS "Reported costs - HO Interview Count",
+    COALESCE(CASE WHEN csf.is_substantive_hearing IS TRUE THEN 'Yes' WHEN csf.is_substantive_hearing IS FALSE THEN 'No' END, '') AS "Reported costs - Substantive Hearing Flag",
+    COALESCE(CASE WHEN csf.is_additional_travel_payment IS TRUE THEN 'Yes' WHEN csf.is_additional_travel_payment IS FALSE THEN 'No' END, '') AS "Reported costs - Additional Travel Payment Flag",
     -- SABC INITIAL COSTS
-    COALESCE(calc.bolt_on_adjourned_hearing_count::text, '')                AS "SaBC Init. Costs - Current Bolt On Adjourned Hearing Count",
-    COALESCE(calc.bolt_on_adjourned_hearing_fee::text, '')                  AS "SaBC Init. Costs - Current Bolt On Adjourned Hearing Fee",
-    COALESCE(calc.bolt_on_cmrh_telephone_count::text, '')                   AS "SaBC Init. Costs - Current Bolt On CMRH Telephone Count",
-    COALESCE(calc.bolt_on_cmrh_telephone_fee::text, '')                     AS "SaBC Init. Costs - Current Bolt On CMRH Telephone Fee",
-    COALESCE(calc.bolt_on_cmrh_oral_count::text, '')                        AS "SaBC Init. Costs - Current Bolt On CMRH Oral Count",
-    COALESCE(calc.bolt_on_cmrh_oral_fee::text, '')                          AS "SaBC Init. Costs - Current Bolt On CMRH Oral Fee",
-    COALESCE(calc.bolt_on_total_fee_amount::text, '')                       AS "SaBC Init. Costs - Current Bolt On Total Fee Amount",
+    COALESCE(calc.bolt_on_adjourned_hearing_count::text, '')                AS "SaBC Initial Costs - Current Bolt On Adjourned Hearing Count",
+    COALESCE(calc.bolt_on_adjourned_hearing_fee::text, '')                  AS "SaBC Initial Costs - Current Bolt On Adjourned Hearing Fee",
+    COALESCE(calc.bolt_on_cmrh_telephone_count::text, '')                   AS "SaBC Initial Costs - Current Bolt On CMRH Telephone Count",
+    COALESCE(calc.bolt_on_cmrh_telephone_fee::text, '')                     AS "SaBC Initial Costs - Current Bolt On CMRH Telephone Fee",
+    COALESCE(calc.bolt_on_cmrh_oral_count::text, '')                        AS "SaBC Initial Costs - Current Bolt On CMRH Oral Count",
+    COALESCE(calc.bolt_on_cmrh_oral_fee::text, '')                          AS "SaBC Initial Costs - Current Bolt On CMRH Oral Fee",
+    COALESCE(calc.bolt_on_total_fee_amount::text, '')                       AS "SaBC Initial Costs - Current Bolt On Total Fee Amount",
     COALESCE(
             CASE
                 WHEN calc.vat_rate_applied IS NOT NULL AND calc.bolt_on_total_fee_amount IS NOT NULL
                     THEN ROUND(calc.bolt_on_total_fee_amount * calc.vat_rate_applied / 100, 2)::text
                 ELSE NULL
-                END, '')                                                    AS "SaBC Init. Costs - Current Bolt On Fees VAT",
-    COALESCE(calc.bolt_on_home_office_interview_fee::text, '')              AS "SaBC Init. Costs - Current Bolt On Home Office Interview Fee",
-    COALESCE(calc.bolt_on_home_office_interview_count::text, '')            AS "SaBC Init. Costs - Current Bolt On Home Office Interview Count",
-    COALESCE(calc.fixed_fee_amount::text, '')                               AS "SaBC Init. Costs - Current Fixed Fee Amount",
-    COALESCE(calc.hourly_total_amount::text, '')                            AS "SaBC Init. Costs - Current Hourly Total Amount",
-    COALESCE(calc.net_profit_costs_amount::text, '')                        AS "SaBC Init. Costs - Current Net Profit Costs Amount",
-    COALESCE(calc.net_cost_of_counsel_amount::text, '')                     AS "SaBC Init. Costs - Current Net Cost Of Counsel Amount",
-    COALESCE(calc.disbursement_amount::text, '')                            AS "SaBC Init. Costs - Current Disbursement Amount",
-    COALESCE(csf.disbursements_vat_amount::text, '')                        AS "SaBC Init. Costs - Disbursement VAT Costs",
-    COALESCE(calc.travel_and_waiting_costs_amount::text, '')                AS "SaBC Init. Costs - Current Travel And Waiting Costs Amount",
-    COALESCE(calc.detention_travel_and_waiting_costs_amount::text, '')      AS "SaBC Init. Costs - Current Detention And Waiting Costs Amount",
-    COALESCE(calc.jr_form_filling_amount::text, '')                         AS "SaBC Init. Costs - Current JR Form Filling Amount",
-    COALESCE(CASE WHEN calc.vat_indicator IS TRUE THEN 'Yes' WHEN calc.vat_indicator IS FALSE THEN 'No' END, '') AS "SaBC Init. Costs - Current VAT Indicator",
+                END, '')                                                    AS "SaBC Initial Costs - Current Bolt On Fees VAT",
+    COALESCE(calc.bolt_on_home_office_interview_fee::text, '')              AS "SaBC Initial Costs - Current Bolt On Home Office Interview Fee",
+    COALESCE(calc.bolt_on_home_office_interview_count::text, '')            AS "SaBC Initial Costs - Current Bolt On HO Interviews count",
+    COALESCE(calc.fixed_fee_amount::text, '')                               AS "SaBC Initial Costs - Current Fixed Fee Amount",
+    COALESCE(calc.hourly_total_amount::text, '')                            AS "SaBC Initial Costs - Current Hourly Total Amount",
+    COALESCE(calc.net_profit_costs_amount::text, '')                        AS "SaBC Initial Costs - Current Net Profit Costs Amount",
+    COALESCE(calc.net_cost_of_counsel_amount::text, '')                     AS "SaBC Initial Costs - Current Net Cost Of Counsel Amount",
+    COALESCE(calc.disbursement_amount::text, '')                            AS "SaBC Initial Costs - Current Disbursement Amount",
+    COALESCE(csf.disbursements_vat_amount::text, '')                        AS "SaBC Initial Costs - Disbursement VAT Costs",
+    COALESCE(calc.travel_and_waiting_costs_amount::text, '')                AS "SaBC Initial Costs - Current Travel And Waiting Costs Amount",
+    COALESCE(calc.detention_travel_and_waiting_costs_amount::text, '')      AS "SaBC Initial Costs - Current Detention And Waiting Costs Amount",
+    COALESCE(calc.jr_form_filling_amount::text, '')                         AS "SaBC Initial Costs - Current JR Form Filling Amount",
+    COALESCE(CASE WHEN calc.vat_indicator IS TRUE THEN 'Yes' WHEN calc.vat_indicator IS FALSE THEN 'No' END, '') AS "SaBC Initial Costs - Current VAT Indicator",
     COALESCE(
             CASE
                 WHEN calc.vat_rate_applied IS NOT NULL AND calc.fixed_fee_amount IS NOT NULL
                     THEN ROUND(calc.fixed_fee_amount * calc.vat_rate_applied / 100, 2)::text
                 ELSE NULL
-                END, '')                                                    AS "SaBC Init. Costs - Current Fixed Fee VAT",
+                END, '')                                                    AS "SaBC Initial Costs - Current Fixed Fee VAT",
     COALESCE(
             CASE
                 WHEN calc.vat_rate_applied IS NOT NULL AND calc.net_profit_costs_amount IS NOT NULL
                     THEN ROUND(calc.net_profit_costs_amount * calc.vat_rate_applied / 100, 2)::text
                 ELSE NULL
-                END, '')                                                    AS "SaBC Init. Costs - Current Profit Costs VAT",
+                END, '')                                                    AS "SaBC Initial Costs - Current Profit Costs VAT",
     COALESCE(
             CASE
                 WHEN calc.vat_rate_applied IS NOT NULL AND calc.net_cost_of_counsel_amount IS NOT NULL
                     THEN ROUND(calc.net_cost_of_counsel_amount * calc.vat_rate_applied / 100, 2)::text
                 ELSE NULL
-                END, '')                                                    AS "SaBC Init. Costs - Current Counsel Costs VAT",
+                END, '')                                                    AS "SaBC Initial Costs - Current Counsel Costs VAT",
     COALESCE(
             CASE
                 WHEN calc.vat_rate_applied IS NOT NULL AND calc.net_travel_costs_amount IS NOT NULL
                     THEN ROUND(calc.net_travel_costs_amount * calc.vat_rate_applied / 100, 2)::text
                 ELSE NULL
-                END, '')                                                    AS "SaBC Init. Costs - Current Travel Costs VAT",
+                END, '')                                                    AS "SaBC Initial Costs - Current Travel Costs VAT",
     COALESCE(
             CASE
                 WHEN calc.vat_rate_applied IS NOT NULL AND calc.net_waiting_costs_amount IS NOT NULL
                     THEN ROUND(calc.net_waiting_costs_amount * calc.vat_rate_applied / 100, 2)::text
                 ELSE NULL
-                END, '')                                                    AS "SaBC Init. Costs - Current Waiting Costs VAT",
+                END, '')                                                    AS "SaBC Initial Costs - Current Waiting Costs VAT",
     COALESCE(
             CASE
                 WHEN calc.vat_rate_applied IS NOT NULL AND calc.jr_form_filling_amount IS NOT NULL
                     THEN ROUND(calc.jr_form_filling_amount * calc.vat_rate_applied / 100, 2)::text
                 ELSE NULL
-                END, '')                                                    AS "SaBC Init. Costs - Current JR / Form Filling Costs VAT",
+                END, '')                                                    AS "SaBC Initial Costs - Current JR / Form Filling Costs VAT",
     -- SABC AMENDMENT COSTS
-    COALESCE(a.fixed_fee_amount::text, '')                                  AS "SaBC Post Initial Costs - Fixed Fee Amount",
-    COALESCE(a.net_profit_costs_amount::text, '')                           AS "SaBC Post Initial Costs - Net Profit Costs Amount",
-    COALESCE(a.net_cost_of_counsel_amount::text, '')                        AS "SaBC Post Initial Costs - Net Cost Of Counsel Amount",
-    COALESCE(a.net_travel_costs_amount::text, '')                           AS "SaBC Post Initial Costs - Net Travel Costs Amount",
-    COALESCE(csf.net_waiting_costs_amount::text, '')                        AS "SaBC Post Initial Costs - Net Waiting Costs Amount",
-    COALESCE(a.bolt_on_home_office_interview_fee::text, '')                 AS "SaBC Post Initial Costs - Bolt On Home Office Interview Fee",
-    COALESCE(a.bolt_on_adjourned_hearing_fee::text, '')                     AS "SaBC Post Initial Costs - Bolt On Adjourned Hearing Fee",
-    COALESCE(a.bolt_on_cmrh_telephone_fee::text, '')                        AS "SaBC Post Initial Costs - Bolt On CMRH Telephone Fee",
-    COALESCE(a.bolt_on_cmrh_oral_fee::text, '')                             AS "SaBC Post Initial Costs - Bolt On CMRH Oral Fee",
-    COALESCE(a.bolt_on_substantive_hearing_fee::text, '')                   AS "SaBC Post Initial Costs - Bolt On Substantive Hearing Fee",
+    COALESCE(a.fixed_fee_amount::text, '')                                  AS "SaBC Adjusted Costs - Fixed Fee Amount",
+    COALESCE(a.net_profit_costs_amount::text, '')                           AS "SaBC Adjusted Costs - Net Profit Costs Amount",
+    COALESCE(a.net_cost_of_counsel_amount::text, '')                        AS "SaBC Adjusted Costs - Net Cost Of Counsel Amount",
+    COALESCE(a.net_travel_costs_amount::text, '')                           AS "SaBC Adjusted Costs - Net Travel Costs Amount",
+    COALESCE(csf.net_waiting_costs_amount::text, '')                        AS "SaBC Adjusted Costs - Net Waiting Costs Amount",
+    COALESCE(a.bolt_on_home_office_interview_fee::text, '')                 AS "SaBC Adjusted Costs - Bolt On Home Office Interview Fee",
+    COALESCE(a.bolt_on_adjourned_hearing_fee::text, '')                     AS "SaBC Adjusted Costs - Bolt On Adjourned Hearing Fee",
+    COALESCE(a.bolt_on_cmrh_telephone_fee::text, '')                        AS "SaBC Adjusted Costs - Bolt On CMRH Telephone Fee",
+    COALESCE(a.bolt_on_cmrh_oral_fee::text, '')                             AS "SaBC Adjusted Costs - Bolt On CMRH Oral Fee",
+    COALESCE(a.bolt_on_substantive_hearing_fee::text, '')                   AS "SaBC Adjusted Costs - Bolt On Substantive Hearing Fee",
     -- SABC SYSTEM FLAGS
     COALESCE(CASE WHEN calc.escape_case_flag IS TRUE THEN 'Yes' WHEN calc.escape_case_flag IS FALSE THEN 'No' END, '') AS "SaBC System Flags - Current Escape Case Flag",
     COALESCE
@@ -239,11 +239,11 @@ SELECT
     ''                                                                      AS "SaBC System Flags - Has Post Submission Change",
     COALESCE(CASE WHEN c.has_assessment IS TRUE THEN 'Yes' WHEN c.has_assessment IS FALSE THEN 'No' END, '') AS "SaBC System Flags - Assessed Flag",
     -- SABC AMENDMENT COSTS
-    COALESCE(a.created_by_user_id, '')                                      AS "SaBC Post Initial Costs - Assessed By User ID",
-    COALESCE(a.updated_by_user_id, '')                                      AS "SaBC Post Initial Costs - Assessment Updated By User ID",
-    COALESCE(a.created_on::text, '')                                        AS "SaBC Post Initial Costs - Assessment Date Time",
-    COALESCE(a.updated_on::text, '')                                        AS "SaBC Post Initial Costs - Assessment Update Date Time",
-    COALESCE(a.net_waiting_costs_amount::text, '')                          AS "SaBC Post Initial Costs - Assessed Net Waiting Costs Amount",
+    COALESCE(a.created_by_user_id, '')                                      AS "SaBC Adjusted Costs - Assessed By User ID",
+    COALESCE(a.updated_by_user_id, '')                                      AS "SaBC Adjusted Costs - Assessment Updated By User ID",
+    COALESCE(a.created_on::text, '')                                        AS "SaBC Adjusted Costs - Assessment Date Time",
+    COALESCE(a.updated_on::text, '')                                        AS "SaBC Adjusted Costs - Assessment Update Date Time",
+    COALESCE(a.net_waiting_costs_amount::text, '')                          AS "SaBC Adjusted Costs - Assessed Net Waiting Costs Amount",
     -- SABC TOTAL COSTING
     COALESCE(
             CASE
