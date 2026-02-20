@@ -109,7 +109,7 @@ SELECT
     COALESCE(CASE WHEN cc.is_legacy_case IS TRUE THEN 'Yes' WHEN cc.is_legacy_case IS FALSE THEN 'No' END, '') AS "Immigration - Legacy Case Flag",
     COALESCE(CASE WHEN csf.is_irc_surgery IS TRUE THEN 'Yes' WHEN csf.is_irc_surgery IS FALSE THEN 'No' END, '') AS "Immigration - IRC Surgery",
     COALESCE(csf.surgery_date::text, '')                                     AS "Immigration - Surgery Date",
-    COALESCE(csf.surgery_clients_count::text, '')                            AS "Immigration - No. Of Clients Seen At The Surgery",
+    COALESCE(csf.surgery_clients_count::text, '')                            AS "Immigration - Number Of Clients Seen At The Surgery",
     COALESCE(csf.surgery_matters_count::text, '')                            AS "Immigration - Surgery Clients Resulting in Legal Help Matters",
     COALESCE(CASE WHEN cc.is_nrm_advice IS TRUE THEN 'Yes' WHEN cc.is_nrm_advice IS FALSE THEN 'No' END, '') AS "Immigration - NRM Advice",
     COALESCE(cc.follow_on_work::text, '')                                    AS "Immigration - PRN Follow On Work",
