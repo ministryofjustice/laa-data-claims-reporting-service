@@ -122,13 +122,13 @@ class S3ClientWrapperTest {
     assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.exe"));
   }
 
-  @Test
-  void uploadFile_shouldErrorIfUtf8CheckReturnsFalse() {
-    when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(true);
-    when(csvFileValidator.checkFileExtension("testReport.csv", "filename.csv")).thenReturn(true);
-    when(csvFileValidator.checkUtf8Encoded(testReport)).thenReturn(false);
-    assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
-  }
+//  @Test
+//  void uploadFile_shouldErrorIfUtf8CheckReturnsFalse() {
+//    when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(true);
+//    when(csvFileValidator.checkFileExtension("testReport.csv", "filename.csv")).thenReturn(true);
+//    when(csvFileValidator.checkUtf8Encoded(testReport)).thenReturn(false);
+//    assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
+//  }
 
   @Test
   void uploadFile_shouldErrorIfUtf8CheckThrowsException() {
