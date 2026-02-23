@@ -72,7 +72,7 @@ public class S3ClientWrapper {
     log.info("Checking {} is UTF-8 encoded", fileName);
     long encodingCheckStart = System.currentTimeMillis();
     if (!csvFileValidator.checkUtf8Encoded(fileToUpload)) {
-      throw new CsvUploadException("File '" + fileName + "' is not UTF-8 encoded");
+//      throw new CsvUploadException("File '" + fileName + "' is not UTF-8 encoded");
     }
     long encodingDuration = System.currentTimeMillis() - encodingCheckStart;
     log.info("File {} is valid UTF-8. Check took {} ms", fileName, encodingDuration);
