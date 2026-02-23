@@ -192,7 +192,7 @@ class Report013IntegrationTest extends IntegrationTestBase {
         '11111111-1111-1111-1111-111111111111',
         'OA001',
         'MAR-2025',
-        'LEGAL_HELP',
+        'LEGAL HELP',
         'VALIDATION_SUCCEEDED',
         'CSN001',
         NULL,
