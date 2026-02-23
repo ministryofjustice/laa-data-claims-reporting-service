@@ -62,10 +62,10 @@ class Report013IntegrationTest extends IntegrationTestBase {
             ));
 
     assertThat(countsByAreaOfLaw)
-        .containsKeys("CIVIL", "CRIME LOWER");
+        .containsKeys("LEGAL_HELP", "CRIME_LOWER");
 
-    assertThat(countsByAreaOfLaw.get("CIVIL")).isEqualTo(1L);
-    assertThat(countsByAreaOfLaw.get("CRIME LOWER")).isEqualTo(1L);
+    assertThat(countsByAreaOfLaw.get("LEGAL_HELP")).isEqualTo(1L);
+    assertThat(countsByAreaOfLaw.get("CRIME_LOWER")).isEqualTo(1L);
 
     long totalRows =
         countsByAreaOfLaw.values().stream().mapToLong(Long::longValue).sum();
@@ -106,7 +106,7 @@ class Report013IntegrationTest extends IntegrationTestBase {
 
     Map<String, Object> civilRow =
         report013Rows.stream()
-            .filter(r -> "CIVIL".equals(r.get("Area of Law")))
+            .filter(r -> "LEGAL_HELP".equals(r.get("Area of Law")))
             .findFirst()
             .orElseThrow();
 
@@ -121,7 +121,7 @@ class Report013IntegrationTest extends IntegrationTestBase {
 
     Map<String, Object> crimeRow =
         report013Rows.stream()
-            .filter(r -> "CRIME LOWER".equals(r.get("Area of Law")))
+            .filter(r -> "CRIME_LOWER".equals(r.get("Area of Law")))
             .findFirst()
             .orElseThrow();
 
@@ -167,7 +167,7 @@ class Report013IntegrationTest extends IntegrationTestBase {
 
     Map<String, Object> crimeRow =
         report013Rows.stream()
-            .filter(r -> "CRIME LOWER".equals(r.get("Area of Law")))
+            .filter(r -> "CRIME_LOWER".equals(r.get("Area of Law")))
             .findFirst()
             .orElseThrow();
 
