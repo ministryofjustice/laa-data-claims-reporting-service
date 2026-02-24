@@ -292,7 +292,4 @@ FROM submission_periods AS sp
 WHERE sp.submission_status = 'VALIDATION_SUCCEEDED'
   AND c.status = 'VALID'
   AND bs.created_on >= (CURRENT_DATE - INTERVAL '3 years')
-ORDER BY
-    sp.submission_period_start NULLS LAST,
-    sp.office_account_number,
-    c.line_number;
+
