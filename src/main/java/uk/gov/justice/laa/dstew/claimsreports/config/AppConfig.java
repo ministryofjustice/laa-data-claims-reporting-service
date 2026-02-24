@@ -73,7 +73,7 @@ public class AppConfig {
   @Bean
   public S3ClientWrapper createS3ClientWrapper(@Value("${AWS_REGION}") String awsRegion, @Value("${S3_REPORT_STORE}") String bucketName,
                                                MetricsHandler metricsHandler, CsvFileValidator csvFileValidator) {
-    return new S3ClientWrapper(awsRegion, bucketName, metricsHandler, csvFileValidator);
+    return new S3ClientWrapper(awsRegion, bucketName, metricsHandler, csvFileValidator, uploadUtf8FailuresToS3);
   }
 
   /**
@@ -89,5 +89,8 @@ public class AppConfig {
   @Value("${feature.force-run-rep000:false}")
   @Getter
   private boolean forceRunReport000;
+
+  @Value("${feature.upload-utf-8-failures-to-s3:false}")
+  private boolean uploadUtf8FailuresToS3;
 
 }

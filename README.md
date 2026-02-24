@@ -100,6 +100,11 @@ kubectl -n {namespace} create job {give a job name here} --from=cronjob/{cronjob
 | kubectl -n {namespace} apply -f -
 ```
 
+#### Debugging feature flags
+You can create the cronjob with the `FEATURE_UPLOAD-UTF-8-FAILURES-TO-S3="true"` if you are debugging an issue with UTF-8 validation and need to see the invalid document.
+When enabled it will attempt to upload the report to the `reports/errors` folder.
+You should not turn this on permanently it is intended as just a debug helper.  
+
 ### Pre commit hooks
 
 Pre commit hooks have been set up on this repository to ensure no accidental commits of secrets, keys etc. Provided by DevSecOps https://github.com/ministryofjustice/devsecops-hooks
