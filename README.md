@@ -99,3 +99,7 @@ kubectl -n {namespace} create job {give a job name here} --from=cronjob/{cronjob
 | kubectl -n {namespace} set env --local -f - FORCE_RUN_REP000="true" -o yaml \
 | kubectl -n {namespace} apply -f -
 ```
+
+### Pre commit hooks
+
+Pre commit hooks have been set up on this repository to ensure no accidental commits of secrets, keys etc. Provided by DevSecOps https://github.com/ministryofjustice/devsecops-hooks
