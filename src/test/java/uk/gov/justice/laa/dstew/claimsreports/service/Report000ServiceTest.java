@@ -69,9 +69,9 @@ class Report000ServiceTest {
 
     verify(creationService).buildCsvFromData(
         eq("SELECT * FROM claims.mvw_report_000 "
-            + "ORDER BY  to_char(to_date(\"Submission Period\", 'MON-YYYY'), 'YYYYMM') NULLS LAST,"
-            + "    \"Office Account Number\","
-            + "    \"Line Number\""),
+            + "ORDER BY  to_char(to_date(\"Submission data - Submission Period\", 'MON-YYYY'), 'YYYYMM') NULLS LAST,"
+            + "    \"Provider Data - Office Account Number\","
+            + "    \"Submission data - Line Number\""),
         any(BufferedWriter.class),
         any()
     );
