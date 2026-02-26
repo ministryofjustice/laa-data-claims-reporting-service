@@ -48,8 +48,8 @@ class S3ClientWrapperTest {
 
   @BeforeEach
   void beforeEach() {
-    reset(csvFileValidator, metricsHandler);
-    s3ClientWrapper = new S3ClientWrapper(s3Client, "bucket", metricsHandler, csvFileValidator);
+    reset(csvFileValidator, metricsHandler, s3Client);
+    s3ClientWrapper = new S3ClientWrapper(s3Client, "bucket", metricsHandler, csvFileValidator, false);
   }
 
   @SneakyThrows
@@ -122,13 +122,42 @@ class S3ClientWrapperTest {
     assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.exe"));
   }
 
-//  @Test
-//  void uploadFile_shouldErrorIfUtf8CheckReturnsFalse() {
-//    when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(true);
-//    when(csvFileValidator.checkFileExtension("testReport.csv", "filename.csv")).thenReturn(true);
-//    when(csvFileValidator.checkUtf8Encoded(testReport)).thenReturn(false);
-//    assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
-//  }
+  @Test
+  void uploadFile_shouldErrorIfUtf8CheckReturnsFalse() {
+    when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(true);
+    when(csvFileValidator.checkFileExtension("testReport.csv", "filename.csv")).thenReturn(true);
+    when(csvFileValidator.checkUtf8Encoded(testReport)).thenReturn(false);
+    assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
+  }
+
+  @SneakyThrows
+  @Test
+  void uploadFile_shouldUploadErrorFileToS3IfUtf8CheckReturnsFalseAndFeatureFlagOn() {
+    s3ClientWrapper = new S3ClientWrapper(s3Client, "bucket", metricsHandler, csvFileValidator, true);
+
+    when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(true);
+    when(csvFileValidator.checkFileExtension("testReport.csv", "filename.csv")).thenReturn(true);
+    when(csvFileValidator.checkUtf8Encoded(testReport)).thenReturn(false);
+
+    var mockResponse = PutObjectResponse.builder().build();
+    when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class))).thenReturn(mockResponse);
+
+    assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
+
+    // Check wrapper builds up the correct request to S3
+    var captorPutObjectRequest = ArgumentCaptor.forClass(PutObjectRequest.class);
+    var captorRequestBody = ArgumentCaptor.forClass(RequestBody.class);
+    verify(s3Client).putObject(captorPutObjectRequest.capture(), captorRequestBody.capture());
+
+    var requestToS3 = captorPutObjectRequest.getValue();
+    assertEquals("bucket", requestToS3.bucket());
+    assertEquals("reports/errors/testReport.csv", requestToS3.key());
+
+    // Check the expected contents was sent up to S3
+    var requestBody = captorRequestBody.getValue();
+    assertEquals(Files.readString(Path.of(testFilePath)), getRequestBodyContents(requestBody));
+
+  }
 
   @Test
   void uploadFile_shouldErrorIfUtf8CheckThrowsException() {

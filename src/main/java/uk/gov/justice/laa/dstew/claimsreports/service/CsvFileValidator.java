@@ -4,8 +4,11 @@ import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.nio.ByteBuffer;
+import java.nio.CharBuffer;
+import java.nio.channels.Channels;
 import java.nio.charset.CharacterCodingException;
 import java.nio.charset.CodingErrorAction;
+import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import lombok.extern.slf4j.Slf4j;
@@ -19,45 +22,89 @@ import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
 @Slf4j
 public class CsvFileValidator {
 
-  private static final int BUFFER_SIZE = 4096;
+  static final int BUFFER_SIZE = 4096;
 
   /**
    * Check the file is UTF-8 encoded.
    * Important if changing this that you do not load the whole file into memory at once!
+   * We manually check as libraries like Tika just look at 10kb or so and predict based on that, which feels insufficient for our purpose and sizes
    *
    * @param fileToUpload file to check
    * @return true if UTF-8, false otherwise
    */
   public boolean checkUtf8Encoded(File fileToUpload) {
 
+    var decoder = StandardCharsets.UTF_8
+        .newDecoder()
+        .onMalformedInput(CodingErrorAction.REPORT)
+        .onUnmappableCharacter(CodingErrorAction.REPORT);
+
+    // inBuffer is what we read the csv file into
+    var inBuffer = ByteBuffer.allocate(BUFFER_SIZE);
+    // outBuffer has the "decoded" UTF-8 chars in.
+    var outBuffer = CharBuffer.allocate(BUFFER_SIZE);
+
+    var totalBytesRead = 0;
+
     try (var inputStream = new FileInputStream(fileToUpload)) {
 
-      var decoder = StandardCharsets.UTF_8
-          .newDecoder()
-          .onMalformedInput(CodingErrorAction.REPORT)
-          .onUnmappableCharacter(CodingErrorAction.REPORT);
-
-      // We can't just read the whole file at once as it could be hundreds or thousands of MBs and will blow the memory
-      // So we loop over a small section at a time
-      byte[] readingBuffer = new byte[BUFFER_SIZE];
+      var readableByteChannel = Channels.newChannel(inputStream);
 
       int bytesRead;
-      while ((bytesRead = inputStream.read(readingBuffer)) != -1) {
-        // Decoder needs a byte buffer not a byte array
-        var byteBuffer = ByteBuffer.wrap(readingBuffer, 0, bytesRead);
+      // We can't just read the whole file at once as it could be hundreds or thousands of MBs and will blow the memory
+      // So we loop over a small section at a time
+      // -1 is end of file (but still might have carry-over bytes in the inBuffer to handle after)
+      while ((bytesRead = readableByteChannel.read(inBuffer)) != -1) {
 
-        // No error = utf-8 encoded bytes.
-        // We don't actually care about the output, just that it doesn't throw an error. So don't save output
-        decoder.decode(byteBuffer);
+        // Jump back to the start of the buffer
+        inBuffer.flip();
+
+        while (true) {
+          var result = decoder.decode(inBuffer, outBuffer, false);
+
+          if (result.isError()) {
+            result.throwException();
+          }
+          if (result.isUnderflow()) {
+            // Either a: all bytes in buffer have been consumed, or
+            // b: start of multibyte character, and it needs to read the next bit
+            inBuffer.compact();
+            outBuffer.clear();
+            break;
+          }
+          if (result.isOverflow()) {
+            // This means outBuffer is full. We don't care about the contents so just clear it
+            outBuffer.clear();
+          }
+        }
+
+        totalBytesRead += bytesRead;
+        outBuffer.clear();
       }
 
-      // Finish decoding anything left over
-      decoder.decode(ByteBuffer.allocate(0));
+      // Tell the decoder we are finished.
+      inBuffer.flip();
+      var end = decoder.decode(inBuffer, outBuffer, true);
+      if (end.isError()) {
+        // This error would e.g. be that the last thing read was part of a multibyte sequence and so we underflowed above,
+        // but there is no more to read so we need to error.
+        end.throwException();
+      }
 
+      // Clear anything still left in the decoder.
+      var flush = decoder.flush(outBuffer);
+      if (flush.isError()) {
+        flush.throwException();
+      }
+
+      // No error = all utf-8 encoded bytes.
       return true;
 
+    } catch (MalformedInputException e) {
+      int errorIndex = e.getInputLength();
+      log.error("Malformed UTF-8 at byte offset {} in file {}: {}", totalBytesRead + errorIndex, fileToUpload.getPath(), e.getMessage());
+      return false;
     } catch (CharacterCodingException e) {
-      // Most likely a MalformedInputException
       log.error("Failed to decode in UTF-8 with exception {}, {}", e.getClass().getName(), e.getMessage());
       return false;
     } catch (IOException e) {

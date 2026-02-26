@@ -73,7 +73,8 @@ public class LocalstackS3Config {
       S3Client localstackS3Client,
       @Value("${S3_REPORT_STORE}") String bucketName,
       MetricsHandler metricsHandler,
-      CsvFileValidator csvFileValidator
+      CsvFileValidator csvFileValidator,
+      @Value("${feature.upload-utf-8-failures-to-s3:false}") boolean uploadUtf8FailuresToS3
   ) {
 
     // create bucket if it doesn't exist
@@ -83,7 +84,7 @@ public class LocalstackS3Config {
       // ignore
     }
 
-    return new S3ClientWrapper(localstackS3Client, bucketName, metricsHandler, csvFileValidator);
+    return new S3ClientWrapper(localstackS3Client, bucketName, metricsHandler, csvFileValidator, uploadUtf8FailuresToS3);
   }
 
 }

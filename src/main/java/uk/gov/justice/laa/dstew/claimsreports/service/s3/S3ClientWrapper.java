@@ -20,6 +20,7 @@ public class S3ClientWrapper {
   private final String s3Bucket;
   private final MetricsHandler metricsHandler;
   private final CsvFileValidator csvFileValidator;
+  private final Boolean uploadUtf8FailuresToS3;
 
   /**
    * Create S3ClientWrapper based on AWS region.
@@ -29,11 +30,13 @@ public class S3ClientWrapper {
    * @param metricsHandler Prometheus metric handler
    * @param csvFileValidator CSV file validation service
    */
-  public S3ClientWrapper(String awsRegion, String s3Bucket, MetricsHandler metricsHandler, CsvFileValidator csvFileValidator) {
+  public S3ClientWrapper(String awsRegion, String s3Bucket, MetricsHandler metricsHandler,
+                         CsvFileValidator csvFileValidator, Boolean uploadUtf8FailuresToS3) {
     this.s3Client = new S3ClientFactory().createS3Client(awsRegion);
     this.s3Bucket = s3Bucket;
     this.metricsHandler = metricsHandler;
     this.csvFileValidator = csvFileValidator;
+    this.uploadUtf8FailuresToS3 = uploadUtf8FailuresToS3;
   }
 
   /**
@@ -44,11 +47,13 @@ public class S3ClientWrapper {
    * @param metricsHandler Prometheus metric handler
    * @param csvFileValidator CSV file validation service
    */
-  public S3ClientWrapper(S3Client s3Client, String s3Bucket, MetricsHandler metricsHandler, CsvFileValidator csvFileValidator) {
+  public S3ClientWrapper(S3Client s3Client, String s3Bucket, MetricsHandler metricsHandler,
+                         CsvFileValidator csvFileValidator, Boolean uploadUtf8FailuresToS3) {
     this.s3Client = s3Client;
     this.s3Bucket = s3Bucket;
     this.metricsHandler = metricsHandler;
     this.csvFileValidator = csvFileValidator;
+    this.uploadUtf8FailuresToS3 = uploadUtf8FailuresToS3;
   }
 
   /**
@@ -72,7 +77,10 @@ public class S3ClientWrapper {
     log.info("Checking {} is UTF-8 encoded", fileName);
     long encodingCheckStart = System.currentTimeMillis();
     if (!csvFileValidator.checkUtf8Encoded(fileToUpload)) {
-      // throw new CsvUploadException("File '" + fileName + "' is not UTF-8 encoded");
+      if (uploadUtf8FailuresToS3) {
+        uploadErroredFile(fileToUpload, fileName);
+      }
+      throw new CsvUploadException("File '" + fileName + "' is not UTF-8 encoded");
     }
     long encodingDuration = System.currentTimeMillis() - encodingCheckStart;
     log.info("File {} is valid UTF-8. Check took {} ms", fileName, encodingDuration);
@@ -98,6 +106,21 @@ public class S3ClientWrapper {
     metricsHandler.setCustomMetric(CustomReportMetric.REPORT_FILE_SIZE, fileSizeMib);
     log.info("Uploaded {} to S3 bucket {} with filename {} and size {} MiB in {} ms",
         fileToUpload.getPath(), s3Bucket, desiredFileKey, fileSizeMib, durationMilliseconds);
+  }
+
+  private void uploadErroredFile(File fileToUpload, String fileName) {
+    log.info("UTF-8 check failed and uploadUtf8Errors is enabled, attempting to upload to errors folder");
+    var errorFileName = "reports/errors/" + fileName;
+
+    var errorUpload = PutObjectRequest.builder()
+        .bucket(s3Bucket)
+        .key(errorFileName)
+        .contentType("text/csv")
+        .build();
+    s3Client.putObject(errorUpload, RequestBody.fromFile(fileToUpload));
+    log.info("Uploaded non-UTF-8 file {} to S3 bucket {} with filename {}",
+        fileToUpload.getPath(), s3Bucket, errorFileName);
+
   }
 
 }
