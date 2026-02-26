@@ -40,7 +40,6 @@ public class CsvFileValidator {
         .onUnmappableCharacter(CodingErrorAction.REPORT);
 
     // inBuffer is what we read the csv file into
-    // Add 4 to allow it to handle cases where multibyte chars occur at boundaries
     var inBuffer = ByteBuffer.allocate(BUFFER_SIZE);
     // outBuffer has the "decoded" UTF-8 chars in.
     var outBuffer = CharBuffer.allocate(BUFFER_SIZE);
