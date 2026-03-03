@@ -43,7 +43,7 @@ public class TestConfig {
     } catch (BucketAlreadyOwnedByYouException e) {
       // ignore
     }
-    return new S3ClientWrapper(localstackS3Client, bucketName, metricsHandler, csvFileValidator);
+    return new S3ClientWrapper(localstackS3Client, bucketName, metricsHandler, csvFileValidator, false);
   }
 
   @Bean

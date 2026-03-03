@@ -1,9 +1,12 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.OutputStream;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Arrays;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -15,6 +18,7 @@ import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
 import static org.junit.jupiter.api.Assertions.assertFalse;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.justice.laa.dstew.claimsreports.service.CsvFileValidator.BUFFER_SIZE;
 
 @ExtendWith(MockitoExtension.class)
 class CsvFileValidatorTest {
@@ -45,6 +49,73 @@ class CsvFileValidatorTest {
 
     assertFalse(csvFileValidator.checkUtf8Encoded(path.toFile()));
     Files.deleteIfExists(path);
+  }
+
+  @Test
+  public void testValidUtf8TwoBytesCharacterSplitAcrossChunks() throws Exception {
+    byte[] pound = "£".getBytes(StandardCharsets.UTF_8); // C2 A3
+
+    // Want to force our pound sign to be spread across buffer reads.
+    byte[] padding = new byte[BUFFER_SIZE - 1];
+    Arrays.fill(padding, (byte) ' ');
+
+    var path = File.createTempFile("utf8-split-valid", ".txt");
+    try (FileOutputStream out = new FileOutputStream(path)) {
+      out.write(padding);
+      out.write(pound);
+      out.write("Hello World".getBytes(StandardCharsets.UTF_8));
+    }
+    assertTrue(csvFileValidator.checkUtf8Encoded(path));
+  }
+
+  @Test
+  public void testValidUtf8ThreeBytesCharacterSplitAcrossChunks() throws Exception {
+    byte[] dash = "–".getBytes(StandardCharsets.UTF_8); // E2 80 93
+
+    // Want to force our dash to be spread across buffer reads.
+    byte[] padding = new byte[BUFFER_SIZE - 2];
+    Arrays.fill(padding, (byte) ' ');
+
+    var path = File.createTempFile("utf8-split-valid", ".txt");
+    try (FileOutputStream out = new FileOutputStream(path)) {
+      out.write(padding);
+      out.write(dash);
+      out.write("Hello World".getBytes(StandardCharsets.UTF_8));
+    }
+   assertTrue(csvFileValidator.checkUtf8Encoded(path));
+  }
+
+  @Test
+  public void testValidUtf8FourBytesCharacterSplitAcrossChunks() throws Exception {
+    // This is a smiley emoji.
+    byte[] emoji = "\uD83D\uDE00".getBytes(StandardCharsets.UTF_8); // F0 9F 98 80
+
+    // Want to force our emoji to be spread across buffer reads.
+    byte[] padding = new byte[BUFFER_SIZE - 2];
+    Arrays.fill(padding, (byte) ' ');
+
+    var path = File.createTempFile("utf8-split-valid", ".txt");
+    try (FileOutputStream out = new FileOutputStream(path)) {
+      out.write(padding);
+      out.write(emoji);
+      out.write("Hello World".getBytes(StandardCharsets.UTF_8));
+    }
+  assertTrue(csvFileValidator.checkUtf8Encoded(path));
+  }
+
+  @Test
+  public void testIncompleteUtf8AtEOF() throws Exception {
+    // "–" = E2 80 93, write only E2 80 (incomplete)
+    byte[] dash = "–".getBytes(StandardCharsets.UTF_8);
+    byte[] incomplete = new byte[]{dash[0], dash[1]}; // E2 80
+
+    var path = File.createTempFile("utf8-incomplete-eof", ".txt");
+    try (FileOutputStream out = new FileOutputStream(path)) {
+      out.write("Hello ".getBytes(StandardCharsets.UTF_8));
+      out.write(incomplete);
+    }
+
+    assertFalse(csvFileValidator.checkUtf8Encoded(path));
   }
 
   @Test
@@ -108,6 +179,5 @@ class CsvFileValidatorTest {
       );
     }
   }
-
 
 }
