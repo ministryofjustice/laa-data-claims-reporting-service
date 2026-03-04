@@ -4,4 +4,3 @@ ignore:
   SNYK-JAVA-COMFASTERXMLJACKSONCORE-15365924:
     - '*':
         reason: "Jackson version managed and forced by Spring Boot plugin"
-        expires: "2026-01-01T00:00:00.000Z"
