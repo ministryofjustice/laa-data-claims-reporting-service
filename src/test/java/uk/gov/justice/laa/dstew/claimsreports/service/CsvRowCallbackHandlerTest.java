@@ -13,11 +13,11 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
-import tools.jackson.core.exc.JacksonIOException;
-import tools.jackson.databind.ObjectWriter;
-import tools.jackson.databind.SequenceWriter;
-import tools.jackson.dataformat.csv.CsvMapper;
-import tools.jackson.dataformat.csv.CsvSchema;
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SequenceWriter;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
+import java.io.IOException;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 
 import java.io.BufferedWriter;
@@ -66,7 +66,7 @@ public class CsvRowCallbackHandlerTest {
   }
 
   @Test
-  void willSetupHeaderRowFirstTimeAround() throws SQLException {
+  void willSetupHeaderRowFirstTimeAround() throws Exception {
     setupResultSetData(1, "data");
 
     when(csvMapper.writer(any(CsvSchema.class))).thenReturn(objectWriter);
@@ -77,7 +77,7 @@ public class CsvRowCallbackHandlerTest {
   }
 
   @Test
-  void buildsOutputForSubsequentRowsWithoutRebuildingSequenceWriter() throws SQLException {
+  void buildsOutputForSubsequentRowsWithoutRebuildingSequenceWriter() throws Exception {
     buildFirstRowAndSchema();
     var secondRowMap = new LinkedHashMap<String, String>();
     setupResultSetData(10, "second_data_row");
@@ -91,7 +91,7 @@ public class CsvRowCallbackHandlerTest {
   }
 
   @Test
-  void willNotFlushBufferIfDataSizeIsSmallerThanBufferFlushValue() throws SQLException {
+  void willNotFlushBufferIfDataSizeIsSmallerThanBufferFlushValue() throws Exception {
     setupResultSetData(1, "data");
 
     when(csvMapper.writer(any(CsvSchema.class))).thenReturn(objectWriter);
@@ -102,7 +102,7 @@ public class CsvRowCallbackHandlerTest {
   }
 
   @Test
-  void willFlushWhenRowNumberEqualsFlushSize() throws SQLException, IOException {
+  void willFlushWhenRowNumberEqualsFlushSize() throws Exception {
     CsvRowCallbackHandler csvRowCallbackHandler = new CsvRowCallbackHandler(writer, row, 1, csvMapper);
     setupResultSetData(1, "data");
 
@@ -125,13 +125,12 @@ public class CsvRowCallbackHandlerTest {
   }
 
   @Test
-  void willThrowCsvCreationExceptionIfWriterThrows() throws SQLException {
+  void willThrowCsvCreationExceptionIfWriterThrows() throws Exception {
     setupResultSetData(1, "data");
 
     when(csvMapper.writer(any(CsvSchema.class))).thenReturn(objectWriter);
     when(objectWriter.writeValues(writer)).thenReturn(sequenceWriter);
-    when(sequenceWriter.write(any())).thenThrow(JacksonIOException.class);
-
+    when(sequenceWriter.write(any())).thenThrow(new IOException("boom"));
     assertThrows(CsvCreationException.class, () -> csvRowCallbackHandler.processRow(resultSet));
   }
 
@@ -142,7 +141,7 @@ public class CsvRowCallbackHandlerTest {
   }
 
   @Test
-  void willHandleCommaInData() throws SQLException {
+  void willHandleCommaInData() throws Exception {
     var dataWithCommaMap = new LinkedHashMap<String, String>();
     setupResultSetData(1, "Data, Mrs. S");
     for (int i = 1; i <= 10; i++) {
@@ -164,7 +163,7 @@ public class CsvRowCallbackHandlerTest {
   }
 
   @Test
-  void willIncrementCounterWhenRowsAreHandled() throws SQLException {
+  void willIncrementCounterWhenRowsAreHandled() throws Exception {
     buildFirstRowAndSchema();
     setupResultSetData(10, "second_data_row");
     csvRowCallbackHandler.processRow(resultSet);
@@ -182,7 +181,7 @@ public class CsvRowCallbackHandlerTest {
   }
 
   // To process subsequent rows you need to process 1st row so it builds the headers etc
-  private void buildFirstRowAndSchema() throws SQLException {
+  private void buildFirstRowAndSchema() throws Exception {
     setupResultSetData(1, "data");
     when(csvMapper.writer(any(CsvSchema.class))).thenReturn(objectWriter);
     when(objectWriter.writeValues(writer)).thenReturn(sequenceWriter);

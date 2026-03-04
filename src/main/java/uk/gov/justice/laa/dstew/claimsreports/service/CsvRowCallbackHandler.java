@@ -1,17 +1,17 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import com.fasterxml.jackson.databind.ObjectWriter;
+import com.fasterxml.jackson.databind.SequenceWriter;
+import com.fasterxml.jackson.dataformat.csv.CsvMapper;
+import com.fasterxml.jackson.dataformat.csv.CsvSchema;
 import java.io.BufferedWriter;
+import java.io.IOException;
 import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Map;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowCallbackHandler;
-import tools.jackson.core.exc.JacksonIOException;
-import tools.jackson.databind.ObjectWriter;
-import tools.jackson.databind.SequenceWriter;
-import tools.jackson.dataformat.csv.CsvMapper;
-import tools.jackson.dataformat.csv.CsvSchema;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 
 /**
@@ -65,7 +65,7 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
 
       rowCount++;
 
-    } catch (JacksonIOException | SQLException ex) {
+    } catch (IOException | SQLException ex) {
       throw new CsvCreationException("Failure to write data row to new csv file", ex);
     }
   }
@@ -75,12 +75,16 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
     for (int i = 1; i <= columnCount; i++) {
       schemaBuilder.addColumn(meta.getColumnName(i));
     }
-    CsvSchema schema = schemaBuilder.build();
 
-    // Knows what schema and format to use
+    CsvSchema schema = schemaBuilder.build();
     ObjectWriter objectWriter = csvMapper.writer(schema);
-    // Streaming writer that handles CSV formatting, quotations, line endings etc.
-    sequenceWriter = objectWriter.writeValues(writer);
+
+    try {
+      // Streaming writer that handles CSV formatting, quotations, line endings etc.
+      sequenceWriter = objectWriter.writeValues(writer);
+    } catch (IOException e) {
+      throw new CsvCreationException("Failure to initialise CSV writer", e);
+    }
   }
 
   public int getRowCount() {
