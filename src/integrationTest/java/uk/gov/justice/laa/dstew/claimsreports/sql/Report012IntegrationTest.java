@@ -104,10 +104,10 @@ jdbcTemplate.update("""
             ));
 
     assertThat(countsByAreaOfLaw)
-        .containsKeys("CIVIL", "CRIME LOWER");
+        .containsKeys("LEGAL_HELP", "CRIME_LOWER");
 
-    assertThat(countsByAreaOfLaw.get("CIVIL")).isEqualTo(2L);
-    assertThat(countsByAreaOfLaw.get("CRIME LOWER")).isEqualTo(2L);
+    assertThat(countsByAreaOfLaw.get("LEGAL_HELP")).isEqualTo(2L);
+    assertThat(countsByAreaOfLaw.get("CRIME_LOWER")).isEqualTo(2L);
 
     long totalRows =
         countsByAreaOfLaw.values().stream().mapToLong(Long::longValue).sum();
