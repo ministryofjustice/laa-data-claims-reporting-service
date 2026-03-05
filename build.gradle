@@ -51,9 +51,6 @@ dependencies {
 
     implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.1.0'
 
-    // Overrides for CVEs. Remove when Spring versioning supports these
-    implementation 'tools.jackson.core:jackson-core:3.1.0'
-
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly "org.flywaydb:flyway-database-postgresql"
