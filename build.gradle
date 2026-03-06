@@ -47,7 +47,7 @@ dependencies {
     //can not upgrade pushgateway to 1.4.x yet as
     //Prometheus Metrics 1.4.x removed methods Micrometer-Registry still calls.
     implementation 'io.micrometer:micrometer-registry-prometheus'
-    implementation 'io.prometheus:prometheus-metrics-exporter-pushgateway:1.5.0'
+    implementation 'io.prometheus:prometheus-metrics-exporter-pushgateway:1.4.3'
 
     implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.1.0'
 
