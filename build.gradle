@@ -40,14 +40,12 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    implementation(platform 'software.amazon.awssdk:bom:2.41.27')
+    implementation(platform 'software.amazon.awssdk:bom:2.42.7')
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:sts'
 
-    //can not upgrade pushgateway to 1.4.x yet as
-    //Prometheus Metrics 1.4.x removed methods Micrometer-Registry still calls.
     implementation 'io.micrometer:micrometer-registry-prometheus'
-    implementation 'io.prometheus:prometheus-metrics-exporter-pushgateway:1.3.1'
+    implementation 'io.prometheus:prometheus-metrics-exporter-pushgateway'
 
     implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.1.0'
 
