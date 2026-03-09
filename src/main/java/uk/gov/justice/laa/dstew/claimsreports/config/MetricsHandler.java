@@ -91,6 +91,9 @@ public class MetricsHandler {
     }
   }
 
+  /**
+   * Push replication health metrics.
+   */
   public void pushReplicationHealthMetric() {
     try {
       PushGateway.builder()

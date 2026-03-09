@@ -114,7 +114,8 @@ public class PrometheusConfiguration {
    * This class defines some custom metrics we push to Prometheus.
    */
   public record CustomReportGauges(Gauge reportSuccessful, Gauge reportTotalTime, Gauge dataRefreshTimeMs, Gauge generatedTimeMs,
-                                   Gauge rowsWritten, Gauge reportFileSize, Gauge uploadTimeMs, Gauge encodingCheckTimeMs, Gauge replicationHealthCheckStatus) {
+                                   Gauge rowsWritten, Gauge reportFileSize, Gauge uploadTimeMs, Gauge encodingCheckTimeMs,
+                                   Gauge replicationHealthCheckStatus) {
 
     public static int REPORT_FAILED = -1;
     public static int REPORT_SUCCESSFUL = 1;

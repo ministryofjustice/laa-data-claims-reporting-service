@@ -101,6 +101,7 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
     log.info("Replication health confirmed — proceeding with report generation.");
     return true;
   }
+
   /**
    * Generates reports by iterating through a list of report services, performing the following tasks:
    * - Refreshing the associated materialized view for each report service.
