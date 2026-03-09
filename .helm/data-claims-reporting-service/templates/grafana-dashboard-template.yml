@@ -124,7 +124,7 @@
             {
               "disableTextWrap": false,
               "editorMode": "builder",
-              "expr": "report_success{namespace='{{ .Release.Namespace }}'}",
+              "expr": "report_success{namespace=\"{{ .Release.Namespace }}\",exported_job!=\"replicationHealth\"}",
               "fullMetaSearch": false,
               "includeNullMetadata": true,
               "interval": "",

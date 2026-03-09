@@ -54,7 +54,7 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
 
   @Override
   public void run(ApplicationArguments args) {
-    if (!ensureReplicationHealthy()) {
+    if (ensureReplicationHealthy()) {
       generateReports();
     } else {
       log.error("Replication health check failed, reports not generated.");
@@ -124,7 +124,7 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
         service.generateReport();
       } catch (Exception e) {
         log.error("Report generation failed for {}: {}",
-            service.getClass().getSimpleName(), e.getMessage(), e);
+                service.getClass().getSimpleName(), e.getMessage(), e);
         metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
       } finally {
         var reportDuration = System.currentTimeMillis() - startTime;
@@ -137,11 +137,12 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
 
   private void markAllReportsFailedDueToReplication() {
     log.info("Marking all report metrics as failed due to replication health check failure.");
-
     for (AbstractReportService service : reportServices) {
+      String reportName = service.getReportName();
+      log.info("Pushing FAILED metric for report: '{}'", reportName); // verify this matches previous pushes
       metricsHandler.resetCustomMetrics();
       metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
-      metricsHandler.pushReportMetrics(service.getReportName());
+      metricsHandler.pushReportMetrics(reportName);
     }
   }
 
