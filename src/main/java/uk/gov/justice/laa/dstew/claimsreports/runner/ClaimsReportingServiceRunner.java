@@ -1,5 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.runner;
 
+import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric.REPLICATION_HEALTH_CHECK_STATUS;
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_FAILED;
 
 import java.util.List;
@@ -57,6 +58,7 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
       generateReports();
     } else {
       log.error("Replication health check failed, reports not generated.");
+      markAllReportsFailedDueToReplication();
     }
   }
 
@@ -80,18 +82,25 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
     if (!report.isHealthy()) {
       log.error("Replication health check failed:\n{}", report.summary());
 
-      //Even if the overall replication is unhealthy, we want to continue if ignoreRowCountMismatch is set and basic WAL check passed.
+      // Even if the overall replication is unhealthy, we want to continue if
+      // ignoreRowCountMismatch is set and basic WAL check passed.
       if (ignoreRowCountMismatch && report.isWalLsnOk()) {
         log.info("Ignoring Row Count Mismatch because ignoreRowCountMismatch is set to true and WAL LSN check has passed ");
+        metricsHandler.setCustomMetric(REPLICATION_HEALTH_CHECK_STATUS, 1);
+        metricsHandler.pushReplicationHealthMetric();
       } else {
+        metricsHandler.setCustomMetric(REPLICATION_HEALTH_CHECK_STATUS, 0);
+        metricsHandler.pushReplicationHealthMetric();
         return false;
       }
+    } else {
+      metricsHandler.setCustomMetric(REPLICATION_HEALTH_CHECK_STATUS, 1);
+      metricsHandler.pushReplicationHealthMetric();
     }
 
     log.info("Replication health confirmed — proceeding with report generation.");
     return true;
   }
-
   /**
    * Generates reports by iterating through a list of report services, performing the following tasks:
    * - Refreshing the associated materialized view for each report service.
@@ -122,6 +131,16 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
         log.info("Report generation for report {} took {} ms ({} s)", service.getReportName(), reportDuration, reportDuration / 1000);
         metricsHandler.pushReportMetrics(service.getReportName());
       }
+    }
+  }
+
+  private void markAllReportsFailedDueToReplication() {
+    log.info("Marking all report metrics as failed due to replication health check failure.");
+
+    for (AbstractReportService service : reportServices) {
+      metricsHandler.resetCustomMetrics();
+      metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
+      metricsHandler.pushReportMetrics(service.getReportName());
     }
   }
 

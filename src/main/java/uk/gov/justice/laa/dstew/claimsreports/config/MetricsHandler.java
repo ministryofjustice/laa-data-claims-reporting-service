@@ -55,6 +55,7 @@ public class MetricsHandler {
       case UPLOAD_TIME_MS -> customReportGauges.uploadTimeMs().set(value);
       case GENERATED_TIME_MS -> customReportGauges.generatedTimeMs().set(value);
       case ENCODING_CHECK_TIME_MS -> customReportGauges.encodingCheckTimeMs().set(value);
+      case REPLICATION_HEALTH_CHECK_STATUS -> customReportGauges.replicationHealthCheckStatus().set(value);
       default -> throw new EnumConstantNotPresentException(CustomReportMetric.class, metric.name());
     }
   }
@@ -85,6 +86,19 @@ public class MetricsHandler {
           .job("jobEnd")
           .registry(jobPrometheusMeterRegistry.getPrometheusRegistry()).build()
           .push();
+    } catch (Exception e) {
+      System.err.println("Failed to push metrics: " + e.getMessage());
+    }
+  }
+
+  public void pushReplicationHealthMetric() {
+    try {
+      PushGateway.builder()
+              .address(gatewayAddress)
+              .job("replicationHealth")
+              .registry(reportPrometheusMeterRegistry.getPrometheusRegistry())
+              .build()
+              .push();
     } catch (Exception e) {
       System.err.println("Failed to push metrics: " + e.getMessage());
     }
