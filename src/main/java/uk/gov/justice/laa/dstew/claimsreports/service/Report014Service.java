@@ -64,8 +64,5 @@ public class Report014Service extends AbstractReportService {
 
   // Daily report
   @Override
-  protected boolean runToday() {
-    // Temporarily disable on Prod until confirmation of DPIA
-    return !environment.acceptsProfiles(Profiles.of("prod"));
-  }
+  protected boolean runToday() { return true; }
 }
