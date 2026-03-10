@@ -64,5 +64,7 @@ public class Report014Service extends AbstractReportService {
 
   // Daily report
   @Override
-  protected boolean runToday() { return true; }
+  protected boolean runToday() {
+    return true;
+  }
 }
