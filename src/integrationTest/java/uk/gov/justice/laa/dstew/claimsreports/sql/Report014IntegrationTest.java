@@ -127,6 +127,26 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
   }
 
+  @Test
+  void testNoTypeAndReasonIsMappedToEscapeFeeDuringCrossOverPeriod() {
+
+    // This case will no longer be valid when crossover period is over and existing records are populated properly.
+    insertDataForFirstAssessmentTest();
+
+    List<Map<String, Object>> returnedRows = jdbcTemplate.queryForList("""
+        SELECT "Assessment Type", "Assessment Reason"
+        FROM claims.mvw_report_014
+        WHERE "Assessment ID" = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab'
+        """
+    );
+
+    assertThat(returnedRows).isNotNull();
+    assertThat(returnedRows.getFirst().get("Assessment Type")).isEqualTo("Escape Case Assessment");
+    assertThat(returnedRows.getFirst().get("Assessment Reason")).isEqualTo("Escape Fee Case Assessment");
+
+  }
+
+
   private void insertDataForFirstAssessmentTest() {
     insertFullSubmissionWithClaimsAndAssessments("VALIDATION_SUCCEEDED", "VALID");
   }

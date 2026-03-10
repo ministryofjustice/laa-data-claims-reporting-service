@@ -3,7 +3,6 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 import java.time.Clock;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.core.env.Environment;
-import org.springframework.core.env.Profiles;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
@@ -57,8 +56,9 @@ public class Report014Service extends AbstractReportService {
 
   @Override
   protected String getOrderByClause() {
-    return " \"Claim ID\","
-        + " to_char(to_date(\"Amendment Date\", 'DD/MM/YYYY HH24:MI:SS'), 'YYYYMM'),"
+    return "\"Claim ID\","
+        + " to_date(\"Amendment Date\", 'DD/MM/YYYY'),"
+        + " to_timestamp(\"Amendment Time\", 'HH24:MI:SS')::time,"
         + " \"Assessment ID\"";
   }
 
