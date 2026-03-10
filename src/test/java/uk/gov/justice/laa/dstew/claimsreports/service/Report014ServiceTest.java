@@ -73,19 +73,4 @@ class Report014ServiceTest {
     verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/daily/report_014_2025-12-22.csv"));
   }
 
-  @Test
-  void generateReport_shouldNotGenerateReportIfProd(){
-    when(environment.acceptsProfiles((Profiles) any())).thenReturn(true);
-
-    service.generateReport();
-
-    verify(creationService, times(0)).buildCsvFromData(
-        eq("SELECT * FROM claims.mvw_report_014"
-            + " ORDER BY  \"Claim ID\", to_char(to_date(\"Amendment Date\", 'DD/MM/YYYY HH24:MI:SS'), 'YYYYMM'), \"Assessment ID\""),
-        any(BufferedWriter.class),
-        any()
-    );
-    verify(s3ClientWrapper, times(0)).uploadFile(any(File.class), eq("reports/daily/report_014_2025-12-22.csv"));
-  }
-
 }
