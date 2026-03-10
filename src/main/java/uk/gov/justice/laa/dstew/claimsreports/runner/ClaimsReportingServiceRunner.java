@@ -54,12 +54,12 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
 
   @Override
   public void run(ApplicationArguments args) {
-    if (ensureReplicationHealthy()) {
-      generateReports();
-    } else {
+//    if (ensureReplicationHealthy()) {
+//      generateReports();
+//    } else {
       log.error("Replication health check failed, reports not generated.");
       markAllReportsFailedDueToReplication();
-    }
+//    }
   }
 
   /**
