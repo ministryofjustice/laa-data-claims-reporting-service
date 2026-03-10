@@ -46,12 +46,12 @@ jobs:
 #      - name: Run integration tests
 #        run: ./gradlew integrationTest
 #
-#      - name: Upload service JAR artifact
-#        uses: actions/upload-artifact@v7
-#        with:
-#          name: service-jar
-#          path: build/libs/*.jar
-#          retention-days: 1
+      - name: Upload service JAR artifact
+        uses: actions/upload-artifact@v7
+        with:
+          name: service-jar
+          path: build/libs/*.jar
+          retention-days: 1
 #
 #      - name: Upload checkstyle report
 #        if: always()
