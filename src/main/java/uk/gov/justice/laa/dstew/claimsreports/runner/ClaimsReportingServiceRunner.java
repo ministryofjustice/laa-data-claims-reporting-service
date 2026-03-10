@@ -54,12 +54,12 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
 
   @Override
   public void run(ApplicationArguments args) {
-//    if (ensureReplicationHealthy()) {
-//      generateReports();
-//    } else {
+    if (ensureReplicationHealthy()) {
+      generateReports();
+    } else {
       log.error("Replication health check failed, reports not generated.");
       markAllReportsFailedDueToReplication();
-//    }
+    }
   }
 
   /**
@@ -81,19 +81,20 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
     log.info("Checking replication health before generating reports...");
 
     ReplicationHealthReport report = replicationHealthCheckService.checkReplicationHealth();
-    boolean replicationHealthy = true;
+    boolean replicationHealthy = false;
+    log.info("Hit forced failureee");
 
-    if (!report.isHealthy()) {
-      log.error("Replication health check failed:\n{}", report.summary());
-
-      // Even if the overall replication is unhealthy, we want to continue if
-      // ignoreRowCountMismatch is set and basic WAL check passed.
-      if (ignoreRowCountMismatch && report.isWalLsnOk()) {
-        log.info("Ignoring Row Count Mismatch because ignoreRowCountMismatch is set to true and WAL LSN check has passed");
-      } else {
-        replicationHealthy = false;
-      }
-    }
+//    if (!report.isHealthy()) {
+//      log.error("Replication health check failed:\n{}", report.summary());
+//
+//      // Even if the overall replication is unhealthy, we want to continue if
+//      // ignoreRowCountMismatch is set and basic WAL check passed.
+//      if (ignoreRowCountMismatch && report.isWalLsnOk()) {
+//        log.info("Ignoring Row Count Mismatch because ignoreRowCountMismatch is set to true and WAL LSN check has passed");
+//      } else {
+//        replicationHealthy = false;
+//      }
+//    }
 
     metricsHandler.setCustomMetric(
             REPLICATION_HEALTH_CHECK_STATUS,
