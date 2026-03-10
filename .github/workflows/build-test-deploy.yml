@@ -34,48 +34,48 @@ jobs:
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
-#      - name: Test coverage verification
-#        run: ./gradlew jacocoTestCoverageVerification
-#
-#      # This is a temporary workaround for https://github.com/testcontainers/testcontainers-java/issues/11212"
-#      - name: Force docker-java API version (temporary workaround for testcontainers)
-#        run: |
-#          echo "api.version=1.44" > ~/.docker-java.properties
-#
-#      # Add run of integration tests when these are added to the repo
-#      - name: Run integration tests
-#        run: ./gradlew integrationTest
-#
+      - name: Test coverage verification
+        run: ./gradlew jacocoTestCoverageVerification
+
+      # This is a temporary workaround for https://github.com/testcontainers/testcontainers-java/issues/11212"
+      - name: Force docker-java API version (temporary workaround for testcontainers)
+        run: |
+          echo "api.version=1.44" > ~/.docker-java.properties
+
+      # Add run of integration tests when these are added to the repo
+      - name: Run integration tests
+        run: ./gradlew integrationTest
+
       - name: Upload service JAR artifact
         uses: actions/upload-artifact@v7
         with:
           name: service-jar
           path: build/libs/*.jar
           retention-days: 1
-#
-#      - name: Upload checkstyle report
-#        if: always()
-#        uses: actions/upload-artifact@v7
-#        with:
-#          name: checkstyle-report
-#          path: build/reports/checkstyle
-#          retention-days: 14
-#
-#      - name: Upload test report
-#        if: always()
-#        uses: actions/upload-artifact@v7
-#        with:
-#          name: test-report
-#          path: build/reports/tests
-#          retention-days: 14
-#
-#      - name: Upload jacoco coverage report
-#        if: always()
-#        uses: actions/upload-artifact@v7
-#        with:
-#          name: jacoco-coverage-report
-#          path: build/reports/jacoco
-#          retention-days: 14
+
+      - name: Upload checkstyle report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: checkstyle-report
+          path: build/reports/checkstyle
+          retention-days: 14
+
+      - name: Upload test report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: test-report
+          path: build/reports/tests
+          retention-days: 14
+
+      - name: Upload jacoco coverage report
+        if: always()
+        uses: actions/upload-artifact@v7
+        with:
+          name: jacoco-coverage-report
+          path: build/reports/jacoco
+          retention-days: 14
 
   vulnerability-scan-app:
     runs-on: ubuntu-latest
