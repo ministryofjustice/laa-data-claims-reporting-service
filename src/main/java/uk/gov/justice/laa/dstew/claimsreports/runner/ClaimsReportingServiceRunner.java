@@ -74,10 +74,14 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
    *
    * <p>@throws IllegalStateException if the replication health check fails
    */
+  private static final long REPLICATION_HEALTH_CHECK_FAILED = 0;
+  private static final long REPLICATION_HEALTH_CHECK_PASSED = 1;
+
   private boolean ensureReplicationHealthy() {
     log.info("Checking replication health before generating reports...");
 
     ReplicationHealthReport report = replicationHealthCheckService.checkReplicationHealth();
+    boolean replicationHealthy = true;
 
     if (!report.isHealthy()) {
       log.error("Replication health check failed:\n{}", report.summary());
@@ -85,17 +89,20 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
       // Even if the overall replication is unhealthy, we want to continue if
       // ignoreRowCountMismatch is set and basic WAL check passed.
       if (ignoreRowCountMismatch && report.isWalLsnOk()) {
-        log.info("Ignoring Row Count Mismatch because ignoreRowCountMismatch is set to true and WAL LSN check has passed ");
-        metricsHandler.setCustomMetric(REPLICATION_HEALTH_CHECK_STATUS, 1);
-        metricsHandler.pushReplicationHealthMetric();
+        log.info("Ignoring Row Count Mismatch because ignoreRowCountMismatch is set to true and WAL LSN check has passed");
       } else {
-        metricsHandler.setCustomMetric(REPLICATION_HEALTH_CHECK_STATUS, 0);
-        metricsHandler.pushReplicationHealthMetric();
-        return false;
+        replicationHealthy = false;
       }
-    } else {
-      metricsHandler.setCustomMetric(REPLICATION_HEALTH_CHECK_STATUS, 1);
-      metricsHandler.pushReplicationHealthMetric();
+    }
+
+    metricsHandler.setCustomMetric(
+            REPLICATION_HEALTH_CHECK_STATUS,
+            replicationHealthy ? REPLICATION_HEALTH_CHECK_PASSED : REPLICATION_HEALTH_CHECK_FAILED
+    );
+    metricsHandler.pushReplicationHealthMetric();
+
+    if (!replicationHealthy) {
+      return false;
     }
 
     log.info("Replication health confirmed — proceeding with report generation.");
@@ -139,7 +146,6 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
     log.info("Marking all report metrics as failed due to replication health check failure.");
     for (AbstractReportService service : reportServices) {
       String reportName = service.getReportName();
-      log.info("Pushing FAILED metric for report: '{}'", reportName); // verify this matches previous pushes
       metricsHandler.resetCustomMetrics();
       metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
       metricsHandler.pushReportMetrics(reportName);
