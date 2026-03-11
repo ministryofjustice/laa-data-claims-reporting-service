@@ -130,7 +130,12 @@ public abstract class AbstractReportService {
     long startTime = System.currentTimeMillis();
 
     try {
-      var sql = "SELECT * FROM " + getDataSourceName() + " ORDER BY " + getOrderByClause();
+      final String sql = String.format(
+              "SELECT * FROM %s ORDER BY %s",
+              getDataSourceName(),
+              getOrderByClause()
+      );
+
       try (BufferedWriter writer = Files.newBufferedWriter(tempFile.toPath())) {
         csvCreationService.buildCsvFromData(sql, writer, getReportName());
       }
