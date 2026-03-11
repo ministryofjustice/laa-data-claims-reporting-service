@@ -110,4 +110,12 @@ spec:
           for: 1s
           labels:
             severity: {{ .Values.alerting.severity }}
+        - alert: ReplicationHealthCheckFailed
+          annotations:
+            message: Replication health check failed
+            dashboard_url: {{ .Values.alerting.grafanaDashboard }}
+          expr: replication_health_check_status{namespace="{{ .Release.Namespace }}"} == 0
+          for: 1m
+          labels:
+            severity: {{ .Values.alerting.severity }}
   {{- end }}

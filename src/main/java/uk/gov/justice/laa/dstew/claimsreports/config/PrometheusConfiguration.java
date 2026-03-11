@@ -100,15 +100,22 @@ public class PrometheusConfiguration {
         .help("Time taken to verify that the generated file is UTF-8 encoded (ms)")
         .register(registry);
 
+    var replicationHealthCheckStatus = Gauge.builder()
+        .withoutExemplars()
+        .name("replication_health_check_status")
+        .help("1 when replication health check passes, 0 when it fails")
+        .register(registry);
+
     return new CustomReportGauges(reportSuccess, reportTotalTimeMs, dataRefreshTimeMs, generatedTimeMs, rowsWritten, reportFileSize,
-        uploadTimeMs, encodingCheckTimeMs);
+        uploadTimeMs, encodingCheckTimeMs, replicationHealthCheckStatus);
   }
 
   /**
    * This class defines some custom metrics we push to Prometheus.
    */
   public record CustomReportGauges(Gauge reportSuccessful, Gauge reportTotalTime, Gauge dataRefreshTimeMs, Gauge generatedTimeMs,
-                                   Gauge rowsWritten, Gauge reportFileSize, Gauge uploadTimeMs, Gauge encodingCheckTimeMs) {
+                                   Gauge rowsWritten, Gauge reportFileSize, Gauge uploadTimeMs, Gauge encodingCheckTimeMs,
+                                   Gauge replicationHealthCheckStatus) {
 
     public static int REPORT_FAILED = -1;
     public static int REPORT_SUCCESSFUL = 1;
@@ -125,7 +132,8 @@ public class PrometheusConfiguration {
       ROWS_WRITTEN,
       REPORT_FILE_SIZE,
       UPLOAD_TIME_MS,
-      ENCODING_CHECK_TIME_MS
+      ENCODING_CHECK_TIME_MS,
+      REPLICATION_HEALTH_CHECK_STATUS
     }
 
     /**
