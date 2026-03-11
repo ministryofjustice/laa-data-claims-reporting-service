@@ -66,7 +66,7 @@ class Report014ServiceTest {
 
     verify(creationService).buildCsvFromData(
         eq("SELECT * FROM claims.mvw_report_014"
-            + " ORDER BY  \"Claim ID\", to_char(to_date(\"Amendment Date\", 'DD/MM/YYYY HH24:MI:SS'), 'YYYYMM'), \"Assessment ID\""),
+            + " ORDER BY \"Claim ID\", to_date(\"Amendment Date\", 'DD/MM/YYYY'), to_timestamp(\"Amendment Time\", 'HH24:MI:SS')::time, \"Assessment ID\""),
         any(BufferedWriter.class),
         any()
     );
