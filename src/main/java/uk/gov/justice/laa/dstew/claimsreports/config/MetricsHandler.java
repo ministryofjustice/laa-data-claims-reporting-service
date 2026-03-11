@@ -3,6 +3,7 @@ package uk.gov.justice.laa.dstew.claimsreports.config;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import io.prometheus.metrics.exporter.pushgateway.PushGateway;
 import jakarta.annotation.PreDestroy;
+import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric;
@@ -19,6 +20,7 @@ public class MetricsHandler {
   private final PrometheusMeterRegistry reportPrometheusMeterRegistry;
   private final PrometheusMeterRegistry jobPrometheusMeterRegistry;
   private final PrometheusConfiguration.CustomReportGauges customReportGauges;
+  private final AtomicLong replicationHealthCheckStatus;
 
   /**
    * Creates a Metrics Handler.
@@ -33,6 +35,10 @@ public class MetricsHandler {
     this.reportPrometheusMeterRegistry = reportPrometheusMeterRegistry;
     this.jobPrometheusMeterRegistry = jobPrometheusMeterRegistry;
     this.customReportGauges = customReportGauges;
+    this.replicationHealthCheckStatus = jobPrometheusMeterRegistry.gauge(
+            "replication_health_check_status",
+            new AtomicLong(0)
+    );
   }
 
   public void resetCustomMetrics() {
@@ -55,6 +61,7 @@ public class MetricsHandler {
       case UPLOAD_TIME_MS -> customReportGauges.uploadTimeMs().set(value);
       case GENERATED_TIME_MS -> customReportGauges.generatedTimeMs().set(value);
       case ENCODING_CHECK_TIME_MS -> customReportGauges.encodingCheckTimeMs().set(value);
+      case REPLICATION_HEALTH_CHECK_STATUS -> replicationHealthCheckStatus.set(value);
       default -> throw new EnumConstantNotPresentException(CustomReportMetric.class, metric.name());
     }
   }
@@ -65,10 +72,10 @@ public class MetricsHandler {
   public void pushReportMetrics(String reportName) {
     try {
       PushGateway.builder()
-          .address(gatewayAddress)
-          .job(reportName)
-          .registry(reportPrometheusMeterRegistry.getPrometheusRegistry()).build()
-          .push();
+              .address(gatewayAddress)
+              .job(reportName)
+              .registry(reportPrometheusMeterRegistry.getPrometheusRegistry()).build()
+              .push();
     } catch (Exception e) {
       System.err.println("Failed to push metrics: " + e.getMessage());
     }
@@ -81,10 +88,26 @@ public class MetricsHandler {
   public void pushEndOfJobMetrics() {
     try {
       PushGateway.builder()
-          .address(gatewayAddress)
-          .job("jobEnd")
-          .registry(jobPrometheusMeterRegistry.getPrometheusRegistry()).build()
-          .push();
+              .address(gatewayAddress)
+              .job("jobEnd")
+              .registry(jobPrometheusMeterRegistry.getPrometheusRegistry()).build()
+              .push();
+    } catch (Exception e) {
+      System.err.println("Failed to push metrics: " + e.getMessage());
+    }
+  }
+
+  /**
+   * Push replication health metrics.
+   */
+  public void pushReplicationHealthMetric() {
+    try {
+      PushGateway.builder()
+              .address(gatewayAddress)
+              .job("replicationHealth")
+              .registry(jobPrometheusMeterRegistry.getPrometheusRegistry())
+              .build()
+              .push();
     } catch (Exception e) {
       System.err.println("Failed to push metrics: " + e.getMessage());
     }
