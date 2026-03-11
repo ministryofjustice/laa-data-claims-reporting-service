@@ -78,7 +78,3 @@ FROM original_submissions AS os
                    ON vcc.submission_id = os.submission_id
          LEFT JOIN fee_totals AS ft
                    ON ft.submission_id = os.submission_id
-ORDER BY
-    os.office_account_number,
-    os.submission_period_date,
-    os.area_of_law;
