@@ -1,5 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.runner;
 
+import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric.REPLICATION_HEALTH_CHECK_STATUS;
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_FAILED;
 
 import java.util.List;
@@ -57,6 +58,7 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
       generateReports();
     } else {
       log.error("Replication health check failed, reports not generated.");
+      markAllReportsFailedDueToReplication();
     }
   }
 
@@ -72,20 +74,35 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
    *
    * <p>@throws IllegalStateException if the replication health check fails
    */
+  private static final long REPLICATION_HEALTH_CHECK_FAILED = 0;
+  private static final long REPLICATION_HEALTH_CHECK_PASSED = 1;
+
   private boolean ensureReplicationHealthy() {
     log.info("Checking replication health before generating reports...");
 
     ReplicationHealthReport report = replicationHealthCheckService.checkReplicationHealth();
+    boolean replicationHealthy = true;
 
     if (!report.isHealthy()) {
       log.error("Replication health check failed:\n{}", report.summary());
 
-      //Even if the overall replication is unhealthy, we want to continue if ignoreRowCountMismatch is set and basic WAL check passed.
+      // Even if the overall replication is unhealthy, we want to continue if
+      // ignoreRowCountMismatch is set and basic WAL check passed.
       if (ignoreRowCountMismatch && report.isWalLsnOk()) {
-        log.info("Ignoring Row Count Mismatch because ignoreRowCountMismatch is set to true and WAL LSN check has passed ");
+        log.info("Ignoring Row Count Mismatch because ignoreRowCountMismatch is set to true and WAL LSN check has passed");
       } else {
-        return false;
+        replicationHealthy = false;
       }
+    }
+
+    metricsHandler.setCustomMetric(
+            REPLICATION_HEALTH_CHECK_STATUS,
+            replicationHealthy ? REPLICATION_HEALTH_CHECK_PASSED : REPLICATION_HEALTH_CHECK_FAILED
+    );
+    metricsHandler.pushReplicationHealthMetric();
+
+    if (!replicationHealthy) {
+      return false;
     }
 
     log.info("Replication health confirmed — proceeding with report generation.");
@@ -114,7 +131,7 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
         service.generateReport();
       } catch (Exception e) {
         log.error("Report generation failed for {}: {}",
-            service.getClass().getSimpleName(), e.getMessage(), e);
+                service.getClass().getSimpleName(), e.getMessage(), e);
         metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
       } finally {
         var reportDuration = System.currentTimeMillis() - startTime;
@@ -122,6 +139,16 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
         log.info("Report generation for report {} took {} ms ({} s)", service.getReportName(), reportDuration, reportDuration / 1000);
         metricsHandler.pushReportMetrics(service.getReportName());
       }
+    }
+  }
+
+  private void markAllReportsFailedDueToReplication() {
+    log.info("Marking all report metrics as failed due to replication health check failure.");
+    for (AbstractReportService service : reportServices) {
+      String reportName = service.getReportName();
+      metricsHandler.resetCustomMetrics();
+      metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
+      metricsHandler.pushReportMetrics(reportName);
     }
   }
 

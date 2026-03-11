@@ -42,7 +42,7 @@ jobs:
         run: |
           echo "api.version=1.44" > ~/.docker-java.properties
 
-#        Add run of integration tests when these are added to the repo
+      # Add run of integration tests when these are added to the repo
       - name: Run integration tests
         run: ./gradlew integrationTest
 
