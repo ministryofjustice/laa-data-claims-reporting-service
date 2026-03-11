@@ -255,11 +255,11 @@ INSERT INTO calculated_fee_detail (
   		net_cost_of_counsel_amount, detention_travel_and_waiting_costs_amount, is_vat_applicable,
   		bolt_on_adjourned_hearing_fee, jr_form_filling_amount, bolt_on_cmrh_oral_fee, bolt_on_cmrh_telephone_fee,
   		bolt_on_substantive_hearing_fee, bolt_on_home_office_interview_fee, assessed_total_vat, assessed_total_incl_vat,
-  		allowed_total_vat, allowed_total_incl_vat, created_by_user_id, created_on, updated_by_user_id, updated_on
+  		allowed_total_vat, allowed_total_incl_vat, assessment_type, assessment_reason, created_by_user_id, created_on, updated_by_user_id, updated_on
   		) VALUES
         ('12345555-7777-7777-7777-777777777777', '33333333-3333-3333-3333-333333333333', '66666666-6666-6666-6666-666666666666',
          'PAID_IN_FULL', 233.33, 43.44, 44.43, 2.40, 0.12, 123.33, 33.12, 12.3, TRUE, 3.12, 6.45, 86.3, 9.00, 3.33, 4.44,
-          12.33, 94.2, 33.3, 120.33, 'test_user', '2025-10-22 11:00:00+00', 'test_user', '2025-04-19 11:30:00+00' ),
+          12.33, 94.2, 33.3, 120.33, 'ESCAPE_FEE_ASSESSMENT', 'Escape Fee Case Assessment', 'test_user', '2025-10-22 11:00:00+00', 'test_user', '2025-04-19 11:30:00+00' ),
         ('12345555-7777-7777-7777-777777777778', '33333333-3333-3333-3333-333333333333', '66666666-6666-6666-6666-666666666666',
          'REDUCED_TO_FIXED_FEE', 33.23, 44.43, 43.44, 40.20, 12.0, 33.12, 12.33, 3.12, TRUE, 12.3, 45.6, 3.86, 0.90, 33.30, 44.4,
-          33.12, 2.94, 3.33, 33.12, 'test_user', '2025-10-22 11:00:00+00', 'test_user', '2025-04-19 11:30:00+00' );
+          33.12, 2.94, 3.33, 33.12, 'VOID', 'Provider request', 'test_user', '2025-10-22 11:00:00+00', 'test_user', '2025-04-19 11:30:00+00' );
