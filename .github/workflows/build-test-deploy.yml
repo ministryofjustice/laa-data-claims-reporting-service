@@ -7,7 +7,6 @@ on:
     branches:
       - main
 
-# Only allow one run of this workflow, per branch, at a time
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
@@ -17,14 +16,23 @@ jobs:
     runs-on: ubuntu-latest
     permissions:
       contents: read
+      id-token: write
+
     steps:
       - uses: actions/checkout@v6
+
+      - name: Obtain Octo STS Token
+        uses: octo-sts/action@6177b4481c00308b3839969c3eca88c96a91775f # v1.0.0
+        id: octo_sts
+        with:
+          scope: ministryofjustice/laa-spring-boot-common
+          identity: ministryofjustice-laa-data-claims-reporting-service
 
       - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
           java-version: 21
-          distribution: 'corretto'
+          distribution: corretto
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
@@ -32,19 +40,24 @@ jobs:
       - name: Build and test
         run: ./gradlew build
         env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_TOKEN: ${{ steps.octo_sts.outputs.token }}
+          GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Test coverage verification
         run: ./gradlew jacocoTestCoverageVerification
+        env:
+          GITHUB_TOKEN: ${{ steps.octo_sts.outputs.token }}
+          GITHUB_ACTOR: ${{ github.actor }}
 
-      # This is a temporary workaround for https://github.com/testcontainers/testcontainers-java/issues/11212"
       - name: Force docker-java API version (temporary workaround for testcontainers)
         run: |
           echo "api.version=1.44" > ~/.docker-java.properties
 
-      # Add run of integration tests when these are added to the repo
       - name: Run integration tests
         run: ./gradlew integrationTest
+        env:
+          GITHUB_TOKEN: ${{ steps.octo_sts.outputs.token }}
+          GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Upload service JAR artifact
         uses: actions/upload-artifact@v7
@@ -103,23 +116,35 @@ jobs:
       - build-test
     permissions:
       contents: read
+      id-token: write
+
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
-      GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
     steps:
       - uses: actions/checkout@v6
+
+      - name: Obtain Octo STS Token
+        uses: octo-sts/action@6177b4481c00308b3839969c3eca88c96a91775f
+        id: octo_sts
+        with:
+          scope: ministryofjustice/laa-spring-boot-common
+          identity: ministryofjustice-laa-data-claims-reporting-service
 
       - name: Set up JDK 21
         uses: actions/setup-java@v5
         with:
           java-version: 21
-          distribution: 'corretto'
+          distribution: corretto
 
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@v5
 
       - name: Build app jar with gradle
         run: ./gradlew build
+        env:
+          GITHUB_TOKEN: ${{ steps.octo_sts.outputs.token }}
+          GITHUB_ACTOR: ${{ github.actor }}
 
       - name: Build a Docker image
         run: docker build -t spring-boot-microservice:scan .
@@ -149,12 +174,11 @@ jobs:
           name: service-jar
           path: build/libs/
 
-        # ---------- AWS auth (OIDC) ----------
       - name: Configure AWS creds
         uses: aws-actions/configure-aws-credentials@v6.0.0
         with:
           role-to-assume: ${{ secrets.ECR_ROLE_TO_ASSUME }}
-          aws-region: ${{  vars.ECR_REGION }}
+          aws-region: ${{ vars.ECR_REGION }}
 
       - name: Login to ECR
         uses: aws-actions/amazon-ecr-login@v2
