@@ -80,9 +80,9 @@ spec:
             severity: {{ .Values.alerting.severity }}
         - alert: DataRefreshTime
           annotations:
-            message: Data refresh for report {{ "{{" }} $labels.exported_job {{ "}}" }} has taken more than 5 minutes
+            message: Data refresh for report {{ "{{" }} $labels.exported_job {{ "}}" }} has taken more than 10 minutes
             dashboard_url: {{ .Values.alerting.grafanaDashboard }}
-          expr: last_over_time(report_data_refresh_duration_ms{namespace="{{ .Release.Namespace }}"}[5m]) > 300000
+          expr: last_over_time(report_data_refresh_duration_ms{namespace="{{ .Release.Namespace }}"}[10m]) > 600000
           for: 1s
           labels:
             severity: {{ .Values.alerting.severity }}
