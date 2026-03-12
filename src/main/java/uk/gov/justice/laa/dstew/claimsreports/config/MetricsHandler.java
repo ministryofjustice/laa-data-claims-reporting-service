@@ -27,6 +27,7 @@ public class MetricsHandler {
    *
    * @param reportPrometheusMeterRegistry registry for report metrics
    * @param jobPrometheusMeterRegistry registry for job metrics
+   * @param replicationHealthPrometheusMeterRegistry registry for replication health check metric
    * @param customReportGauges custom metric gauges for reports
    * @param replicationHealthCheckGauge gauge for replication health check status
    */
