@@ -72,6 +72,9 @@ public class PrometheusConfiguration {
     return new ReplicationHealthGauge(replicationHealthCheck);
   }
 
+  /**
+   * This class defines the replication health metric we push to Prometheus.
+   */
   public record ReplicationHealthGauge(Gauge replicationHealthCheck) {}
 
   /**
