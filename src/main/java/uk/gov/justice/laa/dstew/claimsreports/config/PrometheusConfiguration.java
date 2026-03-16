@@ -21,7 +21,10 @@ public class PrometheusConfiguration {
    */
   @Bean
   public PrometheusMeterRegistry reportPrometheusMeterRegistry() {
-    return new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+    PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+    registry.config().meterFilter(MeterFilter.deny(id ->
+            id.getName().equals("replication_health_check_status")));
+    return registry;
   }
 
   /**
@@ -31,7 +34,10 @@ public class PrometheusConfiguration {
    */
   @Bean
   public PrometheusMeterRegistry jobPrometheusMeterRegistry() {
-    return new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+    PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+    registry.config().meterFilter(MeterFilter.deny(id ->
+            id.getName().equals("replication_health_check_status")));
+    return registry;
   }
 
   /**
