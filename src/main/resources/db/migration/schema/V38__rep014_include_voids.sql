@@ -67,10 +67,10 @@ SELECT
     COALESCE(al.claim_id::text, '') 											                AS "Claim ID",
     COALESCE(al.assessment_id::text, '') 										                AS "Assessment ID"
 FROM assessment_lines as al
-         JOIN submission_periods AS sp
-              ON sp.submission_id = al.submission_id
-         LEFT JOIN claims.client AS cl
-                   ON cl.claim_id = al.claim_id
+ JOIN submission_periods AS sp
+      ON sp.submission_id = al.submission_id
+ LEFT JOIN claims.client AS cl
+           ON cl.claim_id = al.claim_id
 
 WHERE
     sp.submission_status = 'VALIDATION_SUCCEEDED' AND
