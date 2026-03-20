@@ -7,7 +7,6 @@ import java.util.List;
 import java.util.Map;
 import lombok.extern.slf4j.Slf4j;
 import org.jetbrains.annotations.NotNull;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.justice.laa.dstew.claimsreports.IntegrationTestBase;
 
@@ -18,11 +17,6 @@ public class Report000IntegrationTest extends IntegrationTestBase {
   public static final String CLAIM_ID_WITH_MULTIPLE_FEES_AND_NO_ASSESSMENTS = "33333333-3333-3333-3333-333333333333";
   public static final String CLAIM_ID_FOR_VOIDED_CLAIM = "33333333-3333-3333-3333-333333333336";
   public static final String CLAIM_ID_WITH_MULTIPLE_FEES_AND_ASSESSMENTS = "33333333-3333-3333-3333-333333333337";
-
-  @AfterEach
-  void cleanup() {
-    cleanUpDataFromTests();
-  }
 
   @Test
   void claimDataIsReturnedIfNoAssessmentDataPresent() {

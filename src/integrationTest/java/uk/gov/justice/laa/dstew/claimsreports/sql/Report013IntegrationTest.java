@@ -6,17 +6,11 @@ import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.justice.laa.dstew.claimsreports.IntegrationTestBase;
 
 @Slf4j
 class Report013IntegrationTest extends IntegrationTestBase {
-
-  @AfterEach
-  void cleanup() {
-    cleanUpDataFromTests();
-  }
 
   @Test
   void areaOfLawValuesAreNormalised() {

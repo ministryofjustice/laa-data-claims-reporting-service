@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Map;
 import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.justice.laa.dstew.claimsreports.IntegrationTestBase;
 
@@ -12,11 +11,6 @@ import static org.assertj.core.api.Assertions.assertThat;
 
 @Slf4j
 class Report014IntegrationTest extends IntegrationTestBase {
-
-  @AfterEach
-  void cleanup() {
-    cleanUpDataFromTests();
-  }
 
   @Test
   void testUsesCalculatedFeeForBeforeWhenFirstAssessment() {

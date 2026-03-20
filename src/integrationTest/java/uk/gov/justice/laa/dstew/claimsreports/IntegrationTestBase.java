@@ -14,6 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -21,10 +22,17 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import uk.gov.justice.laa.dstew.claimsreports.config.TestConfig;
 
+/**
+ * Base class for the integration tests.
+ * Individual tests should not change or delete data written in the `R__001_insert_report000_test_data.sql` file.
+ * Test data created by individual tests should use `created_by_user_id` = 'integration_test_user'.
+ * These entries cleaned up after each test to ensure other tests aren't polluted with the data.
+ */
 @Slf4j
 @SpringBootTest(classes = {TestConfig.class})
 @ActiveProfiles("test")
 @Testcontainers
+@Sql(value = "/sql/cleanup_integration_test_data.sql", executionPhase =  Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class IntegrationTestBase {
 
   @BeforeAll
@@ -116,35 +124,5 @@ public class IntegrationTestBase {
           tableName, yesterday, recordCount, updatedCount, mockLsn, now);
     }
   }
-
-    /*
-      Removes data written into tables by the 'integration-test' user, which is data for specific test cases only.
-     */
-    protected void cleanUpDataFromTests(){
-      jdbcTemplate.update("""
-        DELETE FROM claims.assessment
-        WHERE created_by_user_id = 'integration_test_user'
-        """);
-      jdbcTemplate.update("""
-        DELETE FROM claims.claim_case
-        WHERE created_by_user_id = 'integration_test_user'
-    """);
-      jdbcTemplate.update("""
-        DELETE FROM claims.calculated_fee_detail
-         WHERE created_by_user_id = 'integration_test_user'
-    """);
-      jdbcTemplate.update("""
-        DELETE FROM claims.claim_summary_fee
-        WHERE created_by_user_id = 'integration_test_user'
-    """);
-      jdbcTemplate.update("""
-        DELETE FROM claims.claim
-        WHERE created_by_user_id = 'integration_test_user'
-        """);
-      jdbcTemplate.update("""
-        DELETE FROM claims.submission
-        WHERE created_by_user_id = 'integration_test_user'
-        """);
-    }
 
 }
