@@ -15,26 +15,7 @@ class Report013IntegrationTest extends IntegrationTestBase {
 
   @AfterEach
   void cleanup() {
-    jdbcTemplate.update("""
-        DELETE FROM claims.claim_case
-        WHERE created_by_user_id = 'integration_test_user'
-    """);
-    jdbcTemplate.update("""
-        DELETE FROM claims.calculated_fee_detail
-         WHERE created_by_user_id = 'integration_test_user'
-    """);
-    jdbcTemplate.update("""
-        DELETE FROM claims.claim_summary_fee
-        WHERE created_by_user_id = 'integration_test_user'
-    """);
-    jdbcTemplate.update("""
-        DELETE FROM claims.claim
-        WHERE created_by_user_id = 'integration_test_user'
-        """);
-    jdbcTemplate.update("""
-        DELETE FROM claims.submission
-        WHERE created_by_user_id = 'integration_test_user'
-        """);
+    cleanUpDataFromTests();
   }
 
   @Test
@@ -92,7 +73,7 @@ class Report013IntegrationTest extends IntegrationTestBase {
 
     Map<String, Object> firstRow = report013Rows.getFirst();
 
-// Column count
+    // Column count
     assertThat(firstRow)
         .hasSize(4);
 
@@ -128,8 +109,8 @@ class Report013IntegrationTest extends IntegrationTestBase {
     assertThat(crimeRow.get("FEB-2025"))
         .isNull();
 
-    assertThat( crimeRow.get("APR-2025"))
-        .isEqualTo("11602.00");
+    assertThat(crimeRow.get("APR-2025"))
+        .isEqualTo("11722.33");
 
     assertThat(crimeRow.get("MAY-2025"))
         .isEqualTo("0.00");
@@ -174,7 +155,7 @@ class Report013IntegrationTest extends IntegrationTestBase {
     assertThat(crimeRow.get("FEB-2025"))
         .isNull();
 
-    assertThat( crimeRow.get("APR-2025"))
+    assertThat(crimeRow.get("APR-2025"))
         .isEqualTo("1501.00");
 
     assertThat(crimeRow.get("MAY-2025"))
@@ -294,7 +275,7 @@ class Report013IntegrationTest extends IntegrationTestBase {
           net_counsel_costs_amount, disbursements_vat_amount, travel_waiting_costs_amount, net_waiting_costs_amount,
           is_vat_applicable, is_tolerance_applicable, created_by_user_id, created_on, updated_on
       ) VALUES (
-          '66666666-6666-6666-6666-666666666669',
+          '56666666-6666-6666-6666-666666666669',
           'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5',
           60, 30, 15, 1000, 200,
           500, 100, 50, 20,

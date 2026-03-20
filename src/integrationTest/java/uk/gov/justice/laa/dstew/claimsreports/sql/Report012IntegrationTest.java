@@ -16,18 +16,7 @@ class Report012IntegrationTest extends IntegrationTestBase {
 
     @AfterEach
     void cleanup() {
-        jdbcTemplate.update("""
-                DELETE FROM claims.claim_case
-                WHERE created_by_user_id = 'integration_test_user'
-                """);
-        jdbcTemplate.update("""
-                DELETE FROM claims.claim
-                WHERE created_by_user_id = 'integration_test_user'
-                """);
-        jdbcTemplate.update("""
-                DELETE FROM claims.submission
-                WHERE created_by_user_id = 'integration_test_user'
-                """);
+        cleanUpDataFromTests();
     }
 
     @Test

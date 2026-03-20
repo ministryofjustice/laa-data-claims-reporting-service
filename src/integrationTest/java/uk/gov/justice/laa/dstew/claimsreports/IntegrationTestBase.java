@@ -92,9 +92,9 @@ public class IntegrationTestBase {
 
     jdbcTemplate.update("DELETE FROM mock_pg_catalog.pg_stat_subscription");
     jdbcTemplate.update("""
-        INSERT INTO mock_pg_catalog.pg_stat_subscription(subname, received_lsn, latest_end_lsn, latest_end_time)
-        VALUES ('claims_reporting_service_sub', pg_current_wal_lsn()::text, pg_current_wal_lsn()::text, CURRENT_DATE);
-     """);
+           INSERT INTO mock_pg_catalog.pg_stat_subscription(subname, received_lsn, latest_end_lsn, latest_end_time)
+           VALUES ('claims_reporting_service_sub', pg_current_wal_lsn()::text, pg_current_wal_lsn()::text, CURRENT_DATE);
+        """);
 
     for (Map.Entry<String, Pair<Integer, Integer>> entry : tableCounts.entrySet()) {
       String tableName = entry.getKey();
@@ -116,4 +116,35 @@ public class IntegrationTestBase {
           tableName, yesterday, recordCount, updatedCount, mockLsn, now);
     }
   }
+
+    /*
+      Removes data written into tables by the 'integration-test' user, which is data for specific test cases only.
+     */
+    protected void cleanUpDataFromTests(){
+      jdbcTemplate.update("""
+        DELETE FROM claims.assessment
+        WHERE created_by_user_id = 'integration_test_user'
+        """);
+      jdbcTemplate.update("""
+        DELETE FROM claims.claim_case
+        WHERE created_by_user_id = 'integration_test_user'
+    """);
+      jdbcTemplate.update("""
+        DELETE FROM claims.calculated_fee_detail
+         WHERE created_by_user_id = 'integration_test_user'
+    """);
+      jdbcTemplate.update("""
+        DELETE FROM claims.claim_summary_fee
+        WHERE created_by_user_id = 'integration_test_user'
+    """);
+      jdbcTemplate.update("""
+        DELETE FROM claims.claim
+        WHERE created_by_user_id = 'integration_test_user'
+        """);
+      jdbcTemplate.update("""
+        DELETE FROM claims.submission
+        WHERE created_by_user_id = 'integration_test_user'
+        """);
+    }
+
 }

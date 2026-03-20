@@ -2,6 +2,7 @@ package uk.gov.justice.laa.dstew.claimsreports.sql;
 
 import java.util.List;
 import java.util.Map;
+import java.util.Objects;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
@@ -14,30 +15,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
   @AfterEach
   void cleanup() {
-    jdbcTemplate.update("""
-        DELETE FROM claims.assessment
-        WHERE created_by_user_id = 'integration_test_user'
-        """);
-    jdbcTemplate.update("""
-        DELETE FROM claims.claim_case
-        WHERE created_by_user_id = 'integration_test_user'
-    """);
-    jdbcTemplate.update("""
-        DELETE FROM claims.calculated_fee_detail
-         WHERE created_by_user_id = 'integration_test_user'
-    """);
-    jdbcTemplate.update("""
-        DELETE FROM claims.claim_summary_fee
-        WHERE created_by_user_id = 'integration_test_user'
-    """);
-    jdbcTemplate.update("""
-        DELETE FROM claims.claim
-        WHERE created_by_user_id = 'integration_test_user'
-        """);
-    jdbcTemplate.update("""
-        DELETE FROM claims.submission
-        WHERE created_by_user_id = 'integration_test_user'
-        """);
+    cleanUpDataFromTests();
   }
 
   @Test
@@ -111,19 +89,37 @@ class Report014IntegrationTest extends IntegrationTestBase {
   }
 
   @Test
-  void testSkipsAssessmentIfClaimStatusIsNotValid() {
+  void testSkipsAssessmentIfClaimStatusIsInValid() {
 
     insertFullSubmissionWithClaimsAndAssessments("VALIDATION_SUCCEEDED", "INVALID");
 
     List<Map<String, Object>> returnedRows = jdbcTemplate.queryForList("""
         SELECT *
         FROM claims.mvw_report_014
-        WHERE 'Claim ID' = 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5'
+        WHERE "Claim ID" = 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5'
         """
     );
 
     assertThat(returnedRows).isNotNull();
     assertThat(returnedRows).isEmpty();
+
+  }
+
+  @Test
+  void testVoidAssessmentsAreIncluded() {
+
+    insertFullSubmissionWithClaimsAndAssessments("VALIDATION_SUCCEEDED", "VOID");
+
+    List<Map<String, Object>> returnedRows = jdbcTemplate.queryForList("""
+        SELECT "Assessment Type", "Assessment Reason"
+        FROM claims.mvw_report_014
+        WHERE "Claim ID" = 'cccccccc-cccc-cccc-cccc-ccccccccccc5'
+        """
+    );
+
+    assertThat(returnedRows).isNotNull();
+    assertThat(returnedRows.getFirst().get("Assessment Type")).isEqualTo("Void");
+    assertThat(returnedRows.getFirst().get("Assessment Reason")).isEqualTo("Voided");
 
   }
 
@@ -145,7 +141,6 @@ class Report014IntegrationTest extends IntegrationTestBase {
     assertThat(returnedRows.getFirst().get("Assessment Reason")).isEqualTo("Escape Fee Case Assessment");
 
   }
-
 
   private void insertDataForFirstAssessmentTest() {
     insertFullSubmissionWithClaimsAndAssessments("VALIDATION_SUCCEEDED", "VALID");
@@ -225,7 +220,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
           net_counsel_costs_amount, disbursements_vat_amount, travel_waiting_costs_amount, net_waiting_costs_amount,
           is_vat_applicable, is_tolerance_applicable, created_by_user_id, created_on, updated_on
       ) VALUES (
-          '66666666-6666-6666-6666-666666666669',
+          '56666666-6666-6666-6666-666666666669',
           'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5',
           60, 30, 15, 1000, 200,
           500, 100, 50, 20,
@@ -242,15 +237,27 @@ class Report014IntegrationTest extends IntegrationTestBase {
               'FEE001', 'TypeA', 'integration_test_user', '2025-10-20 09:00:00+00', 'test_user', '2025-04-20 09:30:00+00', 'Description 1', 'INVEST', 1501)
       """);
 
-    jdbcTemplate.update(
-        """
-            INSERT INTO claims.assessment
-            (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
-             allowed_total_vat, allowed_total_incl_vat, created_by_user_id, created_on)
-            VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'REDUCED_STILL_ESCAPED', 200.00,
-                    1400.00, 210.00, 2080.00, 'integration_test_user', now() )
-            """
-    );
+    if (Objects.equals(claimStatus, "VOID")){
+      jdbcTemplate.update(
+          """
+              INSERT INTO claims.assessment
+              (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
+               allowed_total_vat, allowed_total_incl_vat, assessment_type, assessment_reason, created_by_user_id, created_on)
+              VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'NILLED', 00.00,
+                      00.00, 00.00, 00.0, 'VOID', 'Voided', 'integration_test_user', now() )
+              """
+      );
+    } else {
+      jdbcTemplate.update(
+          """
+              INSERT INTO claims.assessment
+              (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
+               allowed_total_vat, allowed_total_incl_vat, assessment_type, assessment_reason, created_by_user_id, created_on)
+              VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'REDUCED_STILL_ESCAPED', 200.00,
+                      1400.00, 210.00, 2080.00, 'ESCAPE_CASE_ASSESSMENT', 'Escape Fee Case Assessment', 'integration_test_user', now() )
+              """
+      );
+    }
 
     jdbcTemplate.update("""
       REFRESH MATERIALIZED VIEW claims.mvw_report_014
