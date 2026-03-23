@@ -173,9 +173,9 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
         LocalDate.now(staticClock).minusDays(1),
         OffsetDateTime.now(staticClock),
         Map.of(
-            CLAIM_TABLE_NAME, Pair.of(3, 1),
-            CLIENT_TABLE_NAME, Pair.of(2, 1),
-            CLAIM_SUMMARY_FEE_TABLE_NAME, Pair.of(3, 2)
+            CLAIM_TABLE_NAME, Pair.of(5, 2),
+            CLIENT_TABLE_NAME, Pair.of(4, 2),
+            CLAIM_SUMMARY_FEE_TABLE_NAME, Pair.of(5, 3)
         )
     );
   }
