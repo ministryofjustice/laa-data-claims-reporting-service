@@ -7,28 +7,11 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 import lombok.extern.slf4j.Slf4j;
-import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import uk.gov.justice.laa.dstew.claimsreports.IntegrationTestBase;
 
 @Slf4j
 class Report012IntegrationTest extends IntegrationTestBase {
-
-    @AfterEach
-    void cleanup() {
-        jdbcTemplate.update("""
-                DELETE FROM claims.claim_case
-                WHERE created_by_user_id = 'integration_test_user'
-                """);
-        jdbcTemplate.update("""
-                DELETE FROM claims.claim
-                WHERE created_by_user_id = 'integration_test_user'
-                """);
-        jdbcTemplate.update("""
-                DELETE FROM claims.submission
-                WHERE created_by_user_id = 'integration_test_user'
-                """);
-    }
 
     @Test
     void areaOfLawValuesArePassedThroughFromDbCorrectly() {
