@@ -14,6 +14,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.DynamicPropertyRegistry;
 import org.springframework.test.context.DynamicPropertySource;
+import org.springframework.test.context.jdbc.Sql;
 import org.testcontainers.containers.PostgreSQLContainer;
 import org.testcontainers.containers.localstack.LocalStackContainer;
 import org.testcontainers.junit.jupiter.Container;
@@ -21,10 +22,17 @@ import org.testcontainers.junit.jupiter.Testcontainers;
 import org.testcontainers.utility.DockerImageName;
 import uk.gov.justice.laa.dstew.claimsreports.config.TestConfig;
 
+/**
+ * Base class for the integration tests.
+ * Individual tests should not change or delete data written in the `R__001_insert_report000_test_data.sql` file.
+ * Test data created by individual tests should use `created_by_user_id` = 'integration_test_user'.
+ * These entries cleaned up after each test to ensure other tests aren't polluted with the data.
+ */
 @Slf4j
 @SpringBootTest(classes = {TestConfig.class})
 @ActiveProfiles("test")
 @Testcontainers
+@Sql(value = "/sql/cleanup_integration_test_data.sql", executionPhase =  Sql.ExecutionPhase.AFTER_TEST_METHOD)
 public class IntegrationTestBase {
 
   @BeforeAll
@@ -92,9 +100,9 @@ public class IntegrationTestBase {
 
     jdbcTemplate.update("DELETE FROM mock_pg_catalog.pg_stat_subscription");
     jdbcTemplate.update("""
-        INSERT INTO mock_pg_catalog.pg_stat_subscription(subname, received_lsn, latest_end_lsn, latest_end_time)
-        VALUES ('claims_reporting_service_sub', pg_current_wal_lsn()::text, pg_current_wal_lsn()::text, CURRENT_DATE);
-     """);
+           INSERT INTO mock_pg_catalog.pg_stat_subscription(subname, received_lsn, latest_end_lsn, latest_end_time)
+           VALUES ('claims_reporting_service_sub', pg_current_wal_lsn()::text, pg_current_wal_lsn()::text, CURRENT_DATE);
+        """);
 
     for (Map.Entry<String, Pair<Integer, Integer>> entry : tableCounts.entrySet()) {
       String tableName = entry.getKey();
@@ -116,4 +124,5 @@ public class IntegrationTestBase {
           tableName, yesterday, recordCount, updatedCount, mockLsn, now);
     }
   }
+
 }

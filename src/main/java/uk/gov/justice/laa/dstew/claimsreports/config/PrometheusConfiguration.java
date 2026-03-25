@@ -21,7 +21,10 @@ public class PrometheusConfiguration {
    */
   @Bean
   public PrometheusMeterRegistry reportPrometheusMeterRegistry() {
-    return new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+    PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+    registry.config().meterFilter(MeterFilter.deny(id ->
+            id.getName().equals("replication_health_check_status")));
+    return registry;
   }
 
   /**
@@ -31,6 +34,20 @@ public class PrometheusConfiguration {
    */
   @Bean
   public PrometheusMeterRegistry jobPrometheusMeterRegistry() {
+    PrometheusMeterRegistry registry = new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+    registry.config().meterFilter(MeterFilter.deny(id ->
+            id.getName().equals("replication_health_check_status")));
+    return registry;
+  }
+
+  /**
+   * This registry is used to isolate replication health metric pushes at the end of the process instead of bundling
+   * with job registry.
+   *
+   * @return registry for (replication health)-level metrics
+   */
+  @Bean
+  public PrometheusMeterRegistry replicationHealthPrometheusMeterRegistry() {
     return new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
   }
 
@@ -41,6 +58,30 @@ public class PrometheusConfiguration {
   MeterFilter fixInfoLogsAboutStartTimeMessage() {
     return new PrometheusRenameFilter();
   }
+
+  /**
+   * Create a gauge for the replication health check status, registered on the replication health registry.
+   * Kept separate from report and job gauges as it is not a per-report metric and we don't want duplicate
+   * job registry metric updates.
+   *
+   * @param replicationHealthPrometheusMeterRegistry replication health registry
+   * @return replication health check gauge
+   */
+  @Bean
+  public ReplicationHealthGauge replicationHealthGauge(
+          PrometheusMeterRegistry replicationHealthPrometheusMeterRegistry) {
+    var replicationHealthCheck = Gauge.builder()
+            .withoutExemplars()
+            .name("replication_health_check_status")
+            .help("1 when replication health check passes, 0 when it fails")
+            .register(replicationHealthPrometheusMeterRegistry.getPrometheusRegistry());
+    return new ReplicationHealthGauge(replicationHealthCheck);
+  }
+
+  /**
+   * This class defines the replication health metric we push to Prometheus.
+   */
+  public record ReplicationHealthGauge(Gauge replicationHealthCheck) {}
 
   /**
    * Create a set of custom gauges for measuring report stats.
@@ -100,22 +141,15 @@ public class PrometheusConfiguration {
         .help("Time taken to verify that the generated file is UTF-8 encoded (ms)")
         .register(registry);
 
-    var replicationHealthCheckStatus = Gauge.builder()
-        .withoutExemplars()
-        .name("replication_health_check_status")
-        .help("1 when replication health check passes, 0 when it fails")
-        .register(registry);
-
     return new CustomReportGauges(reportSuccess, reportTotalTimeMs, dataRefreshTimeMs, generatedTimeMs, rowsWritten, reportFileSize,
-        uploadTimeMs, encodingCheckTimeMs, replicationHealthCheckStatus);
+        uploadTimeMs, encodingCheckTimeMs);
   }
 
   /**
    * This class defines some custom metrics we push to Prometheus.
    */
   public record CustomReportGauges(Gauge reportSuccessful, Gauge reportTotalTime, Gauge dataRefreshTimeMs, Gauge generatedTimeMs,
-                                   Gauge rowsWritten, Gauge reportFileSize, Gauge uploadTimeMs, Gauge encodingCheckTimeMs,
-                                   Gauge replicationHealthCheckStatus) {
+                                   Gauge rowsWritten, Gauge reportFileSize, Gauge uploadTimeMs, Gauge encodingCheckTimeMs) {
 
     public static int REPORT_FAILED = -1;
     public static int REPORT_SUCCESSFUL = 1;
