@@ -3,7 +3,6 @@ package uk.gov.justice.laa.dstew.claimsreports.config;
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import io.prometheus.metrics.exporter.pushgateway.PushGateway;
 import jakarta.annotation.PreDestroy;
-import java.util.concurrent.atomic.AtomicLong;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.stereotype.Component;
 import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric;
@@ -19,26 +18,30 @@ public class MetricsHandler {
 
   private final PrometheusMeterRegistry reportPrometheusMeterRegistry;
   private final PrometheusMeterRegistry jobPrometheusMeterRegistry;
+  private final PrometheusMeterRegistry replicationHealthPrometheusMeterRegistry;
   private final PrometheusConfiguration.CustomReportGauges customReportGauges;
-  private final AtomicLong replicationHealthCheckStatus;
+  private final PrometheusConfiguration.ReplicationHealthGauge replicationHealthCheckGauge;
 
   /**
    * Creates a Metrics Handler.
    *
    * @param reportPrometheusMeterRegistry registry for report metrics
    * @param jobPrometheusMeterRegistry registry for job metrics
+   * @param replicationHealthPrometheusMeterRegistry registry for replication health check metric
    * @param customReportGauges custom metric gauges for reports
+   * @param replicationHealthCheckGauge gauge for replication health check status
    */
   public MetricsHandler(PrometheusMeterRegistry reportPrometheusMeterRegistry,
                         PrometheusMeterRegistry jobPrometheusMeterRegistry,
-                        PrometheusConfiguration.CustomReportGauges customReportGauges) {
+                        PrometheusMeterRegistry replicationHealthPrometheusMeterRegistry,
+                        PrometheusConfiguration.CustomReportGauges customReportGauges,
+                        PrometheusConfiguration.ReplicationHealthGauge replicationHealthCheckGauge
+  ) {
     this.reportPrometheusMeterRegistry = reportPrometheusMeterRegistry;
     this.jobPrometheusMeterRegistry = jobPrometheusMeterRegistry;
+    this.replicationHealthPrometheusMeterRegistry = replicationHealthPrometheusMeterRegistry;
     this.customReportGauges = customReportGauges;
-    this.replicationHealthCheckStatus = jobPrometheusMeterRegistry.gauge(
-            "replication_health_check_status",
-            new AtomicLong(0)
-    );
+    this.replicationHealthCheckGauge = replicationHealthCheckGauge;
   }
 
   public void resetCustomMetrics() {
@@ -61,7 +64,7 @@ public class MetricsHandler {
       case UPLOAD_TIME_MS -> customReportGauges.uploadTimeMs().set(value);
       case GENERATED_TIME_MS -> customReportGauges.generatedTimeMs().set(value);
       case ENCODING_CHECK_TIME_MS -> customReportGauges.encodingCheckTimeMs().set(value);
-      case REPLICATION_HEALTH_CHECK_STATUS -> replicationHealthCheckStatus.set(value);
+      case REPLICATION_HEALTH_CHECK_STATUS -> replicationHealthCheckGauge.replicationHealthCheck().set(value);
       default -> throw new EnumConstantNotPresentException(CustomReportMetric.class, metric.name());
     }
   }
@@ -105,7 +108,7 @@ public class MetricsHandler {
       PushGateway.builder()
               .address(gatewayAddress)
               .job("replicationHealth")
-              .registry(jobPrometheusMeterRegistry.getPrometheusRegistry())
+              .registry(replicationHealthPrometheusMeterRegistry.getPrometheusRegistry())
               .build()
               .push();
     } catch (Exception e) {
