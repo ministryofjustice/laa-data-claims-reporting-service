@@ -40,6 +40,7 @@ helm.sh/chart: {{ include "data-claims-reporting.chart" . }}
 app.kubernetes.io/version: {{ .Chart.AppVersion | quote }}
 {{- end }}
 app.kubernetes.io/managed-by: {{ .Release.Service }}
+branch: {{ .Values.branch | default "unknown" | replace "/" "-" | trunc 63 | quote }}
 {{- end }}
 
 {{/*
