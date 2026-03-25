@@ -87,5 +87,6 @@ runs:
           --set image.tag="${GIT_SHA}" \
           --set aws.region="${ECR_REGION}" \
           --values ${VALUES_FILE} \
+          --set branch=${{ github.ref_name }} \
           --install \
           --wait --timeout=10m
