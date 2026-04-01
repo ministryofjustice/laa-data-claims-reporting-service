@@ -40,14 +40,14 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    implementation(platform 'software.amazon.awssdk:bom:2.42.20')
+    implementation(platform 'software.amazon.awssdk:bom:2.42.25')
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:sts'
 
     implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation 'io.prometheus:prometheus-metrics-exporter-pushgateway'
 
-    implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.1.0'
+    implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.1.1'
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
     runtimeOnly 'org.postgresql:postgresql'
