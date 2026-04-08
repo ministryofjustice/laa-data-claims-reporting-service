@@ -82,7 +82,7 @@ INSERT INTO submission (
 
 -- Claim
 INSERT INTO claim (
-    id, submission_id, status, line_number, matter_type_code, created_by_user_id, created_on, updated_on
+    id, submission_id, status, line_number, matter_type_code, created_by_user_id, dscc_number, created_on, updated_on
 ) VALUES (
              '33333333-3333-3333-3333-333333333333',
              '22222222-2222-2222-2222-222222222222',
@@ -90,6 +90,7 @@ INSERT INTO claim (
              1,
              'MT001',
              'test_user',
+             NULL,
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day',
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          ),
@@ -100,6 +101,7 @@ INSERT INTO claim (
              1,
              'MT001',
              'test_user',
+             'DSCC123456',
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day',
              NULL
          ),
@@ -110,6 +112,7 @@ INSERT INTO claim (
              1,
              'MT001',
              'test_user',
+             NULL,
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day',
              NULL
          ),
@@ -120,6 +123,7 @@ INSERT INTO claim (
              2,
              'MT001',
              'test_user',
+             NULL,
              TIMESTAMP '2025-11-21 06:00:00' - interval '1 day',
              TIMESTAMP '2025-11-22 12:03:32'
          ),
@@ -130,6 +134,7 @@ INSERT INTO claim (
              1,
              'MT001',
              'test_user',
+             NULL,
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day',
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          );

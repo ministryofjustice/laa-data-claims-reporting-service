@@ -218,6 +218,34 @@ public class Report000IntegrationTest extends IntegrationTestBase {
         .isEqualTo("0");
   }
 
+  @Test
+  void report000ContainsDsccNumber() {
+    // When
+    List<Map<String, Object>> rows = getDataForClaimId(CLAIM_ID_WITH_SINGLE_FEE_AND_NO_ASSESSMENTS);
+
+    // Then
+    assertThat(rows).hasSize(1);
+    Map<String, Object> row = rows.getFirst();
+    assertThat(row).containsKey("Crime - DSCC Number");
+    assertThat(row.get("Crime - DSCC Number"))
+      .isNotNull()
+      .isEqualTo("DSCC123456");
+  }
+
+ @Test
+  void report000WithoutDsccNumberReturnsEmptyString() {
+    // When
+    List<Map<String, Object>> rows = getDataForClaimId(CLAIM_ID_WITH_MULTIPLE_FEES_AND_NO_ASSESSMENTS);
+
+    // Then
+    assertThat(rows).hasSize(1);
+    Map<String, Object> row = rows.getFirst();
+    assertThat(row).containsKey("Crime - DSCC Number");
+    assertThat(row.get("Crime - DSCC Number"))
+      .isNotNull()
+      .isEqualTo("");
+  }
+
   private @NotNull List<Map<String, Object>> getDataForClaimId(String claimId) {
 
     jdbcTemplate.update("""
