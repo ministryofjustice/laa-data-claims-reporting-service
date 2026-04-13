@@ -7,4 +7,12 @@ ignore:
         reason: Issue with Json parser we don't use, so wait for Spring to catch up with fix
         expires: 2026-05-08T00:00:00.000Z
         created: 2026-04-08T00:00:00.000Z
+  SNYK-JAVA-ORGAPACHETOMCATEMBED-15989820:
+    - '*':
+        reason: >-
+          Tomcat version managed by LAA Spring Boot plugin. 
+          Not using CLIENT_CERT authentication where vulnerability applies.
+          Will be fixed when plugin updates dependency.
+        expires: 2026-05-13T00:00:00.000Z
+        created: 2026-04-13T00:00:00.000Z
 patch: {}
