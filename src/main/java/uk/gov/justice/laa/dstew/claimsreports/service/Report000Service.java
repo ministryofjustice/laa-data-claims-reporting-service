@@ -59,9 +59,9 @@ public class Report000Service extends AbstractReportService {
 
   @Override
   protected String getOrderByClause() {
-    return " to_char(to_date(\"Submission data - Submission Period\", 'MON-YYYY'), 'YYYYMM') NULLS LAST,"
-        + "    \"Provider Data - Office Account Number\","
-        + "    \"Submission data - Line Number\"";
+    return " to_char(to_date(\"Submission Period\", 'MON-YYYY'), 'YYYYMM') NULLS LAST,"
+        + "    \"Office Account Number\","
+        + "    \"Line Number\"";
   }
 
   // Monthly report
