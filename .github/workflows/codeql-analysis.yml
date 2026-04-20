@@ -15,8 +15,8 @@ jobs:
 
     steps:
       - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
-      - uses: github/codeql-action/init@e2b3eec763ff1ea4c6560fc4b6f2a0818a8f7eb8 # v3.24.5
+      - uses: github/codeql-action/init@7fc6561ed893d15cec696e062df840b21db27eb0 # v4.35.2
         with:
-          languages: java
+          languages: '["actions", "java"]'
       - run: ./gradlew build
-      - uses: github/codeql-action/analyze@e2b3eec763ff1ea4c6560fc4b6f2a0818a8f7eb8 # v3.24.5
+      - uses: github/codeql-action/analyze@7fc6561ed893d15cec696e062df840b21db27eb0 # v4.35.2
