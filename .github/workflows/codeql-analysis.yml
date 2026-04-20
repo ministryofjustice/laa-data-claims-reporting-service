@@ -2,7 +2,7 @@ name: CodeQL Analysis
 
 on:
   push:
-    branches: [main]
+    branches: [main, bug/lpf1360-fix-codeQL]
   pull_request:
     branches: [main]
 
