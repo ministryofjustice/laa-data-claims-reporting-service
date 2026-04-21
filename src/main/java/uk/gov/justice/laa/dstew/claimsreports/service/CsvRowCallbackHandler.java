@@ -5,6 +5,8 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Map;
+
+import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowCallbackHandler;
 import tools.jackson.core.exc.JacksonIOException;
@@ -26,6 +28,7 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
   private final int bufferFlushFrequency;
   private final CsvMapper csvMapper;
   private SequenceWriter sequenceWriter;
+  @Getter
   private int rowCount;
 
   @Override
@@ -53,7 +56,11 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
       row.clear();
 
       for (int i = 1; i <= columnCount; i++) {
-        row.put(meta.getColumnName(i), resultSet.getString(i));
+        String value = resultSet.getString(i);
+        if (value != null) {
+          value = value.replace("\n", "").replace("\r", "");
+        }
+        row.put(meta.getColumnName(i), value);
       }
       sequenceWriter.write(row);
 
@@ -81,9 +88,5 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
     ObjectWriter objectWriter = csvMapper.writer(schema);
     // Streaming writer that handles CSV formatting, quotations, line endings etc.
     sequenceWriter = objectWriter.writeValues(writer);
-  }
-
-  public int getRowCount() {
-    return rowCount;
   }
 }

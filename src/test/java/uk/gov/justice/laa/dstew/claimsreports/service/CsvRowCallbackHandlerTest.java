@@ -171,6 +171,23 @@ public class CsvRowCallbackHandlerTest {
     assertEquals(2, csvRowCallbackHandler.getRowCount());
   }
 
+  @Test
+  void willRemoveLineFeedAndCarriageReturnFromData() throws SQLException {
+    buildFirstRowAndSchema();
+
+    // Setup data with line feed and carriage return characters
+    setupResultSetData(2, "random\ndata\r\nwith line breaks");
+    when(sequenceWriter.write(any(Map.class))).thenAnswer(invocation -> {
+      Map<String, String> writtenRow = invocation.getArgument(0);
+      assertEquals("randomdatawith line breaks", writtenRow.get("column_1"));
+      return null;
+    });
+
+    csvRowCallbackHandler.processRow(resultSet);
+
+    verify(sequenceWriter, times(1)).write(any(Map.class));
+  }
+
   private void setupResultSetData(int rowNo, String data) throws SQLException {
     when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
     when(resultSet.getRow()).thenReturn(rowNo);
