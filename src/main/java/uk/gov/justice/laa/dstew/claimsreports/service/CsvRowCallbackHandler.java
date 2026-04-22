@@ -5,7 +5,6 @@ import java.sql.ResultSet;
 import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.Map;
-
 import lombok.Getter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.jdbc.core.RowCallbackHandler;
