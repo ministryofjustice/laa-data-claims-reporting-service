@@ -171,6 +171,108 @@ public class CsvRowCallbackHandlerTest {
     assertEquals(2, csvRowCallbackHandler.getRowCount());
   }
 
+  @Test
+  void willRemoveLineFeedAndCarriageReturnFromData() throws SQLException {
+    buildFirstRowAndSchema();
+
+    // Setup data with line feed and carriage return characters
+    setupResultSetData(2, "random\ndata\r\nwith line breaks");
+    when(sequenceWriter.write(any(Map.class))).thenAnswer(invocation -> {
+      Map<String, String> writtenRow = invocation.getArgument(0);
+      assertEquals("randomdatawith line breaks", writtenRow.get("column_1"));
+      return null;
+    });
+
+    csvRowCallbackHandler.processRow(resultSet);
+
+    verify(sequenceWriter, times(1)).write(any(Map.class));
+  }
+
+  @Test
+  void willRemoveOnlyCarriageReturnCharacters() throws SQLException {
+    buildFirstRowAndSchema();
+
+    // Setup data with only carriage return characters (no line feeds)
+    setupResultSetData(2, "data\rwith\rcarriage\rreturns");
+    when(sequenceWriter.write(any(Map.class))).thenAnswer(invocation -> {
+      Map<String, String> writtenRow = invocation.getArgument(0);
+      assertEquals("datawithcarriagereturns", writtenRow.get("column_1"));
+      return null;
+    });
+
+    csvRowCallbackHandler.processRow(resultSet);
+
+    verify(sequenceWriter, times(1)).write(any(Map.class));
+  }
+
+  @Test
+  void willRemoveMultipleConsecutiveLineBreaks() throws SQLException {
+    buildFirstRowAndSchema();
+
+    // Setup data with multiple consecutive line breaks
+    setupResultSetData(2, "data\n\n\nwith\r\n\r\nmultiple\n\r\n\rbreaks");
+    when(sequenceWriter.write(any(Map.class))).thenAnswer(invocation -> {
+      Map<String, String> writtenRow = invocation.getArgument(0);
+      assertEquals("datawithmultiplebreaks", writtenRow.get("column_1"));
+      return null;
+    });
+
+    csvRowCallbackHandler.processRow(resultSet);
+
+    verify(sequenceWriter, times(1)).write(any(Map.class));
+  }
+
+  @Test
+  void willRemoveLeadingLineBreaks() throws SQLException {
+    buildFirstRowAndSchema();
+
+    // Setup data with leading line breaks
+    setupResultSetData(2, "\n\r\ndata with leading breaks");
+    when(sequenceWriter.write(any(Map.class))).thenAnswer(invocation -> {
+      Map<String, String> writtenRow = invocation.getArgument(0);
+      assertEquals("data with leading breaks", writtenRow.get("column_1"));
+      return null;
+    });
+
+    csvRowCallbackHandler.processRow(resultSet);
+
+    verify(sequenceWriter, times(1)).write(any(Map.class));
+  }
+
+  @Test
+  void willRemoveTrailingLineBreaks() throws SQLException {
+    buildFirstRowAndSchema();
+
+    // Setup data with trailing line breaks
+    setupResultSetData(2, "data with trailing breaks\n\r\n");
+    when(sequenceWriter.write(any(Map.class))).thenAnswer(invocation -> {
+      Map<String, String> writtenRow = invocation.getArgument(0);
+      assertEquals("data with trailing breaks", writtenRow.get("column_1"));
+      return null;
+    });
+
+    csvRowCallbackHandler.processRow(resultSet);
+
+    verify(sequenceWriter, times(1)).write(any(Map.class));
+  }
+
+  @Test
+  void willRemoveLeadingAndTrailingLineBreaks() throws SQLException {
+    buildFirstRowAndSchema();
+
+    // Setup data with both leading and trailing line breaks
+    setupResultSetData(2, "\r\ndata surrounded by breaks\n\r");
+    when(sequenceWriter.write(any(Map.class))).thenAnswer(invocation -> {
+      Map<String, String> writtenRow = invocation.getArgument(0);
+      assertEquals("data surrounded by breaks", writtenRow.get("column_1"));
+      return null;
+    });
+
+    csvRowCallbackHandler.processRow(resultSet);
+
+    verify(sequenceWriter, times(1)).write(any(Map.class));
+  }
+
   private void setupResultSetData(int rowNo, String data) throws SQLException {
     when(resultSet.getMetaData()).thenReturn(resultSetMetaData);
     when(resultSet.getRow()).thenReturn(rowNo);
