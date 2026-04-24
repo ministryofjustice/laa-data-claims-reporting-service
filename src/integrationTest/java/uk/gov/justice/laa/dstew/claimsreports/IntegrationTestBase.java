@@ -54,7 +54,7 @@ public class IntegrationTestBase {
 
   @Container
   static final LocalStackContainer localstack =
-      new LocalStackContainer(DockerImageName.parse("localstack/localstack:3.4"))
+      new LocalStackContainer(DockerImageName.parse("localstack/localstack:s3-community-archive"))
           .withServices(LocalStackContainer.Service.S3);
 
   @Autowired
