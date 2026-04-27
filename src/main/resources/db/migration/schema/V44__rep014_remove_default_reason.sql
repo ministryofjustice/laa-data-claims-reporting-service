@@ -20,7 +20,7 @@ WITH submission_periods AS (
 	FROM claims.submission AS s
 ), assessment_lines AS (
 	SELECT
-		a.id as assessment_id,
+		a.id AS assessment_id,
 		a.claim_id,
 		c.submission_id,
 		c.unique_file_number,
@@ -36,7 +36,7 @@ WITH submission_periods AS (
 		a.assessment_type,
 		a.assessment_reason
     FROM claims.assessment AS a
-    JOIN claims.claim as c
+    JOIN claims.claim AS c
 		ON c.id = a.claim_id
 	 -- LATERAL join for latest calculated fee detail (performance optimization)
     LEFT JOIN LATERAL (
@@ -65,7 +65,7 @@ SELECT
     COALESCE(sp.submission_id::text, '') 										                AS "Submission ID",
     COALESCE(al.claim_id::text, '') 											                AS "Claim ID",
     COALESCE(al.assessment_id::text, '') 										                AS "Assessment ID"
-FROM assessment_lines as al
+FROM assessment_lines AS al
          JOIN submission_periods AS sp
               ON sp.submission_id = al.submission_id
          LEFT JOIN claims.client AS cl
