@@ -24,7 +24,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
   #  local AWS cloud stack for dev
   localstack:
-    image: localstack/localstack:latest
+    image: localstack/localstack:s3-community-archive
     ports:
       - "4566:4566"
     environment:
