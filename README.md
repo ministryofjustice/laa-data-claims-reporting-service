@@ -1,5 +1,5 @@
 # laa-data-claims-reporting-service
-[![Ministry of Justice Repository Compliance Badge](https://github-community.service.justice.gov.uk/repository-standards/api/laa-data-claims-reporting-service/badge)](https://github-community.service.justice.gov.uk/repository-standards/laa-data-claims-reporting-service)
+[![Ministry of Justice Repository Compliance Badge](https://github-community.service.justice.gov.uk/repository-standards/api/laa-data-claims-reporting-service/badge?v=2)](https://github-community.service.justice.gov.uk/repository-standards/laa-data-claims-reporting-service)
 
 This is a Java based Spring Boot application hosted on [MOJ Cloud Platform](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/concepts/what-is-the-cloud-platform.html).
 
@@ -106,4 +106,5 @@ When enabled it will attempt to upload the report to the `reports/errors` folder
 You should not turn this on permanently it is intended as just a debug helper.  
 
 ### Pre commit hooks
+
 Pre commit hooks have been set up on this repository to ensure no accidental commits of secrets, keys etc. Provided by DevSecOps https://github.com/ministryofjustice/devsecops-hooks
