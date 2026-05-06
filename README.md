@@ -1,5 +1,5 @@
 # laa-data-claims-reporting-service
-[![Ministry of Justice Repository Compliance Badge](https://github-community.service.justice.gov.uk/repository-standards/api/laa-data-claims-reporting-service/badge)](https://github-community.service.justice.gov.uk/repository-standards/laa-data-claims-reporting-service)
+[![Ministry of Justice Repository Compliance Badge](https://github-community.service.justice.gov.uk/repository-standards/api/laa-data-claims-reporting-service/badge?v=2)](https://github-community.service.justice.gov.uk/repository-standards/laa-data-claims-reporting-service)
 
 This is a Java based Spring Boot application hosted on [MOJ Cloud Platform](https://user-guide.cloud-platform.service.justice.gov.uk/documentation/concepts/what-is-the-cloud-platform.html).
 
