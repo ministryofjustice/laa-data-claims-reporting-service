@@ -106,5 +106,4 @@ When enabled it will attempt to upload the report to the `reports/errors` folder
 You should not turn this on permanently it is intended as just a debug helper.  
 
 ### Pre commit hooks
-
 Pre commit hooks have been set up on this repository to ensure no accidental commits of secrets, keys etc. Provided by DevSecOps https://github.com/ministryofjustice/devsecops-hooks
