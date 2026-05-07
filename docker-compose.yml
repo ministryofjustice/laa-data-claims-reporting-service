@@ -11,7 +11,7 @@ services:
       GATEWAY_ADDRESS: pushgateway:9091
       feature_ignore-replication-rowcount-mismatch: true
   postgres:
-    image: postgres:17
+    image: postgres:17@sha256:5b96f1a16bd9768b060dd2ffe55cb6225c4d9ef4d214a8b21eb08134869a97e4
     container_name: data-claims-reporting-service-local-postgres
     restart: unless-stopped
     environment:
@@ -24,7 +24,7 @@ services:
       - postgres-data:/var/lib/postgresql/data
   #  local AWS cloud stack for dev
   localstack:
-    image: localstack/localstack:s3-community-archive
+    image: localstack/localstack:s3-community-archive@sha256:b14111811a1071ff8e05ea2d89fac68dc3aa115bcb0b053f5502a1dfffba4ff8
     ports:
       - "4566:4566"
     environment:
@@ -35,7 +35,7 @@ services:
       - "/var/run/docker.sock:/var/run/docker.sock"
       - "./localstack-init:/etc/localstack/init/ready.d"
   pushgateway:
-    image: prom/pushgateway:latest
+    image: prom/pushgateway:latest@sha256:c835998819105d84d484918908df132807c78c05f3e0e649df0c0479c6780d98
     container_name: pushgateway
     ports:
       - "9091:9091"
