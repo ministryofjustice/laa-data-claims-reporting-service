@@ -35,6 +35,9 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 
+    // Resolve snyk scan
+    implementation(platform("io.netty:netty-bom:4.2.13.Final"))
+
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
 
     implementation 'org.mapstruct:mapstruct:1.6.3'
