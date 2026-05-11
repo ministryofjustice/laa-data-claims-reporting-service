@@ -1,5 +1,5 @@
 # Specify java runtime base image
-FROM amazoncorretto:25.0.2-alpine3.23
+FROM amazoncorretto:25.0.2-alpine3.23@sha256:29fb372e1090a314688d0105870559369f8481ad18826e1c2367eab67e6eca4b
 
 # Set up working directory in the container
 RUN mkdir -p /opt/laa-data-reporting-service/claims-reporting/
