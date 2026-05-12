@@ -13,6 +13,15 @@ bootRun {
     systemProperty "spring.profiles.active", "local"
 }
 
+processResources {
+    filteringCharset = 'UTF-8'
+    filesMatching('**/application*.yml') {
+        filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [
+            version: project.version.toString()
+        ], beginToken: '@', endToken: '@')
+    }
+}
+
 jacocoTestReport {
     afterEvaluate {
         classDirectories.setFrom(files(classDirectories.files.collect {
@@ -54,6 +63,10 @@ dependencies {
 
     implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation 'io.prometheus:prometheus-metrics-exporter-pushgateway'
+
+    // Required for tracing information
+    implementation 'org.springframework.boot:spring-boot-micrometer-tracing-brave'
+    implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 
     implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.1.3'
 

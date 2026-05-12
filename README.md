@@ -33,6 +33,79 @@ Includes the following subprojects:
 
 `./gradlew integrationTest`
 
+## Logging
+
+This application uses **ECS (Elastic Common Schema) structured logging** for production environments and console logging for local development.
+
+### Structured Logging (Default/Production)
+
+By default, the application outputs logs in ECS JSON format with distributed tracing support:
+
+```json
+{
+  "@timestamp": "2026-05-11T16:25:18.992904Z",
+  "ecs": {
+    "version": "8.11"
+  },
+  "log": {
+    "level": "INFO",
+    "logger": "uk.gov.justice.laa.dstew.claimsreports.runner.ClaimsReportingServiceRunner"
+  },
+  "message": "Generated REPXXX report with 1234 rows",
+  "process": {
+    "pid": 1,
+    "thread": {
+      "name": "main"
+    }
+  },
+  "service": {
+    "environment": "staging",
+    "name": "LAA Claims Data Reporting Service",
+    "node": {
+      "name": "laa-data-claims-reporting-service-xxxxx"
+    },
+    "version": "1.0.0"
+  },
+  "spanId": "fe4586c5fd5f7021",
+  "traceId": "69aaffee8d19869cfe4586c5fd5f7021"
+}
+```
+
+**Key fields:**
+- `@timestamp`: ISO 8601 timestamp
+- `log.level`: Log level (INFO, DEBUG, WARN, ERROR)
+- `message`: Log message
+- `service.name`: Application name from spring.application.name
+- `service.version`: Application version from gradle.properties
+- `service.environment`: Active Spring profile
+- `service.node.name`: Hostname (pod name in Kubernetes)
+- `traceId` / `spanId`: Distributed tracing correlation IDs
+
+### Local Development Logging
+
+When running with the `local` profile (e.g., `./gradlew bootRun`), logs use a human-readable console format:
+
+```
+2026-05-11T16:25:18.992+01:00 [main] [69aaffee8d19869cfe4586c5fd5f7021/fe4586c5fd5f7021] INFO  u.g.j.l.d.c.runner.ClaimsReportingServiceRunner - Starting claims report generation
+```
+
+This format includes trace/span IDs for correlation while remaining easy to read during development.
+
+### Log Level Configuration
+
+Log levels can be controlled via environment variables:
+
+- `ROOT_LOGGING_LEVEL`: Root logger level (default: info)
+- `SPRING_LOGGING_LEVEL`: Spring framework logger level (default: info)
+- `APP_LOGGING_LEVEL`: Application package logger level (default: info)
+
+Example:
+```bash
+export ROOT_LOGGING_LEVEL=debug
+export APP_LOGGING_LEVEL=trace
+./gradlew bootRun
+```
+
 ### Run locally using Minikube
 ```
 brew install minikube

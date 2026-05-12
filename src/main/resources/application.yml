@@ -1,6 +1,7 @@
 spring:
   application:
     name: LAA Claims Data Reporting Application
+    version: @version@
   # Default connection details for local dev, overridden in other envs
   datasource:
     driver-class-name: org.postgresql.Driver
@@ -18,9 +19,22 @@ spring:
       replication_source_db_url: "replication_source_db_url"
       replication_source_db_name: "replication_source_db_name"
 
+# ECS structured logging
 logging:
   level:
+    root: ${ROOT_LOGGING_LEVEL:info}
+    org.springframework: ${SPRING_LOGGING_LEVEL:info}
+    uk.gov.justice.laa.dstew.claimsreports: ${APP_LOGGING_LEVEL:info}
     org.flywaydb: INFO
+  structured:
+    format:
+      console: ecs
+    ecs:
+      service:
+        name: ${spring.application.name:default}
+        version: ${spring.application.version:default}
+        environment: ${spring.profiles.active:default}
+        node_name: ${HOSTNAME:unknown}
 
 # used by actuator info endpoint
 info:
