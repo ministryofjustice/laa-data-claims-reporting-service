@@ -60,7 +60,7 @@ By default, the application outputs logs in ECS JSON format with distributed tra
   },
   "service": {
     "environment": "staging",
-    "name": "LAA Claims Data Reporting Service",
+    "name": "LAA Claims Data Reporting Application",
     "node": {
       "name": "laa-data-claims-reporting-service-xxxxx"
     },
@@ -90,21 +90,6 @@ When running with the `local` profile, logs use a human-readable console format:
 ```
 
 This format includes trace/span IDs for correlation while remaining easy to read during development.
-
-### Log Level Configuration
-
-Log levels can be controlled via environment variables:
-
-- `ROOT_LOGGING_LEVEL`: Root logger level (default: info)
-- `SPRING_LOGGING_LEVEL`: Spring framework logger level (default: info)
-- `APP_LOGGING_LEVEL`: Application package logger level (default: info)
-
-Example:
-```bash
-export ROOT_LOGGING_LEVEL=debug
-export APP_LOGGING_LEVEL=trace
-./gradlew bootRun
-```
 
 ### Run locally using Minikube
 ```
