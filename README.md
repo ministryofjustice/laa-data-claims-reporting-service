@@ -83,7 +83,7 @@ By default, the application outputs logs in ECS JSON format with distributed tra
 
 ### Local Development Logging
 
-When running with the `local` profile (e.g., `./gradlew bootRun`), logs use a human-readable console format:
+When running with the `local` profile, logs use a human-readable console format:
 
 ```
 2026-05-11T16:25:18.992+01:00 [main] [69aaffee8d19869cfe4586c5fd5f7021/fe4586c5fd5f7021] INFO  u.g.j.l.d.c.runner.ClaimsReportingServiceRunner - Starting claims report generation
