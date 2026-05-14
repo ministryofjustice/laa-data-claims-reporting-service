@@ -4,6 +4,10 @@
 
 Describe what you did and why.
 
+## Evidence
+- Attach any screenshots of a manual test or logs, or link to successful deployment
+- Before & after the change if possible
+
 ## Checklist
 
 Before you ask people to review this PR:
