@@ -4,8 +4,6 @@ plugins {
     id 'uk.gov.laa.springboot.laa-spring-boot-gradle-plugin'
 }
 
-version = "0.0.1-SNAPSHOT"
-
 test {
     useJUnitPlatform()
     finalizedBy jacocoTestReport
