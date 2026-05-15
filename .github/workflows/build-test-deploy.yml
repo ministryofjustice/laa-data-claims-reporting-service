@@ -29,13 +29,10 @@ jobs:
       - name: Set up Gradle
         uses: gradle/actions/setup-gradle@50e97c2cd7a37755bbfafc9c5b7cafaece252f6e # v6.1.0
 
-      - name: Build and test
+      - name: Build and test (includes JaCoCo gate)
         run: ./gradlew build
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-
-      - name: Test coverage verification
-        run: ./gradlew jacocoTestCoverageVerification
 
       # This is a temporary workaround for https://github.com/testcontainers/testcontainers-java/issues/11212"
       - name: Force docker-java API version (temporary workaround for testcontainers)
