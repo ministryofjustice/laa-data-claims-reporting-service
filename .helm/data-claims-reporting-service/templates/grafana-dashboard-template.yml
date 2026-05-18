@@ -46,7 +46,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -179,7 +179,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -296,7 +296,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -413,7 +413,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -530,7 +530,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -647,7 +647,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -764,7 +764,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -881,7 +881,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -1011,7 +1011,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -1062,7 +1062,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "prometheus"
+                "uid": "P5DCFC7561CCDE821"
               },
               "editorMode": "builder",
               "expr": "sum(kube_pod_container_info{namespace='{{ .Release.Namespace }}',pod=~'main-data-claims-reporting-service.*'})",
@@ -1073,7 +1073,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "prometheus"
+                "uid": "P5DCFC7561CCDE821"
               },
               "editorMode": "code",
               "expr": "sum({namespace='{{ .Release.Namespace }}',phase='Running',pod=~'main-data-claims-reporting-service.*'} + 0)",
@@ -1085,7 +1085,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "prometheus"
+                "uid": "P5DCFC7561CCDE821"
               },
               "editorMode": "builder",
               "expr": "sum({namespace='{{ .Release.Namespace }}',phase='Pending',pod=~'main-data-claims-reporting-service.*'} + 0)",
@@ -1097,7 +1097,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "prometheus"
+                "uid": "P5DCFC7561CCDE821"
               },
               "editorMode": "code",
               "expr": "sum({namespace='{{ .Release.Namespace }}',phase='Failed',pod=~'main-data-claims-reporting-service.*'} + 0)",
@@ -1113,7 +1113,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -1206,7 +1206,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "prometheus"
+                "uid": "P5DCFC7561CCDE821"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1227,7 +1227,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -1341,7 +1341,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -1439,7 +1439,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -1532,7 +1532,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "prometheus"
+                "uid": "P5DCFC7561CCDE821"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1549,7 +1549,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "prometheus"
+                "uid": "P5DCFC7561CCDE821"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1570,7 +1570,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -1681,7 +1681,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -1764,7 +1764,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "prometheus"
+                "uid": "P5DCFC7561CCDE821"
               },
               "disableTextWrap": false,
               "editorMode": "code",
@@ -1785,7 +1785,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -1883,7 +1883,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "description": "Top 3 CPU Used Per Instance",
           "fieldConfig": {
@@ -1994,7 +1994,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -2042,7 +2042,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "prometheus"
+                "uid": "P5DCFC7561CCDE821"
               },
               "editorMode": "code",
               "expr": "jvm_memory_max_bytes{namespace='{{ .Release.Namespace }}',area='heap',id='G1 Survivor Space'} / 1000000",
@@ -2057,7 +2057,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -2139,7 +2139,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "prometheus"
+                "uid": "P5DCFC7561CCDE821"
               },
               "editorMode": "code",
               "expr": "jvm_memory_used_bytes{namespace='{{ .Release.Namespace }}',area='heap',id='G1 Survivor Space'}/1000000",
@@ -2154,7 +2154,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -2201,7 +2201,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "prometheus"
+                "uid": "P5DCFC7561CCDE821"
               },
               "editorMode": "code",
               "expr": "jvm_memory_max_bytes{namespace='{{ .Release.Namespace }}',area='heap',id='G1 Eden Space'}/1000000",
@@ -2216,7 +2216,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -2298,7 +2298,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "prometheus"
+                "uid": "P5DCFC7561CCDE821"
               },
               "editorMode": "code",
               "expr": "jvm_memory_used_bytes{namespace='{{ .Release.Namespace }}',area='heap',id='G1 Eden Space'}/1000000",
@@ -2313,7 +2313,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -2360,7 +2360,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "prometheus"
+                "uid": "P5DCFC7561CCDE821"
               },
               "editorMode": "code",
               "expr": "jvm_memory_max_bytes{namespace='{{ .Release.Namespace }}',area='heap',id='G1 Old Gen'} /1000000",
@@ -2375,7 +2375,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -2457,7 +2457,7 @@
             {
               "datasource": {
                 "type": "prometheus",
-                "uid": "prometheus"
+                "uid": "P5DCFC7561CCDE821"
               },
               "editorMode": "code",
               "expr": "jvm_memory_used_bytes{namespace='{{ .Release.Namespace }}',area='heap',id='G1 Old Gen'} /1000000",
