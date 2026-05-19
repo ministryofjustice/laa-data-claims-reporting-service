@@ -10,4 +10,8 @@ metadata:
 data:
     {{ .Release.Namespace }}.json:
     {{ include "grafana-dashboard-template" . | quote | indent 4 }}
+
+    {{ .Release.Namespace }}-database.json:
+    {{ include "grafana-database-dashboard-template" . | quote | indent 4 }}
+
 {{- end }}
