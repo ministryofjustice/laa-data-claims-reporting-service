@@ -8,10 +8,10 @@ metadata:
   labels:
     grafana_dashboard: "1"
 data:
-    {{ .Release.Namespace }}.json:
+  {{ .Release.Namespace }}.json:
     {{ include "grafana-dashboard-template" . | quote | indent 4 }}
 
-    {{ .Release.Namespace }}-database.json:
+  {{ .Release.Namespace }}-database.json:
     {{ include "grafana-database-dashboard-template" . | quote | indent 4 }}
 
 {{- end }}
