@@ -6,7 +6,7 @@ metadata:
   name: {{ .Release.Namespace }}-dashboard
   namespace: {{ .Release.Namespace }}
   labels:
-    grafana_dashboard: {{ .Release.Namespace }}-dashboard
+    grafana_dashboard: "1"
 data:
     {{ .Release.Namespace }}.json:
     {{ include "grafana-dashboard-template" . | quote | indent 4 }}
