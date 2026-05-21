@@ -13,7 +13,9 @@ repos:
     hooks:
       - id: valid-commit-format
         name: Validate commit message format (with ticket ID)
-        entry:
-          bash -c 'grep -Eq "^(feat|fix|docs|chore|refactor|test|ci|build|perf)(\([A-Z]+-[0-9]+\))?: .+" <<< "$(cat "$1")"'
+        entry: >
+          bash -c 'grep -Eq "^(feat|fix|docs|chore|refactor|test|ci|build|perf)(\([A-Z]+-[0-9]+\))?:
+            .+" "$1" || { echo "Invalid commit format. Expected:
+              type(TICKET-123): message"; exit 1; }' --
         language: system
         stages: [ commit-msg ]
