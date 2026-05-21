@@ -4,10 +4,25 @@
 
 Describe what you did and why.
 
+## Evidence
+- Attach any screenshots of a manual test or logs, or link to successful deployment
+- Before & after the change if possible
+
 ## Checklist
 
 Before you ask people to review this PR:
 
+- [ ] Title follows the format `{type}({TICKET-NUMBER}): {brief description}`.   Example: `feat(ABC-123): add caching layer`
+    - Type must be one of:
+        - feat
+        - fix
+        - docs
+        - chore
+        - refactor
+        - test
+        - ci
+        - build
+        - perf
 - [ ] Bump Helm chart version (if you have changed the Helm templates)
 - [ ] Tests should be passing: `./gradlew test` & `./gradlew integrationTest`
 - [ ] Github should not be reporting conflicts; you should have recently run `git rebase main`.
