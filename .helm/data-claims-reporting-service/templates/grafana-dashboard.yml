@@ -1,4 +1,4 @@
-{{/*{{- if or (and (contains "uat" .Release.Namespace) (eq .Release.Name "main")) (contains "staging" .Release.Namespace) (contains "prod" .Release.Namespace)}}*/}}
+{{- if or (and (contains "uat" .Release.Namespace) (eq .Release.Name "main")) (contains "staging" .Release.Namespace) (contains "prod" .Release.Namespace)}}
 
 apiVersion: v1
 kind: ConfigMap
@@ -10,4 +10,4 @@ metadata:
 data:
     {{ .Release.Namespace }}.json:
     {{ include "grafana-dashboard-template" . | quote | indent 4 }}
-{{/*{{- end }}*/}}
+{{- end }}
