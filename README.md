@@ -158,11 +158,125 @@ kubectl -n {namespace} create job {give a job name here} --from=cronjob/{cronjob
 | kubectl -n {namespace} apply -f -
 ```
 
-#### Debugging feature flags
+# Releases
+
+This project uses [release-please](https://github.com/googleapis/release-please)
+to automate versioning, changelog generation, and GitHub releases.
+
+### How It Works
+
+When commits are merged into `main`, release-please:
+
+- determines the next semantic version
+- updates `pom.xml`
+- updates `CHANGELOG.md`
+- creates a release pull request
+- creates a GitHub release after the PR is merged
+
+---
+
+When the Release PR is merged:
+- a Git tag is created
+- a GitHub Release is published
+- the new version becomes available
+
+---
+
+### Commit Message Format
+
+All commits should follow this format:
+
+```text
+<type>: <short summary>
+```
+
+Examples:
+
+```text
+feat: add webhook retry support
+fix: prevent duplicate event processing
+docs: update installation instructions
+```
+
+---
+
+### Commit Types
+
+| Type | Description | Version Impact |
+|------|-------------|----------------|
+| `feat` | Introduces a new feature | Minor |
+| `fix` | Fixes a bug | Patch |
+| `feat!` | Breaking feature change | Major |
+| `docs` | Documentation updates only | None |
+| `refactor` | Internal code restructuring | None |
+| `test` | Adding or updating tests | None |
+| `chore` | Maintenance tasks | None |
+| `ci` | CI/CD pipeline changes | None |
+| `build` | Build tooling or dependency changes | None |
+| `perf` | Performance improvements | Patch |
+| `revert` | Reverts a previous commit | Depends |
+
+---
+## Semantic Versioning Examples
+
+### Patch Release
+
+```text
+fix: handle null response from API
+```
+
+Results in:
+
+```text
+1.4.0 → 1.4.1
+```
+
+---
+
+### Minor Release
+
+```text
+feat: add OAuth authentication
+```
+
+Results in:
+
+```text
+1.4.0 → 1.5.0
+```
+
+---
+
+### Major Release
+
+```text
+feat!: remove deprecated REST endpoints
+```
+
+or:
+
+```text
+feat: remove deprecated REST endpoints
+
+BREAKING CHANGE: legacy REST API removed
+```
+
+Results in:
+
+```text
+1.4.0 → 2.0.0
+```
+---
+
+## Debugging feature flags
 You can create the cronjob with the `FEATURE_UPLOAD-UTF-8-FAILURES-TO-S3="true"` if you are debugging an issue with UTF-8 validation and need to see the invalid document.
 When enabled it will attempt to upload the report to the `reports/errors` folder.
 You should not turn this on permanently it is intended as just a debug helper.  
 
-### Pre commit hooks
+## Pre commit hooks
+- Pre commit hooks have been set up on this repository to ensure no accidental commits of secrets, keys etc. Provided by DevSecOps https://github.com/ministryofjustice/devsecops-hooks
 
-Pre commit hooks have been set up on this repository to ensure no accidental commits of secrets, keys etc. Provided by DevSecOps https://github.com/ministryofjustice/devsecops-hooks
+Install the hook with the following command:
+```text
+pre-commit install
+```
