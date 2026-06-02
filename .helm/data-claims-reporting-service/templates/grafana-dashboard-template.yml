@@ -46,7 +46,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -139,7 +139,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "description": "Tracking the error rate of DCRS",
           "fieldConfig": {
@@ -233,7 +233,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "description": "Tracking the time it takes for DCRS to respond",
           "fieldConfig": {
@@ -329,7 +329,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "description": "Tracking which endpoints receive the most requests",
           "fieldConfig": {
@@ -425,7 +425,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "description": "Tracking which endpoints are the slowest",
           "fieldConfig": {
@@ -2973,7 +2973,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -3066,7 +3066,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -3159,7 +3159,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
@@ -3265,7 +3265,7 @@
         {
           "datasource": {
             "type": "prometheus",
-            "uid": "prometheus"
+            "uid": "P5DCFC7561CCDE821"
           },
           "fieldConfig": {
             "defaults": {
