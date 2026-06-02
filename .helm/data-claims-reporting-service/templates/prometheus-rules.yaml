@@ -67,6 +67,25 @@ spec:
           for: 0m
           labels:
             severity: {{ .Values.alerting.severity }}
+        - alert: KubeJobFailed
+          annotations:
+            message: Job has failed to run
+            runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/blob/master/runbook.md#alert-name-kubejobfailed
+            dashboard_url: {{ .Values.alerting.grafanaDashboard }}
+          expr: |-
+            max_over_time(kube_job_status_failed{namespace="{{ .Release.Namespace }}"}[2h]) * on(job_name, namespace)group_left()(time() - kube_job_created < 24 * 3600) > 0
+          for: 1m
+          labels:
+            severity: {{ .Values.alerting.severity }}
+        - alert: KubeJobNotCreated
+          annotations:
+            message: Job has failed to be created
+            dashboard_url: {{ .Values.alerting.grafanaDashboard }}
+          expr: |-
+            count(kube_job_created{namespace="{{ .Release.Namespace }}"} and (time() - kube_job_created < 24 * 3600))
+          for: 1m
+          labels:
+            severity: {{ .Values.alerting.severity }}
     - name: application-rules
       rules:
         - alert: reportFailed
@@ -118,4 +137,4 @@ spec:
           for: 1m
           labels:
             severity: {{ .Values.alerting.severity }}
-  {{- end }}
+{{- end }}
