@@ -227,7 +227,7 @@ INSERT INTO client (
 
 -- Claim Case
 INSERT INTO claim_case (
-    id, claim_id, case_id, unique_case_id, case_stage_code, stage_reached_code, outcome_code, created_by_user_id, created_on
+    id, claim_id, case_id, unique_case_id, case_stage_code, stage_reached_code, outcome_code, mental_health_tribunal_reference, created_by_user_id, created_on
 ) VALUES (
              '55555555-5555-5555-5555-555555555555',
              '33333333-3333-3333-3333-333333333333',
@@ -236,6 +236,7 @@ INSERT INTO claim_case (
              'STAGE1',
              'REACHED1',
              'SUCCESS',
+             null,
              'test_user',
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          ),
@@ -247,6 +248,7 @@ INSERT INTO claim_case (
              'STAGE1',
              'REACHED1',
              'SUCCESS',
+             'XKDL-3214-EXAMPLE',
              'test_user',
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          ),
@@ -258,6 +260,7 @@ INSERT INTO claim_case (
              'STAGE1',
              'REACHED1',
              'SUCCESS',
+             null,
              'test_user',
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          ),
@@ -269,6 +272,7 @@ INSERT INTO claim_case (
              'STAGE1',
              'REACHED1',
              'SUCCESS',
+             null,
              'test_user',
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          ),
@@ -280,6 +284,7 @@ INSERT INTO claim_case (
              'STAGE1',
              'REACHED1',
              'SUCCESS',
+             'LKD-EXAMPLE2-1979',
              'test_user',
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day');
 
