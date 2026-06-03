@@ -43,7 +43,6 @@ spotbugs {
     ignoreFailures = true
     effort = 'max'
     reportLevel = 'low'
-    showProgress = true
 }
 
 spotbugsMain {
