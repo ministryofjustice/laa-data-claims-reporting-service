@@ -2,6 +2,7 @@ plugins {
     id 'io.freefair.lombok' version '9.5.0'
     // plugin version set in settings.gradle
     id 'uk.gov.laa.springboot.laa-spring-boot-gradle-plugin'
+    id 'com.github.spotbugs' version '6.5.5'
 }
 
 test {
@@ -35,6 +36,19 @@ jacocoTestCoverageVerification {
         classDirectories.setFrom(files(classDirectories.files.collect {
             fileTree(dir: it, exclude: ['**/ClaimsReportingServiceApplication.class'])
         }))
+    }
+}
+
+spotbugs {
+    ignoreFailures = true
+    effort = 'max'
+    reportLevel = 'low'
+    showProgress = true
+}
+
+spotbugsMain {
+    reports {
+        sarif.required = true
     }
 }
 
@@ -90,4 +104,6 @@ dependencies {
     testRuntimeOnly 'org.junit.platform:junit-platform-launcher'
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
+
+    spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.13.0'
 }
