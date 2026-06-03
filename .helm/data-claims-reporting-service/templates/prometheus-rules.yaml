@@ -73,7 +73,8 @@ spec:
             runbook_url: https://github.com/kubernetes-monitoring/kubernetes-mixin/blob/master/runbook.md#alert-name-kubejobfailed
             dashboard_url: {{ .Values.alerting.grafanaDashboard }}
           expr: |-
-            max_over_time(kube_job_status_failed{namespace="{{ .Release.Namespace }}"}[2h]) * on(job_name, namespace)group_left()(time() - kube_job_created < 24 * 3600) > 0
+            max by (job_name, namespace) (max_over_time(kube_job_status_failed{namespace="{{ .Release.Namespace }}"}[2h]))
+            * on (job_name, namespace) (time() - kube_job_created < 24 * 3600) > 0
           for: 1m
           labels:
             severity: {{ .Values.alerting.severity }}
