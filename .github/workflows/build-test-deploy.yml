@@ -129,6 +129,22 @@ jobs:
         with:
           image: spring-boot-microservice:scan
           args: --file=Dockerfile --severity-threshold=high --policy-path=.snyk
+  
+  spotbugs-scan:
+    if: github.ref == 'refs/heads/main'
+    runs-on: ubuntu-latest
+    needs: build-test
+    permissions:
+      contents: read
+      security-events: write
+    
+    steps:
+      - name: Checkout
+        uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd # v6.0.2
+
+      - name: Run SpotBugs with FindSecBugs
+        continue-on-error: true
+        uses: ./.github/spotbugs-scan
 
   build-push-docker:
     name: build and push docker image
