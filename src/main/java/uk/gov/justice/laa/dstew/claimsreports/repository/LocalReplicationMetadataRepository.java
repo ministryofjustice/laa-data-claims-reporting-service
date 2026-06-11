@@ -63,7 +63,7 @@ public class LocalReplicationMetadataRepository
     return new SubscriptionWalStatus(
         "2CE/FFFFFFE0", // received_lsn
         "2CE/FFFFFFE0", // latest_end_lsn (fully caught up)
-            Instant.now().minusSeconds(30) // applied recently
+        Instant.now().minusSeconds(30) // applied recently
     );
   }
 

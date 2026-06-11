@@ -80,7 +80,7 @@ class ReplicationHealthCheckServiceTest {
         new SubscriptionWalStatus(
             RECENT_WAL_LSN,
             RECENT_WAL_LSN,
-                Instant.now().minusSeconds(30)
+            Instant.now().minusSeconds(30)
         );
     when(metadataRepository.getSubscriptionWalStatus("claims_reporting_service_sub"))
         .thenReturn(healthyWalStatus);
@@ -209,7 +209,7 @@ class ReplicationHealthCheckServiceTest {
           new SubscriptionWalStatus(
               receivedLsn,
               latestEndLsn,
-                  clock.instant().minusSeconds(secondsDelay)
+              clock.instant().minusSeconds(secondsDelay)
           );
       when(metadataRepository.getSubscriptionWalStatus("claims_reporting_service_sub"))
           .thenReturn(healthyWalStatus);
@@ -238,7 +238,7 @@ class ReplicationHealthCheckServiceTest {
         new SubscriptionWalStatus(
             MID_WAL_LSN,
             null,
-                clock.instant()
+            clock.instant()
         );
 
     when(metadataRepository.getSubscriptionWalStatus("claims_reporting_service_sub"))
