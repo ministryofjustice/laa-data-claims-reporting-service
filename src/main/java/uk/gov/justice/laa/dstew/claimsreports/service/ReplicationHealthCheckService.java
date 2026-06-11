@@ -120,14 +120,12 @@ public class ReplicationHealthCheckService {
       report.setWalLsnOk(false);
       report.addFailure(REPLICATION, "No WAL progress information available, replication is failing. Please check RDS logs for more details.");
     } else {
-      Instant lastApplied = wal.latestEndTime() != null ? wal.latestEndTime().toInstant() : null;
-      boolean lagExceedsTolerance = lastApplied == null || lastApplied.isBefore(
-          now.minusSeconds(TOLERABLE_REPLICATION_DELAY_SECONDS));
+      Instant lastApplied = wal.latestEndTime();
+
       if (lastApplied == null) {
         report.setWalLsnOk(false);
-        report.addFailure(REPLICATION, "WAL latest end time is null"
-        );
-      } else if (lagExceedsTolerance) {
+        report.addFailure(REPLICATION, "WAL latest end time is null");
+      } else if (lastApplied.isBefore(now.minusSeconds(TOLERABLE_REPLICATION_DELAY_SECONDS))) {
         long lagMinutes = Duration.between(lastApplied, now).toMinutes();
         report.setWalLsnOk(false);
         report.addFailure(
