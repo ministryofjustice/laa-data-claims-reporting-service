@@ -1,5 +1,7 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
+
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -12,12 +14,9 @@ import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Locale;
-
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
-
-import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
 
 /**
  * Handles logic related to ensuring our generated CSV file is valid.
@@ -106,7 +105,12 @@ public class CsvFileValidator {
 
     } catch (MalformedInputException e) {
       int errorIndex = e.getInputLength();
-      log.error("Malformed UTF-8 at byte offset {} in file {}: {}", totalBytesRead + errorIndex, sanitise(fileToUpload.getPath()), sanitise(e.getMessage()));
+      log.error(
+              "Malformed UTF-8 at byte offset {} in file {}: {}",
+              totalBytesRead + errorIndex,
+              sanitise(fileToUpload.getPath()),
+              sanitise(e.getMessage())
+      );
       return false;
     } catch (CharacterCodingException e) {
       log.error("Failed to decode in UTF-8 with exception {}, {}", sanitise(e.getClass().getName()), sanitise(e.getMessage()));
