@@ -2,6 +2,7 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_SKIPPED;
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_SUCCESSFUL;
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
 
 import java.io.BufferedWriter;
 import java.io.File;
@@ -120,7 +121,7 @@ public abstract class AbstractReportService {
    */
   public void generateReport() {
     if (!runToday()) {
-      log.info("Report {} is not scheduled to run today", getReportName());
+      log.info("Report {} is not scheduled to run today", sanitise(getReportName()));
       metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_SKIPPED);
       return;
     }
@@ -141,13 +142,13 @@ public abstract class AbstractReportService {
       }
       long endTime = System.currentTimeMillis();
       long durationMilliseconds = endTime - startTime;
-      log.info("Created {} file with filename {} in {} ms", getReportName(), getFullReportFileName(), durationMilliseconds);
+      log.info("Created {} file with filename {} in {} ms", sanitise(getReportName()), sanitise(getFullReportFileName()), durationMilliseconds);
       metricsHandler.setCustomMetric(CustomReportMetric.GENERATED_TIME_MS, durationMilliseconds);
       s3ClientWrapper.uploadFile(tempFile, generateS3FileKey());
       metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_SUCCESSFUL);
 
     } catch (Exception e) {
-      log.error("Failed to generate {}: {}", getReportName(), e.getMessage());
+      log.error("Failed to generate {}: {}", sanitise(getReportName()), sanitise(e.getMessage()));
       throw new CsvCreationException("Failure to create " + getReportName(), e);
     } finally {
       deleteTempFile(tempFile);
@@ -158,9 +159,9 @@ public abstract class AbstractReportService {
     if (tempFile.exists()) {
       try {
         Files.delete(tempFile.toPath());
-        log.info("Deleted temp file {}", tempFile.getPath());
+        log.info("Deleted temp file {}", sanitise(tempFile.getPath()));
       } catch (IOException e) {
-        log.warn("Failed to delete temp file {}: {}", tempFile.getPath(), e.getMessage());
+        log.warn("Failed to delete temp file {}: {}", sanitise(tempFile.getPath()), sanitise(e.getMessage()));
       }
     }
   }

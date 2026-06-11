@@ -15,6 +15,8 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
 
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
+
 /**
  * Handles logic related to ensuring our generated CSV file is valid.
  */
@@ -102,13 +104,13 @@ public class CsvFileValidator {
 
     } catch (MalformedInputException e) {
       int errorIndex = e.getInputLength();
-      log.error("Malformed UTF-8 at byte offset {} in file {}: {}", totalBytesRead + errorIndex, fileToUpload.getPath(), e.getMessage());
+      log.error("Malformed UTF-8 at byte offset {} in file {}: {}", totalBytesRead + errorIndex, sanitise(fileToUpload.getPath()), sanitise(e.getMessage()));
       return false;
     } catch (CharacterCodingException e) {
-      log.error("Failed to decode in UTF-8 with exception {}, {}", e.getClass().getName(), e.getMessage());
+      log.error("Failed to decode in UTF-8 with exception {}, {}", sanitise(e.getClass().getName()), sanitise(e.getMessage()));
       return false;
     } catch (IOException e) {
-      log.error("Failed to read generated CSV file {} with exception {}", fileToUpload.getPath(), e.getMessage());
+      log.error("Failed to read generated CSV file {} with exception {}", sanitise(fileToUpload.getPath()), sanitise(e.getMessage()));
       return false;
     }
   }

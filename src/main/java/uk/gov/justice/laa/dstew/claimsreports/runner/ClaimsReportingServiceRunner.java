@@ -2,6 +2,7 @@ package uk.gov.justice.laa.dstew.claimsreports.runner;
 
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric.REPLICATION_HEALTH_CHECK_STATUS;
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_FAILED;
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
 
 import java.util.List;
 import lombok.RequiredArgsConstructor;
@@ -131,12 +132,12 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
         service.generateReport();
       } catch (Exception e) {
         log.error("Report generation failed for {}: {}",
-                service.getClass().getSimpleName(), e.getMessage(), e);
+                service.getClass().getSimpleName(), sanitise(e.getMessage()), e);
         metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
       } finally {
         var reportDuration = System.currentTimeMillis() - startTime;
         metricsHandler.setCustomMetric(CustomReportMetric.REPORT_TOTAL_TIME_MS, reportDuration);
-        log.info("Report generation for report {} took {} ms ({} s)", service.getReportName(), reportDuration, reportDuration / 1000);
+        log.info("Report generation for report {} took {} ms ({} s)", sanitise(service.getReportName()), reportDuration, reportDuration / 1000);
         metricsHandler.pushReportMetrics(service.getReportName());
       }
     }
