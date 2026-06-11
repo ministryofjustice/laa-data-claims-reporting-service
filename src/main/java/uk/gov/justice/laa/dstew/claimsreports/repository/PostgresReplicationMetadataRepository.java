@@ -58,7 +58,7 @@ public class PostgresReplicationMetadataRepository
           (rs, rowNum) -> new SubscriptionWalStatus(
               rs.getString("received_lsn"),
               rs.getString("latest_end_lsn"),
-              rs.getTimestamp("latest_end_time")
+              rs.getTimestamp("latest_end_time").toInstant()
           ),
           subscriptionName
       );

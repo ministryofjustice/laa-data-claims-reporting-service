@@ -1,6 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.dto;
 
-import java.sql.Timestamp;
+import java.time.Instant;
 
 /**
  * Represents the status of the Write Ahead Log (WAL) for a subscription.
@@ -15,5 +15,5 @@ import java.sql.Timestamp;
 public record SubscriptionWalStatus(
     String receivedLsn,
     String latestEndLsn,
-    Timestamp latestEndTime
+    Instant latestEndTime
 ) {}

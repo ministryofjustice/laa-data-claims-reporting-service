@@ -1,4 +1,5 @@
 package uk.gov.justice.laa.dstew.claimsreports.repository;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -63,12 +64,11 @@ class PostgresReplicationMetadataRepositoryTest {
     // Given
     String subscriptionName = "claims_reporting_service_sub";
 
-    SubscriptionWalStatus expected =
-        new SubscriptionWalStatus(
+    SubscriptionWalStatus expected = new SubscriptionWalStatus(
             "2CE/0000FFF0",
             "2CE/0000FFF0",
-            Timestamp.from(Instant.parse("2024-01-01T10:00:00Z"))
-        );
+            Instant.parse("2024-01-01T10:00:00Z")
+    );
 
     when(jdbcTemplate.queryForObject(
         anyString(),
@@ -128,7 +128,7 @@ class PostgresReplicationMetadataRepositoryTest {
           when(rs.getString("received_lsn")).thenReturn("0/16B6C50");
           when(rs.getString("latest_end_lsn")).thenReturn("0/16B6C40");
           when(rs.getTimestamp("latest_end_time"))
-              .thenReturn(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
+                  .thenReturn(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
 
           return mapper.mapRow(rs, 1);
         });

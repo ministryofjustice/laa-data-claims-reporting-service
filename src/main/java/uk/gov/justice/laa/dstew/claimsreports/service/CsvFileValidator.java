@@ -11,6 +11,8 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.Locale;
+
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
@@ -136,7 +138,7 @@ public class CsvFileValidator {
       throw new CsvUploadException("Could not detect MIME type for file: " + fileName);
     }
 
-    if (!mimeType.equalsIgnoreCase("text/csv")) {
+    if (!mimeType.toLowerCase(Locale.ROOT).equals("text/csv")) {
       throw new CsvUploadException("File '" + fileName + "' has invalid MIME type: " + mimeType + ". Expected 'text/csv'.");
     }
 
@@ -153,12 +155,12 @@ public class CsvFileValidator {
    */
   public boolean checkFileExtension(String fileName, String desiredFileKey) throws CsvUploadException {
     // File extension check
-    if (!fileName.toLowerCase().endsWith(".csv")) {
+    if (!fileName.toLowerCase(Locale.ROOT).endsWith(".csv")) {
       throw new CsvUploadException("File '" + fileName + "' does not have a .csv extension.");
     }
 
     // Desired key extension check
-    if (!desiredFileKey.toLowerCase().endsWith(".csv")) {
+    if (!desiredFileKey.toLowerCase(Locale.ROOT).endsWith(".csv")) {
       throw new CsvUploadException("Target key '" + desiredFileKey + "' must end with .csv.");
     }
 

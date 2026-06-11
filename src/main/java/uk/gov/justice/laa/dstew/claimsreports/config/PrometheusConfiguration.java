@@ -151,9 +151,9 @@ public class PrometheusConfiguration {
   public record CustomReportGauges(Gauge reportSuccessful, Gauge reportTotalTime, Gauge dataRefreshTimeMs, Gauge generatedTimeMs,
                                    Gauge rowsWritten, Gauge reportFileSize, Gauge uploadTimeMs, Gauge encodingCheckTimeMs) {
 
-    public static int REPORT_FAILED = -1;
-    public static int REPORT_SUCCESSFUL = 1;
-    public static int REPORT_SKIPPED = 0;
+    public static final int REPORT_FAILED = -1;
+    public static final int REPORT_SUCCESSFUL = 1;
+    public static final int REPORT_SKIPPED = 0;
 
     /**
      * Identifier for a custom metric.
