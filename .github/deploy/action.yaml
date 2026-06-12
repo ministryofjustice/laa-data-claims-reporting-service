@@ -62,14 +62,8 @@ runs:
         RELEASE_NAME: laa-data-claims-reporting-service
       run: |
         set -euo pipefail
-        DEPLOY_FAILED=1
-        cleanup() {
-          if [ "${DEPLOY_FAILED}" = "1" ]; then
-            echo "Deployment was interrupted or failed; attempting rollback for ${RELEASE_NAME}"
-            helm rollback "${RELEASE_NAME}" || true
-          fi
-        }
-        trap cleanup TERM INT EXIT
+
+        echo "Deploying ${RELEASE_NAME} (${GIT_SHA}) to namespace ${KUBE_NAMESPACE}"
 
         helm upgrade "${RELEASE_NAME}" .helm/data-claims-reporting-service \
           --namespace "${KUBE_NAMESPACE}" \
@@ -78,7 +72,24 @@ runs:
           --set aws.region="${ECR_REGION}" \
           --values "${VALUES_FILE}" \
           --install \
-          --wait --timeout=10m \
+          --wait \
+          --timeout=10m \
           --atomic
 
-        DEPLOY_FAILED=0
+        echo "Deployment completed successfully"
+
+    - name: Helm diagnostics after failed deployment
+      if: failure()
+      shell: bash
+      env:
+        RELEASE_NAME: laa-data-claims-reporting-service
+      run: |
+        echo "Deployment failed."
+
+        echo
+        echo "===== HELM STATUS ====="
+        helm status "${RELEASE_NAME}" || true
+
+        echo
+        echo "===== HELM HISTORY ====="
+        helm history "${RELEASE_NAME}" || true
