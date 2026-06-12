@@ -76,16 +76,29 @@ runs:
         VALUES_FILE: .helm/data-claims-reporting-service/values/${{ inputs.app-environment }}.yaml
         RELEASE_NAME: ${{ steps.extract_release_name.outputs.release-name }}
       run: |
+        set -euo pipefail
+        DEPLOY_FAILED=1
+        cleanup() {
+          if [ "${DEPLOY_FAILED}" = "1" ]; then
+            echo "Deployment was interrupted or failed; attempting rollback for ${RELEASE_NAME}"
+            helm rollback "${RELEASE_NAME}" || true
+          fi
+        }
+        trap cleanup TERM INT EXIT
+
         ingress_name="$RELEASE_NAME-data-claims-reporting"
         release_host="$RELEASE_NAME-$KUBE_NAMESPACE.cloud-platform.service.justice.gov.uk"
         identifier="$ingress_name-$KUBE_NAMESPACE-green"
         LAA_IPS=$(curl -s https://raw.githubusercontent.com/ministryofjustice/laa-ip-allowlist/main/cidrs.txt | tr -d ' ' | tr '\n' ',' | sed 's/,/\\,/g' | sed 's/\\,$//')
 
-        helm upgrade ${RELEASE_NAME} .helm/data-claims-reporting-service  \
-          --namespace ${KUBE_NAMESPACE} \
+        helm upgrade "${RELEASE_NAME}" .helm/data-claims-reporting-service  \
+          --namespace "${KUBE_NAMESPACE}" \
           --set image.repository="${ECR_REGISTRY}/${ECR_REPOSITORY}" \
           --set image.tag="${GIT_SHA}" \
           --set aws.region="${ECR_REGION}" \
-          --values ${VALUES_FILE} \
+          --values "${VALUES_FILE}" \
           --install \
-          --wait --timeout=10m
+          --wait --timeout=10m \
+          --atomic
+
+        DEPLOY_FAILED=0

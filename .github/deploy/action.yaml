@@ -59,12 +59,26 @@ runs:
         GIT_SHA: ${{ github.sha }}
         KUBE_NAMESPACE: ${{ inputs.kube-namespace }}
         VALUES_FILE: .helm/data-claims-reporting-service/values/${{ inputs.app-environment }}.yaml
+        RELEASE_NAME: laa-data-claims-reporting-service
       run: |
-        helm upgrade laa-data-claims-reporting-service .helm/data-claims-reporting-service \
-          --namespace ${KUBE_NAMESPACE} \
+        set -euo pipefail
+        DEPLOY_FAILED=1
+        cleanup() {
+          if [ "${DEPLOY_FAILED}" = "1" ]; then
+            echo "Deployment was interrupted or failed; attempting rollback for ${RELEASE_NAME}"
+            helm rollback "${RELEASE_NAME}" || true
+          fi
+        }
+        trap cleanup TERM INT EXIT
+
+        helm upgrade "${RELEASE_NAME}" .helm/data-claims-reporting-service \
+          --namespace "${KUBE_NAMESPACE}" \
           --set image.repository="${ECR_REGISTRY}/${ECR_REPOSITORY}" \
           --set image.tag="${GIT_SHA}" \
           --set aws.region="${ECR_REGION}" \
-          --values ${VALUES_FILE} \
+          --values "${VALUES_FILE}" \
           --install \
-          --wait --timeout=10m
+          --wait --timeout=10m \
+          --atomic
+
+        DEPLOY_FAILED=0
