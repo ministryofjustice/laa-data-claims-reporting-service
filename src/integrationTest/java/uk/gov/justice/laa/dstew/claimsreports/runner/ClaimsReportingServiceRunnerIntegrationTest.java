@@ -89,9 +89,9 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
   @Test
   void shouldGenerateAllReportsAndUploadCSVsToS3() throws Exception {
     log.info("Detected report service implementations: {}",
-        reportServices.stream()
+        sanitizeForLog(reportServices.stream()
             .map(s -> s.getClass().getSimpleName())
-            .collect(Collectors.joining(", "))
+            .collect(Collectors.joining(", ")))
     );
 
     //Assert that expected number of reportServices were autowired
@@ -110,7 +110,7 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
         .map(S3Object::key)
         .toList();
 
-    log.info("Uploaded report files: {}", uploadedFiles);
+    log.info("Uploaded report files: {}", sanitizeForLog(uploadedFiles.toString()));
 
     //Assert that expected number of reports were generated
     assertThat(uploadedFiles)
@@ -129,12 +129,15 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
       }
 
       // Locate the expected file in resources
-      Path expectedFile = Paths.get("src/integrationTest/resources/expected_csv_files", uploadedKey);
+      Path expectedFileDirectory = Paths.get("src/integrationTest/resources/expected_csv_files");
+      Path expectedFile = expectedFileDirectory.resolve(uploadedKey).normalize();
+      assertThat(expectedFile).as("Expected CSV file path must remain within the expected files directory")
+          .startsWith(expectedFileDirectory);
       assertThat(tempFile.toFile())
-          .as("CSV file comparison for " + uploadedKey)
+          .as("CSV file comparison for " + sanitizeForLog(uploadedKey))
           .hasSameTextualContentAs(expectedFile.toFile());
 
-      log.info("CSV file '{}' matches expected content.", uploadedKey);
+      log.info("CSV file '{}' matches expected content.", sanitizeForLog(uploadedKey));
     }
 
   }
@@ -157,7 +160,7 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
         .map(S3Object::key)
         .toList();
 
-    log.info("Uploaded report files: {}", uploadedFiles);
+    log.info("Uploaded report files: {}", sanitizeForLog(uploadedFiles.toString()));
 
     //Assert that no reports were generated
     assertThat(uploadedFiles)
@@ -178,6 +181,10 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
             CLAIM_SUMMARY_FEE_TABLE_NAME, Pair.of(5, 3)
         )
     );
+  }
+
+  private static String sanitizeForLog(String value) {
+    return value == null ? null : value.replace("\r", "\\r").replace("\n", "\\n");
   }
 
 }

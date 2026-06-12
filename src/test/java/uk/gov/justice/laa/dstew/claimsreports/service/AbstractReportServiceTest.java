@@ -72,7 +72,13 @@ class AbstractReportServiceTest {
     Assertions.assertThrows(CsvCreationException.class, () -> service.generateReport());
 
     // And ensure it cleans up after itself
-    assertFalse(Files.list(Path.of("/tmp")).anyMatch(file -> file.getFileName().endsWith(".csv")));
+    Path tempDir = Path.of(System.getProperty("java.io.tmpdir"));
+    try (var stream = Files.list(tempDir)) {
+      assertFalse(stream.anyMatch(file -> {
+        var fileName = file.getFileName();
+        return fileName != null && fileName.toString().endsWith(".csv");
+      }));
+    }
   }
 
   @Test
@@ -88,7 +94,13 @@ class AbstractReportServiceTest {
   @Test
   void generateReport_shouldDeleteTheTempFileWhenFinished(){
     service.generateReport();
-    assertFalse(Files.list(Path.of("/tmp")).anyMatch(file -> file.getFileName().endsWith(".csv")));
+    Path tempDir = Path.of(System.getProperty("java.io.tmpdir"));
+    try (var stream = Files.list(tempDir)) {
+      assertFalse(stream.anyMatch(file -> {
+        var fileName = file.getFileName();
+        return fileName != null && fileName.toString().endsWith(".csv");
+      }));
+    }
   }
 
   @Test
