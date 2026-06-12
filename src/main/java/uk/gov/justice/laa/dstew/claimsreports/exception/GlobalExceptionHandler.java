@@ -3,6 +3,7 @@ package uk.gov.justice.laa.dstew.claimsreports.exception;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
@@ -53,8 +54,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   public ResponseEntity<String> handleAwsErrors(AwsServiceException e) {
     var message = "Failed to upload report.";
 
-    // Ensure log has specific AWS exception class name in, such as NoSuchKeyException.
-    log.error("AwsServiceException ({}) Thrown: {}", e.getClass().getSimpleName(), e.awsErrorDetails().toString());
+    log.atError()
+        .addKeyValue("event.action", "s3.upload.failure")
+        .addKeyValue("event.type", "storage")
+        .addKeyValue("event.outcome", "failure")
+        .addKeyValue("run_id", MDC.get("run_id"))
+        .log("AwsServiceException ({}) Thrown: {}", e.getClass().getSimpleName(), e.awsErrorDetails().toString());
 
     return ResponseEntity.internalServerError().body(message);
   }
@@ -70,7 +75,12 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   public ResponseEntity<String> handleCsvUploadException(CsvUploadException e) {
     var message = "Failed to upload report.";
 
-    log.error("CsvUploadException: {}", e.getMessage());
+    log.atError()
+        .addKeyValue("event.action", "csv.validation.failure")
+        .addKeyValue("event.type", "batch")
+        .addKeyValue("event.outcome", "failure")
+        .addKeyValue("run_id", MDC.get("run_id"))
+        .log("CsvUploadException: {}", e.getMessage());
 
     return ResponseEntity.internalServerError().body(message);
   }

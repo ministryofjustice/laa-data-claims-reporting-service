@@ -120,12 +120,21 @@ public abstract class AbstractReportService {
    */
   public void generateReport() {
     if (!runToday()) {
-      log.info("Report {} is not scheduled to run today", getReportName());
+      log.atInfo()
+          .addKeyValue("event.action", "report.schedule.skip")
+          .addKeyValue("event.type", "batch")
+          .addKeyValue("report.name", getReportName())
+          .addKeyValue("event.outcome", "skipped")
+          .log("Report {} is not scheduled to run today", getReportName());
       metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_SKIPPED);
       return;
     }
 
-    log.info("Generating report from {}", getClass().getSimpleName());
+    log.atInfo()
+        .addKeyValue("event.action", "report.generate")
+        .addKeyValue("event.type", "batch")
+        .addKeyValue("report.name", getReportName())
+        .log("Generating report from {}", getClass().getSimpleName());
     File tempFile = new File("/tmp/" + getFullReportFileName());
     long startTime = System.currentTimeMillis();
 
@@ -141,13 +150,23 @@ public abstract class AbstractReportService {
       }
       long endTime = System.currentTimeMillis();
       long durationMilliseconds = endTime - startTime;
-      log.info("Created {} file with filename {} in {} ms", getReportName(), getFullReportFileName(), durationMilliseconds);
+      log.atInfo()
+          .addKeyValue("event.action", "report.generated")
+          .addKeyValue("event.type", "batch")
+          .addKeyValue("report.name", getReportName())
+          .addKeyValue("event.outcome", "success")
+          .log("Created {} file with filename {} in {} ms", getReportName(), getFullReportFileName(), durationMilliseconds);
       metricsHandler.setCustomMetric(CustomReportMetric.GENERATED_TIME_MS, durationMilliseconds);
       s3ClientWrapper.uploadFile(tempFile, generateS3FileKey());
       metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_SUCCESSFUL);
 
     } catch (Exception e) {
-      log.error("Failed to generate {}: {}", getReportName(), e.getMessage());
+      log.atError()
+          .addKeyValue("event.action", "report.generate")
+          .addKeyValue("event.type", "batch")
+          .addKeyValue("report.name", getReportName())
+          .addKeyValue("event.outcome", "failure")
+          .log("Failed to generate {}: {}", getReportName(), e.getMessage());
       throw new CsvCreationException("Failure to create " + getReportName(), e);
     } finally {
       deleteTempFile(tempFile);

@@ -4,8 +4,10 @@ import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfigurat
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_FAILED;
 
 import java.util.List;
+import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -54,11 +56,27 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
 
   @Override
   public void run(ApplicationArguments args) {
-    if (ensureReplicationHealthy()) {
-      generateReports();
-    } else {
-      log.error("Replication health check failed, reports not generated.");
-      markAllReportsFailedDueToReplication();
+    String runId = UUID.randomUUID().toString();
+    MDC.put("run_id", runId);
+    log.atInfo()
+        .addKeyValue("event.action", "job.start")
+        .addKeyValue("event.type", "batch")
+        .addKeyValue("run_id", runId)
+        .log("Starting claims reporting job");
+
+    try {
+      if (ensureReplicationHealthy()) {
+        generateReports();
+      } else {
+        log.atError()
+            .addKeyValue("event.action", "replication.health.check")
+            .addKeyValue("event.outcome", "failure")
+            .addKeyValue("run_id", runId)
+            .log("Replication health check failed, reports not generated.");
+        markAllReportsFailedDueToReplication();
+      }
+    } finally {
+      MDC.clear();
     }
   }
 
@@ -78,13 +96,20 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
   private static final long REPLICATION_HEALTH_CHECK_PASSED = 1;
 
   private boolean ensureReplicationHealthy() {
-    log.info("Checking replication health before generating reports...");
+    log.atInfo()
+        .addKeyValue("event.action", "replication.health.check")
+        .addKeyValue("event.type", "batch")
+        .log("Checking replication health before generating reports...");
 
     ReplicationHealthReport report = replicationHealthCheckService.checkReplicationHealth();
     boolean replicationHealthy = true;
 
     if (!report.isHealthy()) {
-      log.error("Replication health check failed:\n{}", report.summary());
+      log.atError()
+          .addKeyValue("event.action", "replication.health.check")
+          .addKeyValue("event.type", "batch")
+          .addKeyValue("event.outcome", "failure")
+          .log("Replication health check failed:\n{}", report.summary());
 
       // Even if the overall replication is unhealthy, we want to continue if
       // ignoreRowCountMismatch is set and basic WAL check passed.
@@ -105,7 +130,11 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
       return false;
     }
 
-    log.info("Replication health confirmed — proceeding with report generation.");
+    log.atInfo()
+        .addKeyValue("event.action", "replication.health.check")
+        .addKeyValue("event.type", "batch")
+        .addKeyValue("event.outcome", "success")
+        .log("Replication health confirmed — proceeding with report generation.");
     return true;
   }
 
@@ -122,21 +151,35 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
    * which provides the necessary methods for refreshing materialized views and generating reports.
    */
   private void generateReports() {
-    log.info("Generating {} reports...", reportServices.size());
+    log.atInfo()
+        .addKeyValue("event.action", "report.batch.start")
+        .addKeyValue("event.type", "batch")
+        .log("Generating {} reports...", reportServices.size());
     for (AbstractReportService service : reportServices) {
       metricsHandler.resetCustomMetrics();
       var startTime = System.currentTimeMillis();
+      boolean succeeded = true;
       try {
         service.refreshDataSource();
         service.generateReport();
       } catch (Exception e) {
-        log.error("Report generation failed for {}: {}",
-                service.getClass().getSimpleName(), e.getMessage(), e);
+        succeeded = false;
+        log.atError()
+            .addKeyValue("event.action", "report.generation")
+            .addKeyValue("event.type", "batch")
+            .addKeyValue("event.outcome", "failure")
+            .addKeyValue("report.name", service.getReportName())
+            .log("Report generation failed for {}: {}", service.getClass().getSimpleName(), e.getMessage(), e);
         metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
       } finally {
         var reportDuration = System.currentTimeMillis() - startTime;
         metricsHandler.setCustomMetric(CustomReportMetric.REPORT_TOTAL_TIME_MS, reportDuration);
-        log.info("Report generation for report {} took {} ms ({} s)", service.getReportName(), reportDuration, reportDuration / 1000);
+        log.atInfo()
+            .addKeyValue("event.action", "report.batch.complete")
+            .addKeyValue("event.type", "batch")
+            .addKeyValue("report.name", service.getReportName())
+            .addKeyValue("event.outcome", succeeded ? "success" : "failure")
+            .log("Report generation for report {} took {} ms ({} s)", service.getReportName(), reportDuration, reportDuration / 1000);
         metricsHandler.pushReportMetrics(service.getReportName());
       }
     }
