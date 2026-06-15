@@ -1,5 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Clock;
@@ -9,6 +10,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -42,6 +44,7 @@ public class ReplicationHealthCheckService {
   private final ReplicationMetadataRepository metadataRepository;
   private final Clock clock; //This is the system clock for normal prod use, overridden by a static one for tests.
   private static final String SUBSCRIPTION_NAME = "claims_reporting_service_sub";
+  private static final Pattern SAFE_SQL_IDENTIFIER = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)?");
   /**
    * Checks the replication health for a specific date, typically the previous day.
    * This method evaluates various metrics and conditions such as missing tables,
@@ -156,13 +159,18 @@ public class ReplicationHealthCheckService {
         .compareTo(new BigInteger(wal2.replace("/", ""), 16));
   }
 
+  @SuppressFBWarnings(
+      value = "SQL_INJECTION_SPRING_JDBC",
+      justification = "Table names are validated as SQL identifiers before count queries are assembled."
+  )
   private void checkCounts(Map<String, ReplicationSummary> summaries,
       Timestamp startOfDay, Timestamp endOfDay,
       ReplicationHealthReport report) {
     report.setTableCountsOk(true);
     for (ReplicationSummary summary : summaries.values()) {
-      String countSql = String.format("SELECT count(*) FROM %s WHERE created_on < ?", summary.tableName());
-      String updatedSql = String.format("SELECT count(*) FROM %s WHERE updated_on BETWEEN ? AND ?", summary.tableName());
+      String tableName = validatedTableName(summary.tableName());
+      String countSql = String.format("SELECT count(*) FROM %s WHERE created_on < ?", tableName);
+      String updatedSql = String.format("SELECT count(*) FROM %s WHERE updated_on BETWEEN ? AND ?", tableName);
 
       Long actualRecordCount = jdbcTemplate.query(countSql, rs -> {
         if (rs.next()) {
@@ -187,6 +195,13 @@ public class ReplicationHealthCheckService {
                 actualRecordCount, actualUpdatedCount));
       }
     }
+  }
+
+  private String validatedTableName(String tableName) {
+    if (tableName == null || !SAFE_SQL_IDENTIFIER.matcher(tableName).matches()) {
+      throw new IllegalStateException("Unsafe replication summary table name");
+    }
+    return tableName;
   }
 
 }

@@ -132,7 +132,7 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
         service.generateReport();
       } catch (Exception e) {
         log.error("Report generation failed for {}: {}",
-                service.getClass().getSimpleName(), sanitise(e.getMessage()), e);
+                sanitise(service.getClass().getSimpleName()), sanitise(sanitise(e.getMessage())), e);
         metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
       } finally {
         var reportDuration = System.currentTimeMillis() - startTime;

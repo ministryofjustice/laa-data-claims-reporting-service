@@ -142,7 +142,7 @@ public class CsvFileValidator {
       throw new CsvUploadException("Could not detect MIME type for file: " + fileName);
     }
 
-    if (!mimeType.toLowerCase(Locale.ROOT).equals("text/csv")) {
+    if (!"text/csv".equals(mimeType.toLowerCase(Locale.ROOT))) {
       throw new CsvUploadException("File '" + fileName + "' has invalid MIME type: " + mimeType + ". Expected 'text/csv'.");
     }
 

@@ -1,6 +1,8 @@
 package uk.gov.justice.laa.dstew.claimsreports.runner;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
+
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -89,7 +91,7 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
   @Test
   void shouldGenerateAllReportsAndUploadCSVsToS3() throws Exception {
     log.info("Detected report service implementations: {}",
-        sanitizeForLog(reportServices.stream()
+        sanitise(reportServices.stream()
             .map(s -> s.getClass().getSimpleName())
             .collect(Collectors.joining(", ")))
     );
@@ -110,7 +112,7 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
         .map(S3Object::key)
         .toList();
 
-    log.info("Uploaded report files: {}", sanitizeForLog(uploadedFiles.toString()));
+    log.info("Uploaded report files: {}", sanitise(uploadedFiles.toString()));
 
     //Assert that expected number of reports were generated
     assertThat(uploadedFiles)
@@ -134,10 +136,10 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
       assertThat(expectedFile).as("Expected CSV file path must remain within the expected files directory")
           .startsWith(expectedFileDirectory);
       assertThat(tempFile.toFile())
-          .as("CSV file comparison for " + sanitizeForLog(uploadedKey))
+          .as("CSV file comparison for " + sanitise(uploadedKey))
           .hasSameTextualContentAs(expectedFile.toFile());
 
-      log.info("CSV file '{}' matches expected content.", sanitizeForLog(uploadedKey));
+      log.info("CSV file '{}' matches expected content.", sanitise(uploadedKey));
     }
 
   }
@@ -160,7 +162,7 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
         .map(S3Object::key)
         .toList();
 
-    log.info("Uploaded report files: {}", sanitizeForLog(uploadedFiles.toString()));
+    log.info("Uploaded report files: {}", sanitise(uploadedFiles.toString()));
 
     //Assert that no reports were generated
     assertThat(uploadedFiles)
@@ -181,10 +183,6 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
             CLAIM_SUMMARY_FEE_TABLE_NAME, Pair.of(5, 3)
         )
     );
-  }
-
-  private static String sanitizeForLog(String value) {
-    return value == null ? null : value.replace("\r", "\\r").replace("\n", "\\n");
   }
 
 }
