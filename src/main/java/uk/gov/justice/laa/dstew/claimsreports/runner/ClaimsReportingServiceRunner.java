@@ -136,6 +136,7 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
         String safeService = sanitise(service.getClass().getSimpleName());
         String safeMessage = sanitise(e.getMessage());
         log.error("Report generation failed for {}: {}", safeService, safeMessage, e);
+        metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
       } finally {
         var reportDuration = System.currentTimeMillis() - startTime;
         metricsHandler.setCustomMetric(CustomReportMetric.REPORT_TOTAL_TIME_MS, reportDuration);

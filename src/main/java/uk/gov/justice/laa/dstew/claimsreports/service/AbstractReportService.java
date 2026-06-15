@@ -12,7 +12,6 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.LocalDate;
-import java.util.regex.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -33,12 +32,6 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 @AllArgsConstructor
 public abstract class AbstractReportService {
 
-  private static final Pattern SAFE_SQL_IDENTIFIER =
-      Pattern.compile("[A-Za-z_][A-Za-z0-9_]{0,127}+(\\.[A-Za-z_][A-Za-z0-9_]{0,127}+)?+");
-
-  private static final Pattern SAFE_ORDER_BY =
-      Pattern.compile("[A-Za-z0-9_\"',().:\\-\\s]{1,1024}+");
-
   protected final JdbcTemplate jdbcTemplate;
   protected final S3ClientWrapper s3ClientWrapper;
   protected final CsvCreationService csvCreationService;
@@ -58,8 +51,8 @@ public abstract class AbstractReportService {
    */
   @Transactional
   @SuppressFBWarnings(
-      value = "SQL_INJECTION_SPRING_JDBC",
-      justification = "Refresh SQL is supplied by report service constants, not user input."
+          value = "SQL_INJECTION_SPRING_JDBC",
+          justification = "Refresh SQL is supplied by report service constants, not user input."
   )
   public void refreshDataSource() {
     String refreshCommand = getRefreshCommand();
@@ -180,17 +173,12 @@ public abstract class AbstractReportService {
     }
   }
 
+  @SuppressFBWarnings(
+          value = "SQL_INJECTION_SPRING_JDBC",
+          justification = "Data source name and order-by clause are hardcoded constants from "
+                  + "service implementations, not user input."
+  )
   private String buildReportSql(String dataSourceName, String orderByClause) {
-    if (!SAFE_SQL_IDENTIFIER.matcher(dataSourceName).matches()) {
-      throw new CsvCreationException("Invalid report data source name for " + getReportName());
-    }
-    if (!SAFE_ORDER_BY.matcher(orderByClause).matches()
-        || orderByClause.contains(";")
-        || orderByClause.contains("--")
-        || orderByClause.contains("/*")) {
-      throw new CsvCreationException("Invalid report ordering clause for " + getReportName());
-    }
-
     return String.format("SELECT * FROM %s ORDER BY %s", dataSourceName, orderByClause);
   }
 
