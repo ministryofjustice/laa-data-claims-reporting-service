@@ -164,9 +164,12 @@ public abstract class AbstractReportService {
     }
   }
 
+  @SuppressFBWarnings(value = "PATH_TRAVERSAL_IN", justification = "Prefix/suffix sanitised to alphanumeric/dot/dash/underscore only via sanitiseForFilename before use")
   private File createTempReportFile() {
     try {
-      Path tempFile = Files.createTempFile(getReportFileName() + "_" + LocalDate.now(clock) + "_", getReportFileExtension());
+      String prefix = sanitiseForFilename(getReportFileName()) + "_" + LocalDate.now(clock) + "_";
+      String suffix = sanitiseForFilename(getReportFileExtension());
+      Path tempFile = Files.createTempFile(prefix, suffix);
       return tempFile.toFile();
     } catch (IOException e) {
       throw new CsvCreationException("Failure to create temp file for " + getReportName(), e);
@@ -196,6 +199,17 @@ public abstract class AbstractReportService {
         log.warn("Failed to delete temp file {}: {}", sanitise(tempFile.getPath()), sanitise(e.getMessage()));
       }
     }
+  }
+
+  private String sanitiseForFilename(String input) {
+    if (input == null) {
+      throw new IllegalArgumentException("Filename component cannot be null");
+    }
+    String cleaned = input.replaceAll("[^A-Za-z0-9._-]", "");
+    if (cleaned.isEmpty()) {
+      throw new IllegalArgumentException("Filename component invalid after sanitisation");
+    }
+    return cleaned;
   }
 
   protected abstract boolean runToday();

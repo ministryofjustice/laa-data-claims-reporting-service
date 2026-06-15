@@ -44,7 +44,9 @@ public class ReplicationHealthCheckService {
   private final ReplicationMetadataRepository metadataRepository;
   private final Clock clock; //This is the system clock for normal prod use, overridden by a static one for tests.
   private static final String SUBSCRIPTION_NAME = "claims_reporting_service_sub";
-  private static final Pattern SAFE_SQL_IDENTIFIER = Pattern.compile("[A-Za-z_][A-Za-z0-9_]*(\\.[A-Za-z_][A-Za-z0-9_]*)?");
+  private static final Pattern SAFE_SQL_IDENTIFIER =
+          Pattern.compile("[A-Za-z_][A-Za-z0-9_]{0,127}+(?:\\.[A-Za-z_][A-Za-z0-9_]{0,127}+)?+");
+
   /**
    * Checks the replication health for a specific date, typically the previous day.
    * This method evaluates various metrics and conditions such as missing tables,

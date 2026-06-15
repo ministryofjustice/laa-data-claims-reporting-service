@@ -5,6 +5,8 @@ import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfigurat
 import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
 
 import java.util.List;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;
@@ -122,6 +124,7 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
    * <p>The implementation assumes that the report services extend from the AbstractReportService base class,
    * which provides the necessary methods for refreshing materialized views and generating reports.
    */
+  @SuppressFBWarnings(value = "SECCRLFLOG", justification = "Both arguments sanitised via sanitise() to strip CRLF before logging")
   private void generateReports() {
     log.info("Generating {} reports...", reportServices.size());
     for (AbstractReportService service : reportServices) {
@@ -131,9 +134,9 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
         service.refreshDataSource();
         service.generateReport();
       } catch (Exception e) {
-        log.error("Report generation failed for {}: {}",
-                sanitise(service.getClass().getSimpleName()), sanitise(sanitise(e.getMessage())), e);
-        metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
+        String safeService = sanitise(service.getClass().getSimpleName());
+        String safeMessage = sanitise(e.getMessage());
+        log.error("Report generation failed for {}: {}", safeService, safeMessage, e);
       } finally {
         var reportDuration = System.currentTimeMillis() - startTime;
         metricsHandler.setCustomMetric(CustomReportMetric.REPORT_TOTAL_TIME_MS, reportDuration);
