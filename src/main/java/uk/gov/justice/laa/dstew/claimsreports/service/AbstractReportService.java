@@ -34,10 +34,10 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 public abstract class AbstractReportService {
 
   private static final Pattern SAFE_SQL_IDENTIFIER =
-    Pattern.compile("[A-Za-z_][A-Za-z0-9_]{0,127}+(\\.[A-Za-z_][A-Za-z0-9_]{0,127}+)?+");
+      Pattern.compile("[A-Za-z_][A-Za-z0-9_]{0,127}+(\\.[A-Za-z_][A-Za-z0-9_]{0,127}+)?+");
 
   private static final Pattern SAFE_ORDER_BY =
-    Pattern.compile("[A-Za-z0-9_\"',().:\\-\\s]{1,1024}+");
+      Pattern.compile("[A-Za-z0-9_\"',().:\\-\\s]{1,1024}+");
 
   protected final JdbcTemplate jdbcTemplate;
   protected final S3ClientWrapper s3ClientWrapper;
@@ -164,7 +164,11 @@ public abstract class AbstractReportService {
     }
   }
 
-  @SuppressFBWarnings(value = "PATH_TRAVERSAL_IN", justification = "Prefix/suffix sanitised to alphanumeric/dot/dash/underscore only via sanitiseForFilename before use")
+  @SuppressFBWarnings(
+          value = "PATH_TRAVERSAL_IN",
+          justification =
+                  "Prefix/suffix sanitised to alphanumeric/dot/dash/underscore only via sanitiseForFilename before use"
+  )
   private File createTempReportFile() {
     try {
       String prefix = sanitiseForFilename(getReportFileName()) + "_" + LocalDate.now(clock) + "_";

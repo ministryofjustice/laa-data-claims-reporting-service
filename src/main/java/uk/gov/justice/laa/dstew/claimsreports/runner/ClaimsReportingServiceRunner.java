@@ -4,9 +4,8 @@ import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfigurat
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_FAILED;
 import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
 
-import java.util.List;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Value;

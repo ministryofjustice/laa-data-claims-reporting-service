@@ -2,6 +2,7 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
@@ -14,8 +15,6 @@ import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Locale;
-
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
@@ -130,7 +129,11 @@ public class CsvFileValidator {
    * @return true if CSV file
    * @throws CsvUploadException thrown when not a valid CSV file
    */
-  @SuppressFBWarnings(value = "IMPROPER_UNICODE", justification = "MIME type validated against fixed allow-list pattern, not used for case-sensitive security decisions")
+  @SuppressFBWarnings(
+          value = "IMPROPER_UNICODE",
+          justification =
+                  "MIME type validated against fixed allow-list pattern, not used for case-sensitive security decisions"
+  )
   public boolean checkMimeTypeIsCsv(File fileToUpload) throws CsvUploadException {
     String fileName = fileToUpload.getName();
     String mimeType;
