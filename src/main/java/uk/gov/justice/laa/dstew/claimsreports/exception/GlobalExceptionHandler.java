@@ -80,7 +80,8 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         .addKeyValue("event.type", "batch")
         .addKeyValue("event.outcome", "failure")
         .addKeyValue("run_id", MDC.get("run_id"))
-        .log("CsvUploadException: {}", e.getMessage());
+        .setCause(e)
+        .log("CsvUploadException thrown");
 
     return ResponseEntity.internalServerError().body(message);
   }

@@ -166,7 +166,8 @@ public abstract class AbstractReportService {
           .addKeyValue("event.type", "batch")
           .addKeyValue("report.name", getReportName())
           .addKeyValue("event.outcome", "failure")
-          .log("Failed to generate {}: {}", getReportName(), e.getMessage());
+          .setCause(e)
+          .log("Failed to generate {}", getReportName());
       throw new CsvCreationException("Failure to create " + getReportName(), e);
     } finally {
       deleteTempFile(tempFile);

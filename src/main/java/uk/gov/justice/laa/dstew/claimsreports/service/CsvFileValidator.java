@@ -113,14 +113,16 @@ public class CsvFileValidator {
           .addKeyValue("event.action", "csv.validation.failure")
           .addKeyValue("event.type", "batch")
           .addKeyValue("event.outcome", "failure")
-          .log("Failed to decode in UTF-8 with exception {}, {}", e.getClass().getName(), e.getMessage());
+          .setCause(e)
+          .log("Failed to decode in UTF-8 with exception {}", e.getClass().getName());
       return false;
     } catch (IOException e) {
       log.atError()
           .addKeyValue("event.action", "csv.validation.failure")
           .addKeyValue("event.type", "batch")
           .addKeyValue("event.outcome", "failure")
-          .log("Failed to read generated CSV file {} with exception {}", fileToUpload.getPath(), e.getMessage());
+          .setCause(e)
+          .log("Failed to read generated CSV file {}", fileToUpload.getPath());
       return false;
     }
   }

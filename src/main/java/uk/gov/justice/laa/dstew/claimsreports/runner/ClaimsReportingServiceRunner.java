@@ -61,7 +61,6 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
     log.atInfo()
         .addKeyValue("event.action", "job.start")
         .addKeyValue("event.type", "batch")
-        .addKeyValue("run_id", runId)
         .log("Starting claims reporting job");
 
     try {
@@ -71,12 +70,18 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
         log.atError()
             .addKeyValue("event.action", "replication.health.check")
             .addKeyValue("event.outcome", "failure")
-            .addKeyValue("run_id", runId)
             .log("Replication health check failed, reports not generated.");
         markAllReportsFailedDueToReplication();
       }
+    } catch (Exception e) {
+      log.atError()
+          .addKeyValue("event.action", "job.run")
+          .addKeyValue("event.outcome", "failure")
+          .setCause(e)
+          .log("Claims reporting job failed");
+      throw e;
     } finally {
-      MDC.clear();
+      MDC.remove("run_id");
     }
   }
 
@@ -157,29 +162,31 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
         .log("Generating {} reports...", reportServices.size());
     for (AbstractReportService service : reportServices) {
       metricsHandler.resetCustomMetrics();
-      var startTime = System.currentTimeMillis();
-      boolean succeeded = true;
+      var startTime = System.nanoTime();
+      boolean succeeded = false;
       try {
         service.refreshDataSource();
         service.generateReport();
+        succeeded = true;
       } catch (Exception e) {
-        succeeded = false;
         log.atError()
             .addKeyValue("event.action", "report.generation")
             .addKeyValue("event.type", "batch")
             .addKeyValue("event.outcome", "failure")
             .addKeyValue("report.name", service.getReportName())
-            .log("Report generation failed for {}: {}", service.getClass().getSimpleName(), e.getMessage(), e);
+            .setCause(e)
+            .log("Report generation failed for {}", service.getClass().getSimpleName());
         metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
       } finally {
-        var reportDuration = System.currentTimeMillis() - startTime;
+        var reportDuration = (System.nanoTime() - startTime) / 1_000_000;
         metricsHandler.setCustomMetric(CustomReportMetric.REPORT_TOTAL_TIME_MS, reportDuration);
         log.atInfo()
             .addKeyValue("event.action", "report.batch.complete")
             .addKeyValue("event.type", "batch")
             .addKeyValue("report.name", service.getReportName())
             .addKeyValue("event.outcome", succeeded ? "success" : "failure")
-            .log("Report generation for report {} took {} ms ({} s)", service.getReportName(), reportDuration, reportDuration / 1000);
+            .addKeyValue("report.duration.ms", reportDuration)
+            .log("Report generation for report {} completed", service.getReportName());
         metricsHandler.pushReportMetrics(service.getReportName());
       }
     }
