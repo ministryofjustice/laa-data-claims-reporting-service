@@ -173,11 +173,6 @@ public abstract class AbstractReportService {
     }
   }
 
-  @SuppressFBWarnings(
-          value = "SQL_INJECTION_SPRING_JDBC",
-          justification = "Data source name and order-by clause are hardcoded constants from "
-                  + "service implementations, not user input."
-  )
   private String buildReportSql(String dataSourceName, String orderByClause) {
     return String.format("SELECT * FROM %s ORDER BY %s", dataSourceName, orderByClause);
   }
