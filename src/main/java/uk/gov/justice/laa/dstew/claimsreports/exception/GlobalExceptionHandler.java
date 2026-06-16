@@ -58,7 +58,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         .addKeyValue("event.action", "s3.upload.failure")
         .addKeyValue("event.type", "storage")
         .addKeyValue("event.outcome", "failure")
-        .addKeyValue("run_id", MDC.get("run_id"))
         .log("AwsServiceException ({}) Thrown: {}", e.getClass().getSimpleName(), e.awsErrorDetails().toString());
 
     return ResponseEntity.internalServerError().body(message);
@@ -79,7 +78,6 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         .addKeyValue("event.action", "csv.validation.failure")
         .addKeyValue("event.type", "batch")
         .addKeyValue("event.outcome", "failure")
-        .addKeyValue("run_id", MDC.get("run_id"))
         .setCause(e)
         .log("CsvUploadException thrown");
 
