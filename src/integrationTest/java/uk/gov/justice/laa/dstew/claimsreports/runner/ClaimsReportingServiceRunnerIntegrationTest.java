@@ -136,7 +136,7 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
       assertThat(expectedFile).as("Expected CSV file path must remain within the expected files directory")
           .startsWith(expectedFileDirectory);
       assertThat(tempFile.toFile())
-          .as("CSV file comparison for " + sanitise(uploadedKey))
+          .as("CSV file comparison for " + uploadedKey)
           .hasSameTextualContentAs(expectedFile.toFile());
 
       log.info("CSV file '{}' matches expected content.", sanitise(uploadedKey));
