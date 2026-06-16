@@ -59,16 +59,6 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 
-    // Resolve snyk scan
-    implementation(platform("io.netty:netty-codec-compression:4.2.15.Final"))
-    implementation(platform("io.netty:netty-codec-http2:4.2.15.Final"))
-    implementation(platform("io.netty:netty-codec-http:4.2.15.Final"))
-    implementation(platform("io.netty:netty-transport-classes-epoll:4.2.15.Final"))
-    implementation(platform("io.netty:netty-codec-http:4.2.15.Final"))
-
-    // Resolve snyk scan
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.22'
-
     implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
 
     implementation 'org.mapstruct:mapstruct:1.6.3'
@@ -85,10 +75,10 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-micrometer-tracing-brave'
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 
-    implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.1.4'
+    implementation 'tools.jackson.dataformat:jackson-dataformat-csv'
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
-    runtimeOnly 'org.postgresql:postgresql:42.7.11'
+    runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly "org.flywaydb:flyway-database-postgresql"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
