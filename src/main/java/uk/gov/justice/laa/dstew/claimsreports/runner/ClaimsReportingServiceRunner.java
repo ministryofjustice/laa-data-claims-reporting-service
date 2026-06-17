@@ -5,6 +5,8 @@ import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfigurat
 
 import java.util.List;
 import java.util.UUID;
+import java.util.concurrent.TimeUnit;
+
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.slf4j.MDC;
@@ -178,7 +180,7 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
             .log("Report generation failed for {}", service.getClass().getSimpleName());
         metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
       } finally {
-        var reportDuration = (System.nanoTime() - startTime) / 1_000_000;
+        long reportDuration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
         metricsHandler.setCustomMetric(CustomReportMetric.REPORT_TOTAL_TIME_MS, reportDuration);
         log.atInfo()
             .addKeyValue("event.action", "report.batch.complete")
