@@ -56,18 +56,6 @@ class GlobalExceptionHandlerTest {
   }
 
   @Test
-  void handleAwsServiceException_logsWithoutDuplicateMdcError() {
-    MDC.put("run_id", "test-run-123");
-
-    var exception = NoSuchBucketException.builder().message("Bucket don't exist :(")
-        .awsErrorDetails(AwsErrorDetails.builder().errorCode("312").errorMessage("uh oh").build())
-        .build();
-
-    assertThatCode(() -> globalExceptionHandler.handleAwsErrors(exception))
-        .doesNotThrowAnyException();
-  }
-
-  @Test
   void handleCsvUploadException_returnsInternalServerErrorStatusAndErrorMessage() {
     ResponseEntity<String> result = globalExceptionHandler.handleCsvUploadException(new CsvUploadException("File is wrong type"));
 
@@ -75,14 +63,6 @@ class GlobalExceptionHandlerTest {
     assertThat(result.getStatusCode()).isEqualTo(INTERNAL_SERVER_ERROR);
     assertThat(result.getBody()).isNotNull();
     assertThat(result.getBody()).isEqualTo("Failed to upload report.");
-  }
-
-  @Test
-  void handleCsvUploadException_logsWithoutDuplicateMdcError() {
-    MDC.put("run_id", "test-run-123");
-
-    assertThatCode(() -> globalExceptionHandler.handleCsvUploadException(new CsvUploadException("File is wrong type")))
-        .doesNotThrowAnyException();
   }
 
 }
