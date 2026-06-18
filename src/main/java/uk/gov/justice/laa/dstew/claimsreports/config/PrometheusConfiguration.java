@@ -123,7 +123,7 @@ public class PrometheusConfiguration {
    * @return database health check gauge
    */
   @Bean
-  public DatabaseHealthGauge databaseHealthGauge(
+  public DatabaseHealthGauge createDatabaseHealthGauge(
       PrometheusMeterRegistry databaseHealthPrometheusMeterRegistry) {
     var totalConnections = Gauge.builder()
         .withoutExemplars()
