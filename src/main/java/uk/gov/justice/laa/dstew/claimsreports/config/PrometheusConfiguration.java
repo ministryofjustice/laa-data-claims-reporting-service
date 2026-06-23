@@ -79,9 +79,97 @@ public class PrometheusConfiguration {
   }
 
   /**
+   * Identifier for a custom metric.
+   */
+  public enum CustomMetricId {
+    REPORT_SUCCESSFUL,
+    REPORT_TOTAL_TIME_MS,
+    DATA_REFRESH_TIME_MS,
+    GENERATED_TIME_MS,
+    ROWS_WRITTEN,
+    REPORT_FILE_SIZE,
+    UPLOAD_TIME_MS,
+    ENCODING_CHECK_TIME_MS,
+    REPLICATION_HEALTH_CHECK_STATUS,
+    DB_CONNECTIONS_TOTAL,
+    DB_CONNECTIONS_ACTIVE,
+    DB_CONNECTIONS_IDLE,
+    DB_CONNECTIONS_MAX_CONNECTIONS,
+    DB_CONNECTIONS_UTILISATION_ACTIVE,
+    DB_CONNECTIONS_UTILISATION_TOTAL
+  }
+
+  /**
    * This class defines the replication health metric we push to Prometheus.
    */
   public record ReplicationHealthGauge(Gauge replicationHealthCheck) {}
+
+  /**
+   * This registry is used to isolate replication health metric pushes at the end of the process instead of bundling
+   * with job registry.
+   *
+   * @return registry for (replication health)-level metrics
+   */
+  @Bean
+  public PrometheusMeterRegistry databaseHealthPrometheusMeterRegistry() {
+    return new PrometheusMeterRegistry(PrometheusConfig.DEFAULT);
+  }
+
+  /**
+   * Create a gauge for the database health checks, registered on the database health registry.
+   * These are collected at the end of the process
+   *
+   * @param databaseHealthPrometheusMeterRegistry database health registry
+   * @return database health check gauge
+   */
+  @Bean
+  public DatabaseHealthGauge createDatabaseHealthGauge(
+      PrometheusMeterRegistry databaseHealthPrometheusMeterRegistry) {
+    var totalConnections = Gauge.builder()
+        .withoutExemplars()
+        .name("database_connections_total_open")
+        .help("Total open connections to the database at the end of the cronjob")
+        .register(databaseHealthPrometheusMeterRegistry.getPrometheusRegistry());
+
+    var activeConnections = Gauge.builder()
+        .withoutExemplars()
+        .name("database_connections_active")
+        .help("Active connections at the end of the cronjob")
+        .register(databaseHealthPrometheusMeterRegistry.getPrometheusRegistry());
+
+    var idleConnections = Gauge.builder()
+        .withoutExemplars()
+        .name("database_connections_idle")
+        .help("Idle connections at the end of the cronjob")
+        .register(databaseHealthPrometheusMeterRegistry.getPrometheusRegistry());
+
+    var maxConnections = Gauge.builder()
+        .withoutExemplars()
+        .name("database_connections_max")
+        .help("Max connections")
+        .register(databaseHealthPrometheusMeterRegistry.getPrometheusRegistry());
+
+    var activeUtilisation = Gauge.builder()
+        .withoutExemplars()
+        .name("database_connections_active_utilisation")
+        .help("Active utilisation rate (active/max)")
+        .register(databaseHealthPrometheusMeterRegistry.getPrometheusRegistry());
+
+    var totalUtilisation = Gauge.builder()
+        .withoutExemplars()
+        .name("database_connections_total_utilisation")
+        .help("Total utilisation rate (total/max)")
+        .register(databaseHealthPrometheusMeterRegistry.getPrometheusRegistry());
+
+    return new DatabaseHealthGauge(totalConnections, activeConnections, idleConnections, maxConnections,
+        activeUtilisation, totalUtilisation);
+  }
+
+  /**
+   * This class defines the replication health metric we push to Prometheus.
+   */
+  public record DatabaseHealthGauge(Gauge totalConnections, Gauge activeConnections, Gauge idleConnections,
+                                    Gauge maxConnections, Gauge activeUtilisation, Gauge totalUtilisation) {}
 
   /**
    * Create a set of custom gauges for measuring report stats.
@@ -154,21 +242,6 @@ public class PrometheusConfiguration {
     public static final int REPORT_FAILED = -1;
     public static final int REPORT_SUCCESSFUL = 1;
     public static final int REPORT_SKIPPED = 0;
-
-    /**
-     * Identifier for a custom metric.
-     */
-    public enum CustomReportMetric {
-      REPORT_SUCCESSFUL,
-      REPORT_TOTAL_TIME_MS,
-      DATA_REFRESH_TIME_MS,
-      GENERATED_TIME_MS,
-      ROWS_WRITTEN,
-      REPORT_FILE_SIZE,
-      UPLOAD_TIME_MS,
-      ENCODING_CHECK_TIME_MS,
-      REPLICATION_HEALTH_CHECK_STATUS
-    }
 
     /**
      * Reset the metrics.

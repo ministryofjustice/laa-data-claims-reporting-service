@@ -1,6 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.runner;
 
-import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric.REPLICATION_HEALTH_CHECK_STATUS;
+import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId.REPLICATION_HEALTH_CHECK_STATUS;
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_FAILED;
 import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
 
@@ -13,9 +13,10 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
 import org.springframework.stereotype.Component;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
-import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric;
+import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId;
 import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
 import uk.gov.justice.laa.dstew.claimsreports.service.AbstractReportService;
+import uk.gov.justice.laa.dstew.claimsreports.service.DatabaseStatisticService;
 import uk.gov.justice.laa.dstew.claimsreports.service.ReplicationHealthCheckService;
 
 
@@ -53,6 +54,7 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
   private final List<AbstractReportService> reportServices;
 
   private final MetricsHandler metricsHandler;
+  private final DatabaseStatisticService databaseStatisticService;
 
   @Override
   public void run(ApplicationArguments args) {
@@ -62,6 +64,10 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
       log.error("Replication health check failed, reports not generated.");
       markAllReportsFailedDueToReplication();
     }
+
+    databaseStatisticService.setDatabaseMetrics();
+    metricsHandler.pushDatabaseHealthMetrics();
+
   }
 
   /**
@@ -136,10 +142,10 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
         String safeService = sanitise(service.getClass().getSimpleName());
         String safeMessage = sanitise(e.getMessage());
         log.error("Report generation failed for {}: {}", safeService, safeMessage, e);
-        metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
+        metricsHandler.setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_FAILED);
       } finally {
         var reportDuration = System.currentTimeMillis() - startTime;
-        metricsHandler.setCustomMetric(CustomReportMetric.REPORT_TOTAL_TIME_MS, reportDuration);
+        metricsHandler.setCustomMetric(CustomMetricId.REPORT_TOTAL_TIME_MS, reportDuration);
         log.info("Report generation for report {} took {} ms ({} s)", sanitise(service.getReportName()), reportDuration, reportDuration / 1000);
         metricsHandler.pushReportMetrics(service.getReportName());
       }
@@ -151,7 +157,7 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
     for (AbstractReportService service : reportServices) {
       String reportName = service.getReportName();
       metricsHandler.resetCustomMetrics();
-      metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
+      metricsHandler.setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_FAILED);
       metricsHandler.pushReportMetrics(reportName);
     }
   }

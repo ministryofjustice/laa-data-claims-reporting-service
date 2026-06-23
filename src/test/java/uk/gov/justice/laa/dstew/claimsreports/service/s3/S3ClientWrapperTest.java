@@ -18,14 +18,14 @@ import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import software.amazon.awssdk.services.s3.model.PutObjectResponse;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
-import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric;
+import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
 import uk.gov.justice.laa.dstew.claimsreports.service.CsvFileValidator;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyLong;
+import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
@@ -83,8 +83,8 @@ class S3ClientWrapperTest {
     assertEquals(Files.readString(testFilePath), getRequestBodyContents(requestBody));
 
     // Check metrics logged
-    verify(metricsHandler).setCustomMetric(eq(CustomReportMetric.ENCODING_CHECK_TIME_MS), anyLong());
-    verify(metricsHandler).setCustomMetric(eq(CustomReportMetric.UPLOAD_TIME_MS), anyLong());
+    verify(metricsHandler).setCustomMetric(eq(CustomMetricId.ENCODING_CHECK_TIME_MS), anyDouble());
+    verify(metricsHandler).setCustomMetric(eq(CustomMetricId.UPLOAD_TIME_MS), anyDouble());
 
   }
 

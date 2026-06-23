@@ -18,7 +18,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.transaction.annotation.Transactional;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
-import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric;
+import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
@@ -65,7 +65,7 @@ public abstract class AbstractReportService {
     long endTime = System.currentTimeMillis();
     long durationMilliseconds = endTime - startTime;
     log.info("Refresh complete for {} in {} ms", sanitise(getReportName()), durationMilliseconds);
-    metricsHandler.setCustomMetric(CustomReportMetric.DATA_REFRESH_TIME_MS, durationMilliseconds);
+    metricsHandler.setCustomMetric(CustomMetricId.DATA_REFRESH_TIME_MS, durationMilliseconds);
   }
 
   /**
@@ -129,7 +129,7 @@ public abstract class AbstractReportService {
   public void generateReport() {
     if (!runToday()) {
       log.info("Report {} is not scheduled to run today", sanitise(getReportName()));
-      metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_SKIPPED);
+      metricsHandler.setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_SKIPPED);
       return;
     }
 
@@ -146,9 +146,9 @@ public abstract class AbstractReportService {
       long endTime = System.currentTimeMillis();
       long durationMilliseconds = endTime - startTime;
       log.info("Created {} file with filename {} in {} ms", sanitise(getReportName()), sanitise(getFullReportFileName()), durationMilliseconds);
-      metricsHandler.setCustomMetric(CustomReportMetric.GENERATED_TIME_MS, durationMilliseconds);
+      metricsHandler.setCustomMetric(CustomMetricId.GENERATED_TIME_MS, durationMilliseconds);
       s3ClientWrapper.uploadFile(tempFile, generateS3FileKey());
-      metricsHandler.setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_SUCCESSFUL);
+      metricsHandler.setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_SUCCESSFUL);
 
     } catch (IOException | RuntimeException e) {
       log.error("Failed to generate {}: {}", sanitise(getReportName()), sanitise(e.getMessage()));
