@@ -127,7 +127,7 @@ public class PrometheusConfiguration {
       PrometheusMeterRegistry databaseHealthPrometheusMeterRegistry) {
     var totalConnections = Gauge.builder()
         .withoutExemplars()
-        .name("database_connectons_total_open")
+        .name("database_connections_total_open")
         .help("Total open connections to the database at the end of the cronjob")
         .register(databaseHealthPrometheusMeterRegistry.getPrometheusRegistry());
 
