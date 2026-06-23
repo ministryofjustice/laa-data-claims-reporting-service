@@ -3,6 +3,7 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_SKIPPED;
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_SUCCESSFUL;
 import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitiseForFilename;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedWriter;
@@ -186,17 +187,6 @@ public abstract class AbstractReportService {
         log.warn("Failed to delete temp file {}: {}", sanitise(tempFile.getPath()), sanitise(e.getMessage()));
       }
     }
-  }
-
-  private String sanitiseForFilename(String input) {
-    if (input == null) {
-      throw new IllegalArgumentException("Filename component cannot be null");
-    }
-    String cleaned = input.replaceAll("[^A-Za-z0-9._-]", "");
-    if (cleaned.isEmpty()) {
-      throw new IllegalArgumentException("Filename component invalid after sanitisation");
-    }
-    return cleaned;
   }
 
   protected abstract boolean runToday();

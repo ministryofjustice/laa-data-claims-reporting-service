@@ -21,9 +21,34 @@ public final class LogSanitiser {
    * @return the sanitised string, or {@code "null"} if the input is {@code null}
    */
   public static String sanitise(String input) {
+    return input == null
+            ? null
+            : input.replace('\r', '_')
+            .replace('\n', '_');
+  }
+
+  /**
+   * Sanitises a string for safe use as a filename component.
+   *
+   * <p>This method removes all characters except:
+   * letters (A–Z, a–z), digits (0–9), dot (.), underscore (_), and hyphen (-).
+   *
+   * <p>If the input is {@code null}, an {@link IllegalArgumentException} is thrown.
+   * If the resulting string is empty after sanitisation, an {@link IllegalArgumentException}
+   * is also thrown, as it would not form a valid filename component.
+   *
+   * @param input the raw filename component to sanitise; must not be null
+   * @return a sanitised string containing only safe filename characters
+   * @throws IllegalArgumentException if the input is null or results in an empty string
+   */
+  public static String sanitiseForFilename(String input) {
     if (input == null) {
-      return "null";
+      throw new IllegalArgumentException("Filename component cannot be null");
     }
-    return input.replaceAll("[\r\n\t]", "_");
+    String cleaned = input.replaceAll("[^A-Za-z0-9._-]", "");
+    if (cleaned.isEmpty()) {
+      throw new IllegalArgumentException("Filename component invalid after sanitisation");
+    }
+    return cleaned;
   }
 }
