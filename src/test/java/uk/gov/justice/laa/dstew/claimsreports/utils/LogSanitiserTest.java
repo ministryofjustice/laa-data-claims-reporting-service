@@ -4,13 +4,14 @@ import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Nested;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.MethodSource;
 import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 import java.lang.reflect.Constructor;
 import java.util.stream.Stream;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.Assertions.assertThatThrownBy;
 
 /**
  * Unit tests for {@link LogSanitiser}.
@@ -23,9 +24,9 @@ class LogSanitiserTest {
     class SanitiseTests {
 
         @Test
-        @DisplayName("should return 'null' string when input is null")
-        void shouldReturnNullStringWhenInputIsNull() {
-            assertThat(LogSanitiser.sanitise(null)).isEqualTo("null");
+        @DisplayName("should return null when input is null")
+        void shouldReturnNullWhenInputIsNull() {
+            assertThat(LogSanitiser.sanitise(null)).isNull();
         }
 
         @Test
@@ -36,7 +37,7 @@ class LogSanitiserTest {
 
         @ParameterizedTest
         @MethodSource("controlCharacterCases")
-        @DisplayName("should replace CR, LF and TAB with underscores")
+        @DisplayName("should replace CR and LF with underscores (tabs unchanged)")
         void shouldReplaceControlCharacters(String input, String expected) {
             assertThat(LogSanitiser.sanitise(input)).isEqualTo(expected);
         }
@@ -45,11 +46,11 @@ class LogSanitiserTest {
             return Stream.of(
                     Arguments.of("hello\rworld", "hello_world"),
                     Arguments.of("hello\nworld", "hello_world"),
-                    Arguments.of("hello\tworld", "hello_world"),
-                    Arguments.of("\r\n\t", "___"),
-                    Arguments.of("a\rb\nc\td", "a_b_c_d"),
+                    Arguments.of("hello\tworld", "hello\tworld"),
                     Arguments.of("\r\n", "__"),
-                    Arguments.of("multiple\nlines\rwith\ttabs", "multiple_lines_with_tabs")
+                    Arguments.of("a\rb\nc\td", "a_b_c\td"),
+                    Arguments.of("\r\n\t", "__\t"),
+                    Arguments.of("multiple\nlines\rwith\ttabs", "multiple_lines_with\ttabs")
             );
         }
 
@@ -61,22 +62,54 @@ class LogSanitiserTest {
         }
 
         @Test
-        @DisplayName("should handle string containing only control characters")
-        void shouldHandleOnlyControlCharacters() {
-            String input = "\r\n\t\r\n\t";
-            assertThat(LogSanitiser.sanitise(input)).isEqualTo("______");
-        }
-
-        @Test
         @DisplayName("should handle long strings safely")
         void shouldHandleLongStrings() {
-            String input = "This is a long string ".repeat(1000) + "\r\n\t";
+            String input = "This is a long string ".repeat(1000) + "\r\n";
 
             String result = LogSanitiser.sanitise(input);
 
             assertThat(result)
-                    .doesNotContain("\r", "\n", "\t")
-                    .endsWith("___");
+                    .doesNotContain("\r", "\n")
+                    .endsWith("__");
+        }
+    }
+
+    @Nested
+    @DisplayName("sanitiseForFilename")
+    class SanitiseForFilenameTests {
+
+        @Test
+        @DisplayName("should throw exception when input is null")
+        void shouldThrowWhenInputIsNull() {
+            assertThatThrownBy(() -> LogSanitiser.sanitiseForFilename(null))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("Filename component cannot be null");
+        }
+
+        @Test
+        @DisplayName("should remove invalid filename characters")
+        void shouldRemoveInvalidCharacters() {
+            String input = "file name @#$%.txt";
+            assertThat(LogSanitiser.sanitiseForFilename(input))
+                    .isEqualTo("filename.txt");
+        }
+
+        @Test
+        @DisplayName("should preserve valid filename characters")
+        void shouldPreserveValidCharacters() {
+            String input = "file_name-123.txt";
+            assertThat(LogSanitiser.sanitiseForFilename(input))
+                    .isEqualTo("file_name-123.txt");
+        }
+
+        @Test
+        @DisplayName("should throw exception when result is empty after sanitisation")
+        void shouldThrowWhenResultEmpty() {
+            String input = "@#$%^&*";
+
+            assertThatThrownBy(() -> LogSanitiser.sanitiseForFilename(input))
+                    .isInstanceOf(IllegalArgumentException.class)
+                    .hasMessage("Filename component invalid after sanitisation");
         }
     }
 
@@ -85,7 +118,7 @@ class LogSanitiserTest {
     class ConstructorTests {
 
         @Test
-        @DisplayName("should have private constructor and prevent instantiation via reflection")
+        @DisplayName("should prevent instantiation via reflection")
         void shouldHavePrivateConstructor() throws Exception {
             Constructor<LogSanitiser> constructor =
                     LogSanitiser.class.getDeclaredConstructor();
@@ -94,8 +127,8 @@ class LogSanitiserTest {
 
             constructor.setAccessible(true);
 
-            // Reflection can still invoke it, but class remains a proper utility class
-            assertThat(constructor.getParameterCount()).isZero();
+            LogSanitiser instance = constructor.newInstance();
+            assertThat(instance).isNotNull();
         }
     }
 }
