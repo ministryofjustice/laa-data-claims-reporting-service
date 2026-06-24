@@ -6,7 +6,7 @@ import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
-import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric;
+import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
 import uk.gov.justice.laa.dstew.claimsreports.service.CsvFileValidator;
 
@@ -91,7 +91,7 @@ public class S3ClientWrapper {
         .addKeyValue("event.type", "batch")
         .addKeyValue("event.outcome", "success")
         .log("File {} is valid UTF-8. Check took {} ms", fileName, encodingDuration);
-    metricsHandler.setCustomMetric(CustomReportMetric.ENCODING_CHECK_TIME_MS, encodingDuration);
+    metricsHandler.setCustomMetric(CustomMetricId.ENCODING_CHECK_TIME_MS, encodingDuration);
 
     var putRequest = PutObjectRequest.builder()
         .bucket(s3Bucket)
@@ -114,8 +114,8 @@ public class S3ClientWrapper {
 
     // Using MiB as that is what system storage use and isn't user-facing.
     var fileSizeMib = fileToUpload.length() / 1024 / 1024;
-    metricsHandler.setCustomMetric(CustomReportMetric.UPLOAD_TIME_MS, durationMilliseconds);
-    metricsHandler.setCustomMetric(CustomReportMetric.REPORT_FILE_SIZE, fileSizeMib);
+    metricsHandler.setCustomMetric(CustomMetricId.UPLOAD_TIME_MS, durationMilliseconds);
+    metricsHandler.setCustomMetric(CustomMetricId.REPORT_FILE_SIZE, fileSizeMib);
     log.atInfo()
         .addKeyValue("event.action", "s3.upload")
         .addKeyValue("event.type", "storage")

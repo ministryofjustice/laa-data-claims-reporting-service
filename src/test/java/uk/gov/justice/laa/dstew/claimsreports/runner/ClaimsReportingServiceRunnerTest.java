@@ -8,7 +8,7 @@ import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_FAILED;
-import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric.REPLICATION_HEALTH_CHECK_STATUS;
+import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId.REPLICATION_HEALTH_CHECK_STATUS;
 
 import java.time.LocalDate;
 import java.util.List;
@@ -21,9 +21,10 @@ import org.springframework.boot.ApplicationArguments;
 import org.springframework.test.util.ReflectionTestUtils;
 
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
-import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric;
+import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId;
 import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
 import uk.gov.justice.laa.dstew.claimsreports.service.AbstractReportService;
+import uk.gov.justice.laa.dstew.claimsreports.service.DatabaseStatisticService;
 import uk.gov.justice.laa.dstew.claimsreports.service.ReplicationHealthCheckService;
 
 class ClaimsReportingServiceRunnerTest {
@@ -43,6 +44,9 @@ class ClaimsReportingServiceRunnerTest {
   @Mock
   private MetricsHandler metricsHandler;
 
+  @Mock
+  private DatabaseStatisticService databaseStatisticService;
+
   private ClaimsReportingServiceRunner runner;
 
   @BeforeEach
@@ -53,7 +57,8 @@ class ClaimsReportingServiceRunnerTest {
     runner = new ClaimsReportingServiceRunner(
             replicationHealthCheckService,
             List.of(reportService1, reportService2),
-            metricsHandler
+            metricsHandler,
+            databaseStatisticService
     );
 
     // Default behaviour: replication is healthy
@@ -104,7 +109,7 @@ class ClaimsReportingServiceRunnerTest {
   void shouldHandleEmptyServiceList() {
     // Create runner with empty list of report services
     ClaimsReportingServiceRunner emptyRunner =
-            new ClaimsReportingServiceRunner(replicationHealthCheckService, List.of(), metricsHandler);
+            new ClaimsReportingServiceRunner(replicationHealthCheckService, List.of(), metricsHandler, databaseStatisticService);
 
     // Should not throw any exceptions
     assertThatCode(() -> emptyRunner.run(applicationArguments))
@@ -128,7 +133,7 @@ class ClaimsReportingServiceRunnerTest {
     verify(reportService2).generateReport();
 
     // Failure metric should be recorded
-    verify(metricsHandler).setCustomMetric(CustomReportMetric.REPORT_SUCCESSFUL, REPORT_FAILED);
+    verify(metricsHandler).setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_FAILED);
   }
 
   @Test
@@ -174,7 +179,7 @@ class ClaimsReportingServiceRunnerTest {
     // Each report should be marked as failed
     verify(metricsHandler, times(2)).resetCustomMetrics();
     verify(metricsHandler, times(2))
-            .setCustomMetric(eq(CustomReportMetric.REPORT_SUCCESSFUL), eq((long) REPORT_FAILED));
+            .setCustomMetric(eq(CustomMetricId.REPORT_SUCCESSFUL), eq((double) REPORT_FAILED));
 
     // Metrics pushed per report
     verify(metricsHandler).pushReportMetrics("report1");
@@ -207,7 +212,8 @@ class ClaimsReportingServiceRunnerTest {
     runner = new ClaimsReportingServiceRunner(
             replicationHealthCheckService,
             List.of(reportService1, reportService2),
-            metricsHandler
+            metricsHandler,
+            databaseStatisticService
     );
 
     // enable ignoreRowCountMismatch feature flag
@@ -241,7 +247,8 @@ class ClaimsReportingServiceRunnerTest {
     runner = new ClaimsReportingServiceRunner(
             replicationHealthCheckService,
             List.of(reportService1, reportService2),
-            metricsHandler
+            metricsHandler,
+            databaseStatisticService
     );
 
     // enable ignoreRowCountMismatch
@@ -255,7 +262,7 @@ class ClaimsReportingServiceRunnerTest {
 
     // all reports should be marked as failed
     verify(metricsHandler, times(2))
-            .setCustomMetric(eq(CustomReportMetric.REPORT_SUCCESSFUL), eq((long) REPORT_FAILED));
+            .setCustomMetric(eq(CustomMetricId.REPORT_SUCCESSFUL), eq((double) REPORT_FAILED));
 
     verify(metricsHandler).pushReportMetrics("report1");
     verify(metricsHandler).pushReportMetrics("report2");
@@ -265,5 +272,13 @@ class ClaimsReportingServiceRunnerTest {
     verify(reportService1, never()).generateReport();
     verify(reportService2, never()).refreshDataSource();
     verify(reportService2, never()).generateReport();
+  }
+
+  @Test
+  void shouldPublishDbHealthStats() {
+    runner.run(applicationArguments);
+
+    verify(databaseStatisticService).setDatabaseMetrics();
+    verify(metricsHandler).pushDatabaseHealthMetrics();
   }
 }

@@ -64,4 +64,17 @@ class PrometheusConfigurationTest {
     assertEquals(0, customMetrics.uploadTimeMs().get());
   }
 
+  @Test
+  void shouldCreateDbHealthMetrics() {
+    prometheusConfiguration = new PrometheusConfiguration();
+    when(prometheusMeterRegistry.getPrometheusRegistry()).thenReturn(mock(PrometheusRegistry.class));
+    var customMetrics = prometheusConfiguration.createDatabaseHealthGauge(prometheusMeterRegistry);
+
+    assertNotNull(customMetrics.idleConnections());
+    assertNotNull(customMetrics.activeConnections());
+    assertNotNull(customMetrics.totalConnections());
+    assertNotNull(customMetrics.maxConnections());
+    assertNotNull(customMetrics.totalUtilisation());
+    assertNotNull(customMetrics.activeUtilisation());
+  }
 }

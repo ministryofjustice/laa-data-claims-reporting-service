@@ -7,7 +7,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.CustomReportMetric;
+import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId;
 
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.verify;
@@ -38,7 +38,7 @@ class MetricsHandlerTest {
   void shouldSetMetrics() {
     var mockGauge = mock(Gauge.class);
     when(customReportGauges.reportFileSize()).thenReturn(mockGauge);
-    metricsHandler.setCustomMetric(CustomReportMetric.REPORT_FILE_SIZE, 1234);
+    metricsHandler.setCustomMetric(CustomMetricId.REPORT_FILE_SIZE, 1234);
     verify(mockGauge).set(1234);
   }
 
