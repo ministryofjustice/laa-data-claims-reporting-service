@@ -31,7 +31,7 @@ runs:
   steps:
 
     - name: Authenticate to the cluster
-      uses: ministryofjustice/laa-reusable-github-actions/.github/actions/authenticate_to_cluster@2aa2676c3cd9876ec7037ee8b3d729d0306cb7c6
+      uses: ministryofjustice/laa-reusable-github-actions/.github/actions/authenticate_to_cluster@718424912b7cac2b905764128f52ee7c99241507 # latest commit ID for this workflow file
       with:
         kube-cert: ${{ inputs.kube-cert }}
         kube-token: ${{ inputs.kube-token }}
@@ -39,14 +39,14 @@ runs:
         kube-namespace: ${{ inputs.kube-namespace }}
 
     - name: Assume role in Cloud Platform
-      uses: aws-actions/configure-aws-credentials@8df5847569e6427dd6c4fb1cf565c83acfa8afa7 # v6.0.0
+      uses: aws-actions/configure-aws-credentials@e7f100cf4c008499ea8adda475de1042d6975c7b # v6.2.0
       with:
         role-to-assume: ${{ inputs.ecr-role-to-assume }}
         aws-region: ${{ inputs.ecr-region }}
 
     - name: Docker login to ECR
       id: login-ecr
-      uses: aws-actions/amazon-ecr-login@183a1442edf41672e66566b7fc560e297a290896 # v2.1.1
+      uses: aws-actions/amazon-ecr-login@d539f0932e70871a027e9d5a9d8fc38589180a64 # v2.1.6
       with:
         mask-password: 'true'
 
