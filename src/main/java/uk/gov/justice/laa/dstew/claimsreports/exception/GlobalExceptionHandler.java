@@ -1,6 +1,7 @@
 package uk.gov.justice.laa.dstew.claimsreports.exception;
 
 import static org.springframework.http.HttpStatus.NOT_FOUND;
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -54,7 +55,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
     var message = "Failed to upload report.";
 
     // Ensure log has specific AWS exception class name in, such as NoSuchKeyException.
-    log.error("AwsServiceException ({}) Thrown: {}", e.getClass().getSimpleName(), e.awsErrorDetails().toString());
+    log.error("AwsServiceException ({}) Thrown: {}", sanitise(e.getClass().getSimpleName()), sanitise(e.awsErrorDetails().toString()));
 
     return ResponseEntity.internalServerError().body(message);
   }
@@ -70,7 +71,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   public ResponseEntity<String> handleCsvUploadException(CsvUploadException e) {
     var message = "Failed to upload report.";
 
-    log.error("CsvUploadException: {}", e.getMessage());
+    log.error("CsvUploadException: {}", sanitise(e.getMessage()));
 
     return ResponseEntity.internalServerError().body(message);
   }

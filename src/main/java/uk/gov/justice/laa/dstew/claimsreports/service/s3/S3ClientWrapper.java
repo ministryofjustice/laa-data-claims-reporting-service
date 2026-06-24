@@ -1,5 +1,7 @@
 package uk.gov.justice.laa.dstew.claimsreports.service.s3;
 
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
+
 import java.io.File;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
@@ -74,7 +76,7 @@ public class S3ClientWrapper {
       throw new CsvUploadException("Failed to check file extension is valid CSV for file " + fileName + " being uploaded to " + desiredFileKey);
     }
 
-    log.info("Checking {} is UTF-8 encoded", fileName);
+    log.info("Checking {} is UTF-8 encoded", sanitise(fileName));
     long encodingCheckStart = System.currentTimeMillis();
     if (!csvFileValidator.checkUtf8Encoded(fileToUpload)) {
       if (uploadUtf8FailuresToS3) {
@@ -92,7 +94,8 @@ public class S3ClientWrapper {
         .contentType("text/csv")
         .build();
 
-    log.info("Uploading {} to S3 bucket {} with filename {}", fileToUpload.getPath(), s3Bucket, desiredFileKey);
+    log.info("Uploading {} to S3 bucket {} with filename {}",
+        sanitise(fileToUpload.getPath()), sanitise(s3Bucket), sanitise(desiredFileKey));
 
     long startTime = System.currentTimeMillis();
     // Response to this request is just metadata, if it errors it will throw an AwsServiceException
@@ -105,7 +108,7 @@ public class S3ClientWrapper {
     metricsHandler.setCustomMetric(CustomMetricId.UPLOAD_TIME_MS, durationMilliseconds);
     metricsHandler.setCustomMetric(CustomMetricId.REPORT_FILE_SIZE, fileSizeMib);
     log.info("Uploaded {} to S3 bucket {} with filename {} and size {} MiB in {} ms",
-        fileToUpload.getPath(), s3Bucket, desiredFileKey, fileSizeMib, durationMilliseconds);
+        sanitise(fileToUpload.getPath()), sanitise(s3Bucket), sanitise(desiredFileKey), fileSizeMib, durationMilliseconds);
   }
 
   private void uploadErroredFile(File fileToUpload, String fileName) {
@@ -119,9 +122,8 @@ public class S3ClientWrapper {
         .build();
     s3Client.putObject(errorUpload, RequestBody.fromFile(fileToUpload));
     log.info("Uploaded non-UTF-8 file {} to S3 bucket {} with filename {}",
-        fileToUpload.getPath(), s3Bucket, errorFileName);
+        sanitise(fileToUpload.getPath()), sanitise(s3Bucket), sanitise(errorFileName));
 
   }
 
 }
-

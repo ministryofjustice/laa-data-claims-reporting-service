@@ -1,5 +1,8 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
+
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedWriter;
 import java.io.IOException;
 import java.sql.Connection;
@@ -58,9 +61,9 @@ public class CsvCreationService {
       );
 
       writer.flush();
-      log.info("CSV creation completed for {}", reportName);
+      log.info("CSV creation completed for {}", sanitise(reportName));
       var rowsWritten = handler.getRowCount();
-      log.info("Rows written for {}: " + rowsWritten, reportName);
+      log.info("Rows written for {}: {}", sanitise(reportName), rowsWritten);
       metricsHandler.setCustomMetric(CustomMetricId.ROWS_WRITTEN, rowsWritten);
 
     } catch (IOException ex) {
@@ -83,6 +86,10 @@ public class CsvCreationService {
    *
    * @return {PreparedStatement}
    */
+  @SuppressFBWarnings(
+      value = "SQL_INJECTION_JDBC",
+      justification = "Report SQL is assembled from validated service-owned identifiers before reaching this method."
+  )
   private PreparedStatement buildPreparedStatement(
       String sqlQuery, Connection con, int dataChunkSize) {
     try {

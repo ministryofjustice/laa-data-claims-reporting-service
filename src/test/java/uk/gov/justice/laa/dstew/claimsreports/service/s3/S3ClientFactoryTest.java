@@ -17,7 +17,9 @@ class S3ClientFactoryTest {
 
     @AfterEach
     void cleanupCreatedClient() {
-        createdClient.close();
+        if (createdClient != null) {
+            createdClient.close();
+        }
     }
 
     @Test

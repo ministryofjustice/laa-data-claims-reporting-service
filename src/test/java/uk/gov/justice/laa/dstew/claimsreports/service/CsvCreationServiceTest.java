@@ -13,6 +13,7 @@ import static org.mockito.Mockito.doThrow;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
 import org.mockito.junit.jupiter.MockitoExtension;
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.PreparedStatementCreator;
 import org.springframework.jdbc.core.RowCallbackHandler;
@@ -24,6 +25,7 @@ import java.io.BufferedWriter;
 import java.io.IOException;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
+import java.sql.ResultSet;
 import java.sql.SQLException;
 
 @ExtendWith(MockitoExtension.class)
@@ -97,8 +99,9 @@ public class CsvCreationServiceTest {
       PreparedStatementCreator creator = invocation.getArgument(0);
       RowCallbackHandler handler = invocation.getArgument(1);
 
-      // This will call the lambda, which calls the private buildPreparedStatement method
-      creator.createPreparedStatement(connection);
+      try (PreparedStatement statement = creator.createPreparedStatement(connection)) {
+        // This will call the lambda, which calls the private buildPreparedStatement method
+      }
 
       return null;
     }).when(jdbcTemplate).query(any(PreparedStatementCreator.class), any(CsvRowCallbackHandler.class));
@@ -106,17 +109,17 @@ public class CsvCreationServiceTest {
     assertThrows(CsvCreationException.class, () -> csvCreationService.buildCsvFromData("SELECT * FROM ANY_REPORT.DATA", bufferedWriter, "test_report"));
   }
 
+  @SuppressFBWarnings("OBL_UNSATISFIED_OBLIGATION")
   @Test
   void shouldThrowCsvCreationExceptionWhenCreateStatementThrows() throws SQLException {
-    when(connection.prepareStatement(any(), anyInt(), anyInt())).thenThrow(SQLException.class);
+    when(connection.prepareStatement("SELECT * FROM ANY_REPORT.DATA", ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY))
+        .thenThrow(SQLException.class);
 
     doAnswer(invocation -> {
       PreparedStatementCreator creator = invocation.getArgument(0);
-
-      // This will call the lambda, which calls the private buildPreparedStatement method
-      // This method will then throw an exception
-      creator.createPreparedStatement(connection);
-
+      try (PreparedStatement statement = creator.createPreparedStatement(connection)) {
+        // Any returned statement will be cleaned up by the try-with-resources.
+      }
       return null;
     }).when(jdbcTemplate).query(any(PreparedStatementCreator.class), any(CsvRowCallbackHandler.class));
 

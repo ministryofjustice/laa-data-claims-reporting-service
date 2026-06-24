@@ -2,6 +2,7 @@ package uk.gov.justice.laa.dstew.claimsreports.service.s3;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import lombok.SneakyThrows;
@@ -42,12 +43,15 @@ class S3ClientWrapperTest {
   @Mock
   private CsvFileValidator csvFileValidator;
 
-  private final String testFilePath = getClass().getClassLoader().getResource("testReport.csv").getPath();
-  private final File testReport = new File(testFilePath);
+  private Path testFilePath;
+  private File testReport;
   private S3ClientWrapper s3ClientWrapper;
 
+  @SneakyThrows
   @BeforeEach
   void beforeEach() {
+    testFilePath = Path.of(getClass().getClassLoader().getResource("testReport.csv").toURI());
+    testReport = testFilePath.toFile();
     reset(csvFileValidator, metricsHandler, s3Client);
     s3ClientWrapper = new S3ClientWrapper(s3Client, "bucket", metricsHandler, csvFileValidator, false);
   }
@@ -76,7 +80,7 @@ class S3ClientWrapperTest {
 
     // Check the expected contents was sent up to S3
     var requestBody = captorRequestBody.getValue();
-    assertEquals(Files.readString(Path.of(testFilePath)), getRequestBodyContents(requestBody));
+    assertEquals(Files.readString(testFilePath), getRequestBodyContents(requestBody));
 
     // Check metrics logged
     verify(metricsHandler).setCustomMetric(eq(CustomMetricId.ENCODING_CHECK_TIME_MS), anyDouble());
@@ -155,7 +159,7 @@ class S3ClientWrapperTest {
 
     // Check the expected contents was sent up to S3
     var requestBody = captorRequestBody.getValue();
-    assertEquals(Files.readString(Path.of(testFilePath)), getRequestBodyContents(requestBody));
+    assertEquals(Files.readString(testFilePath), getRequestBodyContents(requestBody));
 
   }
 
@@ -171,6 +175,6 @@ class S3ClientWrapperTest {
   private String getRequestBodyContents(RequestBody requestBody) {
     var outputStream = new ByteArrayOutputStream();
     requestBody.contentStreamProvider().newStream().transferTo(outputStream);
-    return outputStream.toString();
+    return outputStream.toString(StandardCharsets.UTF_8);
   }
 }

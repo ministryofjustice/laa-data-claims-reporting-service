@@ -1,5 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Instant;
@@ -29,6 +30,7 @@ import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.ArgumentMatchers.startsWith;
 import static org.mockito.Mockito.when;
 
+@SuppressFBWarnings("SECSQLISPRJDBC")
 class ReplicationHealthCheckServiceTest {
 
   //Mock WAL (Write Ahead Log) LSNs (Log Sequence Numbers) to mimic various replication test scenarios
@@ -58,7 +60,7 @@ class ReplicationHealthCheckServiceTest {
   private ReplicationHealthCheckService service;
 
   @BeforeEach
-  void setUp() {
+  void initMocks() {
     MockitoAnnotations.openMocks(this);
     // Make clock.now() return a fixed instant
     Instant fixedInstant = Instant.parse("2025-11-03T05:00:00Z");
@@ -80,7 +82,7 @@ class ReplicationHealthCheckServiceTest {
         new SubscriptionWalStatus(
             RECENT_WAL_LSN,
             RECENT_WAL_LSN,
-            Timestamp.from(Instant.now().minusSeconds(30))
+            Instant.now().minusSeconds(30)
         );
     when(metadataRepository.getSubscriptionWalStatus("claims_reporting_service_sub"))
         .thenReturn(healthyWalStatus);
@@ -95,23 +97,21 @@ class ReplicationHealthCheckServiceTest {
         .thenReturn(summaries);
 
 // Stub for count queries
-    when(jdbcTemplate.query(contains("WHERE created_on"),
+    when(jdbcTemplate.query(eq("SELECT count(*) FROM claims.table1 WHERE created_on < ?"),
         any(ResultSetExtractor.class), any(Object[].class)))
-        .thenAnswer(invocation -> {
-          String sql = invocation.getArgument(0);
-          if (sql.contains("table1")) return TABLE1_RECORD_COUNT;
-          if (sql.contains("table2")) return TABLE2_RECORD_COUNT;
-          return 0L;
-        });
+        .thenReturn(TABLE1_RECORD_COUNT);
 
-    when(jdbcTemplate.query(contains("WHERE updated_on"),
+    when(jdbcTemplate.query(eq("SELECT count(*) FROM claims.table2 WHERE created_on < ?"),
         any(ResultSetExtractor.class), any(Object[].class)))
-        .thenAnswer(invocation -> {
-          String sql = invocation.getArgument(0);
-          if (sql.contains("table1")) return TABLE1_UPDATE_COUNT;
-          if (sql.contains("table2")) return TABLE2_UPDATE_COUNT;
-          return 0L;
-        });
+        .thenReturn(TABLE2_RECORD_COUNT);
+
+    when(jdbcTemplate.query(eq("SELECT count(*) FROM claims.table1 WHERE updated_on BETWEEN ? AND ?"),
+        any(ResultSetExtractor.class), any(Object[].class)))
+        .thenReturn(TABLE1_UPDATE_COUNT);
+
+    when(jdbcTemplate.query(eq("SELECT count(*) FROM claims.table2 WHERE updated_on BETWEEN ? AND ?"),
+        any(ResultSetExtractor.class), any(Object[].class)))
+        .thenReturn(TABLE2_UPDATE_COUNT);
 
     // When
     ReplicationHealthReport report = service.checkReplicationHealth();
@@ -132,8 +132,10 @@ class ReplicationHealthCheckServiceTest {
     when(metadataRepository.getReplicationSummaries(any()))
         .thenReturn(partialSummary);
 
-    when(jdbcTemplate.queryForObject(anyString(), eq(Long.class), any())).thenReturn(TABLE1_RECORD_COUNT);
-    when(jdbcTemplate.queryForObject(anyString(), eq(Long.class), any(), any())).thenReturn(TABLE1_UPDATE_COUNT);
+    when(jdbcTemplate.queryForObject(eq("SELECT count(*) FROM claims.table1 WHERE created_on < ?"), eq(Long.class), any()))
+        .thenReturn(TABLE1_RECORD_COUNT);
+    when(jdbcTemplate.queryForObject(eq("SELECT count(*) FROM claims.table1 WHERE updated_on BETWEEN ? AND ?"), eq(Long.class), any(), any()))
+        .thenReturn(TABLE1_UPDATE_COUNT);
 
     ReplicationHealthReport report = service.checkReplicationHealth();
 
@@ -146,12 +148,12 @@ class ReplicationHealthCheckServiceTest {
     mockReplicationHealth(List.of("claims.table1"), LATEST_WAL_LSN, MID_WAL_LSN, 600);
 
 // Stub for count queries
-    when(jdbcTemplate.query(contains("WHERE created_on"),
+    when(jdbcTemplate.query(eq("SELECT count(*) FROM claims.table1 WHERE created_on < ?"),
         any(ResultSetExtractor.class),
         any(Object[].class)))
         .thenReturn(TABLE1_RECORD_COUNT);
 
-    when(jdbcTemplate.query(contains("WHERE updated_on"),
+    when(jdbcTemplate.query(eq("SELECT count(*) FROM claims.table1 WHERE updated_on BETWEEN ? AND ?"),
         any(ResultSetExtractor.class),
         any(Object[].class)))
         .thenReturn(TABLE1_UPDATE_COUNT);
@@ -175,9 +177,9 @@ class ReplicationHealthCheckServiceTest {
         .thenReturn(summaries);
 
     // mismatch: actual counts differ
-    when(jdbcTemplate.queryForObject(startsWith("SELECT count(*) FROM claims.table1"), eq(Long.class), any()))
+    when(jdbcTemplate.queryForObject(eq("SELECT count(*) FROM claims.table1 WHERE created_on < ?"), eq(Long.class), any()))
         .thenReturn(TABLE1_INCORRECT_RECORD_COUNT);
-    when(jdbcTemplate.queryForObject(contains("claims.table1 WHERE updated_on"), eq(Long.class), any(), any()))
+    when(jdbcTemplate.queryForObject(eq("SELECT count(*) FROM claims.table1 WHERE updated_on BETWEEN ? AND ?"), eq(Long.class), any(), any()))
         .thenReturn(TABLE2_INCORRECT_RECORD_COUNT);
 
     ReplicationHealthReport report = service.checkReplicationHealth();
@@ -201,7 +203,7 @@ class ReplicationHealthCheckServiceTest {
       when(metadataRepository.getPublishedTables())
           .thenReturn(publicationTables);
 
-      when(jdbcTemplate.query(anyString(), any(ResultSetExtractor.class), eq(summaryDate))).thenReturn(
+      when(jdbcTemplate.query(eq("SELECT table_name, record_count, updated_count, wal_lsn\n        FROM claims.replication_summary\n        WHERE summary_date = ?\n        "), any(ResultSetExtractor.class), eq(summaryDate))).thenReturn(
           summaries);
 
       //Mock the WAL (Write Ahead Log)'s LSN (Log Sequence Number) to a high value to indicate that the replication has processed all previous changes.
@@ -209,7 +211,7 @@ class ReplicationHealthCheckServiceTest {
           new SubscriptionWalStatus(
               receivedLsn,
               latestEndLsn,
-              Timestamp.from(clock.instant().minusSeconds(secondsDelay))
+              clock.instant().minusSeconds(secondsDelay)
           );
       when(metadataRepository.getSubscriptionWalStatus("claims_reporting_service_sub"))
           .thenReturn(healthyWalStatus);
@@ -238,7 +240,7 @@ class ReplicationHealthCheckServiceTest {
         new SubscriptionWalStatus(
             MID_WAL_LSN,
             null,
-            Timestamp.from(clock.instant())
+            clock.instant()
         );
 
     when(metadataRepository.getSubscriptionWalStatus("claims_reporting_service_sub"))
@@ -260,13 +262,13 @@ class ReplicationHealthCheckServiceTest {
     );
 
     when(jdbcTemplate.query(
-        contains("WHERE created_on"),
+        eq("SELECT count(*) FROM claims.table1 WHERE created_on < ?"),
         any(ResultSetExtractor.class),
         any(Object[].class)))
         .thenReturn(TABLE1_RECORD_COUNT);
 
     when(jdbcTemplate.query(
-        contains("WHERE updated_on"),
+        eq("SELECT count(*) FROM claims.table1 WHERE updated_on BETWEEN ? AND ?"),
         any(ResultSetExtractor.class),
         any(Object[].class)))
         .thenReturn(TABLE1_UPDATE_COUNT);
