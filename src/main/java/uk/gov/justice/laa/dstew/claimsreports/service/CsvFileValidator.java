@@ -110,7 +110,12 @@ public class CsvFileValidator {
           .addKeyValue("event.action", "csv.validation.failure")
           .addKeyValue("event.type", "batch")
           .addKeyValue("event.outcome", "failure")
-          .log("Malformed UTF-8 at byte offset {} in file {}: {}", totalBytesRead + errorIndex, sanitise(fileToUpload.getPath()), sanitise(e.getMessage()));
+          .log(
+                  "Malformed UTF-8 at byte offset {} in file {}: {}",
+                  totalBytesRead + errorIndex,
+                  sanitise(fileToUpload.getPath()),
+                  sanitise(e.getMessage())
+          );
       return false;
     } catch (CharacterCodingException e) {
       log.atError()
