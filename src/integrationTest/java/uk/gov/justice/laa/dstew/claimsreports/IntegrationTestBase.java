@@ -72,8 +72,15 @@ public class IntegrationTestBase {
   @BeforeAll
   static void logContainerDetails() {
     //Following can be used for checking the database contents if required (after setting a debug breakpoint).
-    log.info("JDBC URL: {}, Username: {}, Password: {}", POSTGRES.getJdbcUrl(), POSTGRES.getUsername(), POSTGRES.getPassword()
+    log.info("JDBC URL: {}, Username: {}, Password: {}",
+        sanitizeForLog(POSTGRES.getJdbcUrl()),
+        sanitizeForLog(POSTGRES.getUsername()),
+        sanitizeForLog(POSTGRES.getPassword())
     );
+  }
+
+  private static String sanitizeForLog(String value) {
+    return value == null ? null : value.replace("\r", "\\r").replace("\n", "\\n");
   }
 
   @DynamicPropertySource

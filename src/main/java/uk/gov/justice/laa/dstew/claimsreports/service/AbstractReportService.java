@@ -2,11 +2,15 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_SKIPPED;
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_SUCCESSFUL;
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitiseForFilename;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
 import java.nio.file.Files;
+import java.nio.file.Path;
 import java.time.Clock;
 import java.time.LocalDate;
 import lombok.AllArgsConstructor;
@@ -47,16 +51,20 @@ public abstract class AbstractReportService {
    * Refreshes the associated materialized view.
    */
   @Transactional
+  @SuppressFBWarnings(
+          value = "SQL_INJECTION_SPRING_JDBC",
+          justification = "Refresh SQL is supplied by report service constants, not user input."
+  )
   public void refreshDataSource() {
     String refreshCommand = getRefreshCommand();
-    log.info("Refreshing data for {}", getReportName());
+    log.info("Refreshing data for {}", sanitise(getReportName()));
     long startTime = System.currentTimeMillis();
 
     jdbcTemplate.execute(refreshCommand);
 
     long endTime = System.currentTimeMillis();
     long durationMilliseconds = endTime - startTime;
-    log.info("Refresh complete for {} in {} ms", getReportName(), durationMilliseconds);
+    log.info("Refresh complete for {} in {} ms", sanitise(getReportName()), durationMilliseconds);
     metricsHandler.setCustomMetric(CustomMetricId.DATA_REFRESH_TIME_MS, durationMilliseconds);
   }
 
@@ -120,47 +128,63 @@ public abstract class AbstractReportService {
    */
   public void generateReport() {
     if (!runToday()) {
-      log.info("Report {} is not scheduled to run today", getReportName());
+      log.info("Report {} is not scheduled to run today", sanitise(getReportName()));
       metricsHandler.setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_SKIPPED);
       return;
     }
 
     log.info("Generating report from {}", getClass().getSimpleName());
-    File tempFile = new File("/tmp/" + getFullReportFileName());
+    File tempFile = createTempReportFile();
     long startTime = System.currentTimeMillis();
 
     try {
-      final String sql = String.format(
-              "SELECT * FROM %s ORDER BY %s",
-              getDataSourceName(),
-              getOrderByClause()
-      );
+      final String sql = buildReportSql(getDataSourceName(), getOrderByClause());
 
       try (BufferedWriter writer = Files.newBufferedWriter(tempFile.toPath())) {
         csvCreationService.buildCsvFromData(sql, writer, getReportName());
       }
       long endTime = System.currentTimeMillis();
       long durationMilliseconds = endTime - startTime;
-      log.info("Created {} file with filename {} in {} ms", getReportName(), getFullReportFileName(), durationMilliseconds);
+      log.info("Created {} file with filename {} in {} ms", sanitise(getReportName()), sanitise(getFullReportFileName()), durationMilliseconds);
       metricsHandler.setCustomMetric(CustomMetricId.GENERATED_TIME_MS, durationMilliseconds);
       s3ClientWrapper.uploadFile(tempFile, generateS3FileKey());
       metricsHandler.setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_SUCCESSFUL);
 
-    } catch (Exception e) {
-      log.error("Failed to generate {}: {}", getReportName(), e.getMessage());
+    } catch (IOException | RuntimeException e) {
+      log.error("Failed to generate {}: {}", sanitise(getReportName()), sanitise(e.getMessage()));
       throw new CsvCreationException("Failure to create " + getReportName(), e);
     } finally {
       deleteTempFile(tempFile);
     }
   }
 
+  @SuppressFBWarnings(
+          value = "PATH_TRAVERSAL_IN",
+          justification =
+                  "Prefix/suffix sanitised to alphanumeric/dot/dash/underscore only via sanitiseForFilename before use"
+  )
+  private File createTempReportFile() {
+    try {
+      String prefix = sanitiseForFilename(getReportFileName()) + "_" + LocalDate.now(clock) + "_";
+      String suffix = sanitiseForFilename(getReportFileExtension());
+      Path tempFile = Files.createTempFile(prefix, suffix);
+      return tempFile.toFile();
+    } catch (IOException e) {
+      throw new CsvCreationException("Failure to create temp file for " + getReportName(), e);
+    }
+  }
+
+  private String buildReportSql(String dataSourceName, String orderByClause) {
+    return String.format("SELECT * FROM %s ORDER BY %s", dataSourceName, orderByClause);
+  }
+
   private void deleteTempFile(File tempFile) {
     if (tempFile.exists()) {
       try {
         Files.delete(tempFile.toPath());
-        log.info("Deleted temp file {}", tempFile.getPath());
+        log.info("Deleted temp file {}", sanitise(tempFile.getPath()));
       } catch (IOException e) {
-        log.warn("Failed to delete temp file {}: {}", tempFile.getPath(), e.getMessage());
+        log.warn("Failed to delete temp file {}: {}", sanitise(tempFile.getPath()), sanitise(e.getMessage()));
       }
     }
   }

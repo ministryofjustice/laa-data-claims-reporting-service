@@ -2,7 +2,9 @@ package uk.gov.justice.laa.dstew.claimsreports.runner;
 
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId.REPLICATION_HEALTH_CHECK_STATUS;
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_FAILED;
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -127,6 +129,7 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
    * <p>The implementation assumes that the report services extend from the AbstractReportService base class,
    * which provides the necessary methods for refreshing materialized views and generating reports.
    */
+  @SuppressFBWarnings(value = "SECCRLFLOG", justification = "Both arguments sanitised via sanitise() to strip CRLF before logging")
   private void generateReports() {
     log.info("Generating {} reports...", reportServices.size());
     for (AbstractReportService service : reportServices) {
@@ -136,13 +139,14 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
         service.refreshDataSource();
         service.generateReport();
       } catch (Exception e) {
-        log.error("Report generation failed for {}: {}",
-                service.getClass().getSimpleName(), e.getMessage(), e);
+        String safeService = sanitise(service.getClass().getSimpleName());
+        String safeMessage = sanitise(e.getMessage());
+        log.error("Report generation failed for {}: {}", safeService, safeMessage, e);
         metricsHandler.setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_FAILED);
       } finally {
         var reportDuration = System.currentTimeMillis() - startTime;
         metricsHandler.setCustomMetric(CustomMetricId.REPORT_TOTAL_TIME_MS, reportDuration);
-        log.info("Report generation for report {} took {} ms ({} s)", service.getReportName(), reportDuration, reportDuration / 1000);
+        log.info("Report generation for report {} took {} ms ({} s)", sanitise(service.getReportName()), reportDuration, reportDuration / 1000);
         metricsHandler.pushReportMetrics(service.getReportName());
       }
     }

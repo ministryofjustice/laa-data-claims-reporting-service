@@ -42,9 +42,9 @@ class CsvFileValidatorTest {
   void checkUtf8Encoded_shouldReturnFalseIfNotValidUtf8File() {
     var path = Files.createTempFile("notUtf8", ".csv");
     try (OutputStream out = Files.newOutputStream(path)) {
-      out.write("test, test".getBytes());
+      out.write("test, test".getBytes(StandardCharsets.UTF_8));
       out.write(new byte[]{(byte) 0xF0}); //Not valid in utf-8
-      out.write(", test, test".getBytes());
+      out.write(", test, test".getBytes(StandardCharsets.UTF_8));
     }
 
     assertFalse(csvFileValidator.checkUtf8Encoded(path.toFile()));
@@ -52,7 +52,7 @@ class CsvFileValidatorTest {
   }
 
   @Test
-  public void testValidUtf8TwoBytesCharacterSplitAcrossChunks() throws Exception {
+  public void testValidUtf8TwoBytesCharacterSplitAcrossChunks() throws IOException {
     byte[] pound = "£".getBytes(StandardCharsets.UTF_8); // C2 A3
 
     // Want to force our pound sign to be spread across buffer reads.
@@ -69,7 +69,7 @@ class CsvFileValidatorTest {
   }
 
   @Test
-  public void testValidUtf8ThreeBytesCharacterSplitAcrossChunks() throws Exception {
+  public void testValidUtf8ThreeBytesCharacterSplitAcrossChunks() throws IOException {
     byte[] dash = "–".getBytes(StandardCharsets.UTF_8); // E2 80 93
 
     // Want to force our dash to be spread across buffer reads.
@@ -86,7 +86,7 @@ class CsvFileValidatorTest {
   }
 
   @Test
-  public void testValidUtf8FourBytesCharacterSplitAcrossChunks() throws Exception {
+  public void testValidUtf8FourBytesCharacterSplitAcrossChunks() throws IOException {
     // This is a smiley emoji.
     byte[] emoji = "\uD83D\uDE00".getBytes(StandardCharsets.UTF_8); // F0 9F 98 80
 
@@ -104,7 +104,7 @@ class CsvFileValidatorTest {
   }
 
   @Test
-  public void testIncompleteUtf8AtEOF() throws Exception {
+  public void testIncompleteUtf8AtEOF() throws IOException {
     // "–" = E2 80 93, write only E2 80 (incomplete)
     byte[] dash = "–".getBytes(StandardCharsets.UTF_8);
     byte[] incomplete = new byte[]{dash[0], dash[1]}; // E2 80

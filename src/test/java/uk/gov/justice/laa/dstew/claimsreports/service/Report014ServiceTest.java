@@ -30,22 +30,18 @@ class Report014ServiceTest {
   private JdbcTemplate jdbcTemplate;
   private CsvCreationService creationService;
   private S3ClientWrapper s3ClientWrapper;
-  private MetricsHandler metricsHandler;
-  private Clock fixedClock;
-  private Environment environment;
 
   @BeforeEach
   void setUp() {
     jdbcTemplate = mock(JdbcTemplate.class);
     creationService = mock(CsvCreationService.class);
     s3ClientWrapper = mock(S3ClientWrapper.class);
-    metricsHandler = mock(MetricsHandler.class);
-    environment = mock(Environment.class);
+      MetricsHandler metricsHandler = mock(MetricsHandler.class);
 
     Instant fixedNow = Instant.parse("2025-12-22T10:00:00Z");
-    fixedClock = Clock.fixed(fixedNow, ZoneOffset.UTC);
+      Clock fixedClock = Clock.fixed(fixedNow, ZoneOffset.UTC);
 
-    service = new Report014Service(jdbcTemplate, s3ClientWrapper, creationService, metricsHandler, fixedClock, environment);
+    service = new Report014Service(jdbcTemplate, s3ClientWrapper, creationService, metricsHandler, fixedClock);
   }
 
   @Test
@@ -59,16 +55,14 @@ class Report014ServiceTest {
   }
 
   @Test
-  void generateReport_shouldCallTheRightServicesWithTheRightValues(){
-    when(environment.acceptsProfiles((Profiles) any())).thenReturn(false);
-
+  void generateReport_shouldCallTheRightServicesWithTheRightValues() {
     service.generateReport();
 
     verify(creationService).buildCsvFromData(
-        eq("SELECT * FROM claims.mvw_report_014"
-            + " ORDER BY \"Claim ID\", to_date(\"Amendment Date\", 'DD/MM/YYYY'), to_timestamp(\"Amendment Time\", 'HH24:MI:SS')::time, \"Assessment ID\""),
-        any(BufferedWriter.class),
-        any()
+            eq("SELECT * FROM claims.mvw_report_014"
+                    + " ORDER BY \"Claim ID\", to_date(\"Amendment Date\", 'DD/MM/YYYY'), to_timestamp(\"Amendment Time\", 'HH24:MI:SS')::time, \"Assessment ID\""),
+            any(BufferedWriter.class),
+            any()
     );
     verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/daily/report_014_2025-12-22.csv"));
   }
