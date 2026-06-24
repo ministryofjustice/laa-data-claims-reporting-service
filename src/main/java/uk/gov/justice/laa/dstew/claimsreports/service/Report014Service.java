@@ -20,13 +20,12 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 @Service
 public class Report014Service extends AbstractReportService {
 
-  private Environment environment;
-
   public Report014Service(JdbcTemplate jdbcTemplate,
-                          S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService, MetricsHandler metricsHandler, Clock clock,
-                          Environment environment) {
+                          S3ClientWrapper s3ClientWrapper,
+                          CsvCreationService csvCreationService,
+                          MetricsHandler metricsHandler,
+                          Clock clock) {
     super(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, clock);
-    this.environment = environment;
   }
 
   @Override

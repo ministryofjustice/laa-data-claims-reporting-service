@@ -43,11 +43,13 @@ spotbugs {
     ignoreFailures = true
     effort = 'max'
     reportLevel = 'low'
+    excludeFilter = file('spotbugs-exclude.xml')
 }
 
 spotbugsMain {
     reports {
         sarif.required = true
+        html.required = true
     }
 }
 

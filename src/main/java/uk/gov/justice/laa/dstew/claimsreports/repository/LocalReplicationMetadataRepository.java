@@ -1,6 +1,7 @@
 package uk.gov.justice.laa.dstew.claimsreports.repository;
 
-import java.sql.Timestamp;
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
+
 import java.time.Instant;
 import java.time.LocalDate;
 import java.util.HashMap;
@@ -58,19 +59,19 @@ public class LocalReplicationMetadataRepository
    */
   @Override
   public SubscriptionWalStatus getSubscriptionWalStatus(String subscriptionName) {
-    log.info("Using local mock WAL status for {}", subscriptionName);
+    log.info("Using local mock WAL status for {}", sanitise(subscriptionName));
 
     // Simulate a healthy, fully-applied replication state
     return new SubscriptionWalStatus(
         "2CE/FFFFFFE0", // received_lsn
         "2CE/FFFFFFE0", // latest_end_lsn (fully caught up)
-        Timestamp.from(Instant.now().minusSeconds(30)) // applied recently
+        Instant.now().minusSeconds(30) // applied recently
     );
   }
 
   @Override
   public Map<String, ReplicationSummary> getReplicationSummaries(LocalDate summaryDate) {
-    log.info("Using local mock replication summaries for {}", summaryDate);
+    log.info("Using local mock replication summaries for {}", sanitise(summaryDate.toString()));
 
     Map<String, ReplicationSummary> map = new HashMap<>();
 

@@ -2,7 +2,9 @@ package uk.gov.justice.laa.dstew.claimsreports.runner;
 
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId.REPLICATION_HEALTH_CHECK_STATUS;
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_FAILED;
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -162,6 +164,7 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
    * <p>The implementation assumes that the report services extend from the AbstractReportService base class,
    * which provides the necessary methods for refreshing materialized views and generating reports.
    */
+  @SuppressFBWarnings(value = "SECCRLFLOG", justification = "Both arguments sanitised via sanitise() to strip CRLF before logging")
   private void generateReports() {
     log.atInfo()
         .addKeyValue("event.action", "report.batch.start")
@@ -176,13 +179,14 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
         service.generateReport();
         succeeded = true;
       } catch (Exception e) {
+        String safeService = sanitise(service.getClass().getSimpleName());
         log.atError()
             .addKeyValue("event.action", "report.generation")
             .addKeyValue("event.type", "batch")
             .addKeyValue("event.outcome", "failure")
             .addKeyValue("report.name", service.getReportName())
             .setCause(e)
-            .log("Report generation failed for {}", service.getClass().getSimpleName());
+            .log("Report generation failed for {}", safeService);
         metricsHandler.setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_FAILED);
       } finally {
         long reportDuration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
@@ -193,7 +197,7 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
             .addKeyValue("report.name", service.getReportName())
             .addKeyValue("event.outcome", succeeded ? "success" : "failure")
             .addKeyValue("report.duration.ms", reportDuration)
-            .log("Report generation for report {} completed", service.getReportName());
+            .log("Report generation for report {} completed", sanitise(service.getReportName()));
         metricsHandler.pushReportMetrics(service.getReportName());
       }
     }

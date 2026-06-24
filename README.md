@@ -7,7 +7,7 @@ This is a Java based Spring Boot application hosted on [MOJ Cloud Platform](http
 
 Java Spring Boot based application that generates reports from the claims database and stores them in GLAD S3 Bucket.
 
-The project was created from [this Github Template](https://github.com/ministryofjustice/laa-spring-boot-microservice-template)
+The project was created from [this GitHub Template](https://github.com/ministryofjustice/laa-spring-boot-microservice-template)
 
 ### Project Structure
 Includes the following subprojects:
@@ -15,14 +15,16 @@ Includes the following subprojects:
 - `laa-data-claims-reporting-service/laa-data-claims-reporting-service` - Generates reports from replica of claims database
 
 ## Add GitHub Token
-1.	Generate a Github PAT (Personal Access Token) to access the required plugin, via https://github.com/settings/tokens
-2.	Specify the Note field, e.g. “Token to allow access to LAA Gradle plugin”
-3.  If you haven’t got a gradle.properties file create one under `~/.gradle/gradle.properties`
-4.  Add the following properties to `~/.gradle/gradle.properties` and replace the placeholder values as follows:
-  - `project.ext.gitPackageUser` = YOUR_GITHUB_USERNAME
-  - `project.ext.gitPackageKey` = PAT_CREATED_ABOVE
 
-5.	Go back to Github to authorize MOJ for SSO
+1. Generate a GitHub PAT (Personal Access Token) to access the required plugin via <https://github.com/settings/tokens>.
+2. Specify the Note field, for example: "Token to allow access to LAA Gradle plugin".
+3. If you don't already have a `gradle.properties` file, create one at `~/.gradle/gradle.properties`.
+4. Add the following properties to `~/.gradle/gradle.properties`, replacing the placeholder values:
+
+    - `project.ext.gitPackageUser=YOUR_GITHUB_USERNAME`
+    - `project.ext.gitPackageKey=PAT_CREATED_ABOVE`
+
+5. Return to GitHub and authorise MOJ for SSO.
 
 ## Build And Run Application
 
@@ -129,7 +131,7 @@ helm install my-app ./.helm/data-claims-reporting-service -f .helm/data-claims-r
 ## Additional Information
 ### Helm
 - Updates to helm template must include a change to the `Chart.yaml` version number.
-- The Helm version must be bumped to trigger a redeploy, because Helm uses that version to determine whether a release has changed.
+- The Helm version must be bumped to trigger a redeployment, because Helm uses that version to determine whether a release has changed.
 
 ### CronJob
 - The application runs via a CronJob. This job is currently scheduled to run once per day, at 5am.
@@ -202,19 +204,19 @@ docs: update installation instructions
 
 ### Commit Types
 
-| Type | Description | Version Impact |
-|------|-------------|----------------|
-| `feat` | Introduces a new feature | Minor |
-| `fix` | Fixes a bug | Patch |
-| `feat!` | Breaking feature change | Major |
-| `docs` | Documentation updates only | None |
-| `refactor` | Internal code restructuring | None |
-| `test` | Adding or updating tests | None |
-| `chore` | Maintenance tasks | None |
-| `ci` | CI/CD pipeline changes | None |
-| `build` | Build tooling or dependency changes | None |
-| `perf` | Performance improvements | Patch |
-| `revert` | Reverts a previous commit | Depends |
+| Type       | Description                         | Version Impact |
+|------------|-------------------------------------|----------------|
+| `feat`     | Introduces a new feature            | Minor          |
+| `fix`      | Fixes a bug                         | Patch          |
+| `feat!`    | Breaking feature change             | Major          |
+| `docs`     | Documentation updates only          | None           |
+| `refactor` | Internal code restructuring         | None           |
+| `test`     | Adding or updating tests            | None           |
+| `chore`    | Maintenance tasks                   | None           |
+| `ci`       | CI/CD pipeline changes              | None           |
+| `build`    | Build tooling or dependency changes | None           |
+| `perf`     | Performance improvements            | Patch          |
+| `revert`   | Reverts a previous commit           | Depends        |
 
 ---
 ## Semantic Versioning Examples

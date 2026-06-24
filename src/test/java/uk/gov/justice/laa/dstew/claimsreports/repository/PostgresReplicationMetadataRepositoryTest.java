@@ -1,4 +1,5 @@
 package uk.gov.justice.laa.dstew.claimsreports.repository;
+
 import static org.assertj.core.api.Assertions.assertThat;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyString;
@@ -14,6 +15,7 @@ import java.time.Instant;
 import java.time.LocalDate;
 import java.util.List;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.InjectMocks;
@@ -24,6 +26,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.core.RowMapper;
 import uk.gov.justice.laa.dstew.claimsreports.dto.SubscriptionWalStatus;
 
+@SuppressFBWarnings("SECSQLISPRJDBC")
 @ExtendWith(MockitoExtension.class)
 class PostgresReplicationMetadataRepositoryTest {
 
@@ -41,7 +44,14 @@ class PostgresReplicationMetadataRepositoryTest {
         "claims.assessment"
     );
 
-    when(jdbcTemplate.queryForList(anyString(), eq(String.class)))
+    when(jdbcTemplate.queryForList(eq("""
+        SELECT n.nspname || '.' || c.relname
+          FROM pg_subscription_rel sr
+          JOIN pg_class c ON sr.srrelid = c.oid
+          JOIN pg_namespace n ON c.relnamespace = n.oid
+         WHERE sr.srsubid = (SELECT oid FROM pg_subscription WHERE subname = 'claims_reporting_service_sub')
+           AND c.relname != 'replication_summary'
+        """), eq(String.class)))
         .thenReturn(expectedTables);
 
     // When
@@ -63,15 +73,18 @@ class PostgresReplicationMetadataRepositoryTest {
     // Given
     String subscriptionName = "claims_reporting_service_sub";
 
-    SubscriptionWalStatus expected =
-        new SubscriptionWalStatus(
+    SubscriptionWalStatus expected = new SubscriptionWalStatus(
             "2CE/0000FFF0",
             "2CE/0000FFF0",
-            Timestamp.from(Instant.parse("2024-01-01T10:00:00Z"))
-        );
+            Instant.parse("2024-01-01T10:00:00Z")
+    );
 
     when(jdbcTemplate.queryForObject(
-        anyString(),
+        eq("""
+        SELECT received_lsn, latest_end_lsn, latest_end_time
+        FROM pg_stat_subscription
+        WHERE subname = ?
+        """),
         any(RowMapper.class),
         eq(subscriptionName)))
         .thenReturn(expected);
@@ -99,7 +112,11 @@ class PostgresReplicationMetadataRepositoryTest {
     String subscriptionName = "missing_subscription";
 
     when(jdbcTemplate.queryForObject(
-        anyString(),
+        eq("""
+        SELECT received_lsn, latest_end_lsn, latest_end_time
+        FROM pg_stat_subscription
+        WHERE subname = ?
+        """),
         any(RowMapper.class),
         eq(subscriptionName)))
         .thenThrow(new EmptyResultDataAccessException(1));
@@ -118,7 +135,11 @@ class PostgresReplicationMetadataRepositoryTest {
     String subscriptionName = "claims_reporting_service_sub";
 
     when(jdbcTemplate.queryForObject(
-        anyString(),
+        eq("""
+        SELECT received_lsn, latest_end_lsn, latest_end_time
+        FROM pg_stat_subscription
+        WHERE subname = ?
+        """),
         any(RowMapper.class),
         eq(subscriptionName)))
         .thenAnswer(invocation -> {
@@ -128,7 +149,7 @@ class PostgresReplicationMetadataRepositoryTest {
           when(rs.getString("received_lsn")).thenReturn("0/16B6C50");
           when(rs.getString("latest_end_lsn")).thenReturn("0/16B6C40");
           when(rs.getTimestamp("latest_end_time"))
-              .thenReturn(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
+                  .thenReturn(Timestamp.valueOf(LocalDate.now().atStartOfDay()));
 
           return mapper.mapRow(rs, 1);
         });
