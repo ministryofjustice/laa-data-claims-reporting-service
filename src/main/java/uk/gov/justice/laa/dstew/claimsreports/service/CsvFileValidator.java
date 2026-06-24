@@ -106,18 +106,32 @@ public class CsvFileValidator {
 
     } catch (MalformedInputException e) {
       int errorIndex = e.getInputLength();
-      log.error(
-              "Malformed UTF-8 at byte offset {} in file {}: {}",
-              totalBytesRead + errorIndex,
-              sanitise(fileToUpload.getPath()),
-              sanitise(e.getMessage())
-      );
+      log.atError()
+          .addKeyValue("event.action", "csv.validation.failure")
+          .addKeyValue("event.type", "batch")
+          .addKeyValue("event.outcome", "failure")
+          .log(
+                  "Malformed UTF-8 at byte offset {} in file {}: {}",
+                  totalBytesRead + errorIndex,
+                  sanitise(fileToUpload.getPath()),
+                  sanitise(e.getMessage())
+          );
       return false;
     } catch (CharacterCodingException e) {
-      log.error("Failed to decode in UTF-8 with exception {}, {}", sanitise(e.getClass().getName()), sanitise(e.getMessage()));
+      log.atError()
+          .addKeyValue("event.action", "csv.validation.failure")
+          .addKeyValue("event.type", "batch")
+          .addKeyValue("event.outcome", "failure")
+          .setCause(e)
+          .log("Failed to decode in UTF-8 with exception {}", sanitise(e.getClass().getName()));
       return false;
     } catch (IOException e) {
-      log.error("Failed to read generated CSV file {} with exception {}", sanitise(fileToUpload.getPath()), sanitise(e.getMessage()));
+      log.atError()
+          .addKeyValue("event.action", "csv.validation.failure")
+          .addKeyValue("event.type", "batch")
+          .addKeyValue("event.outcome", "failure")
+          .setCause(e)
+          .log("Failed to read generated CSV file {}", sanitise(fileToUpload.getPath()));
       return false;
     }
   }

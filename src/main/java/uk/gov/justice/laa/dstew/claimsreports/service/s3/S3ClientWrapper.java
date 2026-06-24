@@ -76,7 +76,10 @@ public class S3ClientWrapper {
       throw new CsvUploadException("Failed to check file extension is valid CSV for file " + fileName + " being uploaded to " + desiredFileKey);
     }
 
-    log.info("Checking {} is UTF-8 encoded", sanitise(fileName));
+    log.atInfo()
+        .addKeyValue("event.action", "csv.validation")
+        .addKeyValue("event.type", "batch")
+        .log("Checking {} is UTF-8 encoded", sanitise(fileName));
     long encodingCheckStart = System.currentTimeMillis();
     if (!csvFileValidator.checkUtf8Encoded(fileToUpload)) {
       if (uploadUtf8FailuresToS3) {
@@ -85,7 +88,11 @@ public class S3ClientWrapper {
       throw new CsvUploadException("File '" + fileName + "' is not UTF-8 encoded");
     }
     long encodingDuration = System.currentTimeMillis() - encodingCheckStart;
-    log.info("File {} is valid UTF-8. Check took {} ms", fileName, encodingDuration);
+    log.atInfo()
+        .addKeyValue("event.action", "csv.validation")
+        .addKeyValue("event.type", "batch")
+        .addKeyValue("event.outcome", "success")
+        .log("File {} is valid UTF-8. Check took {} ms", fileName, encodingDuration);
     metricsHandler.setCustomMetric(CustomMetricId.ENCODING_CHECK_TIME_MS, encodingDuration);
 
     var putRequest = PutObjectRequest.builder()
@@ -94,8 +101,12 @@ public class S3ClientWrapper {
         .contentType("text/csv")
         .build();
 
-    log.info("Uploading {} to S3 bucket {} with filename {}",
-        sanitise(fileToUpload.getPath()), sanitise(s3Bucket), sanitise(desiredFileKey));
+    log.atInfo()
+        .addKeyValue("event.action", "s3.upload")
+        .addKeyValue("event.type", "storage")
+        .addKeyValue("s3.bucket", s3Bucket)
+        .addKeyValue("s3.key", desiredFileKey)
+        .log("Uploading {} to S3 bucket {} with filename {}", sanitise(fileToUpload.getPath()), sanitise(s3Bucket), sanitise(desiredFileKey));
 
     long startTime = System.currentTimeMillis();
     // Response to this request is just metadata, if it errors it will throw an AwsServiceException
@@ -107,12 +118,23 @@ public class S3ClientWrapper {
     var fileSizeMib = fileToUpload.length() / 1024 / 1024;
     metricsHandler.setCustomMetric(CustomMetricId.UPLOAD_TIME_MS, durationMilliseconds);
     metricsHandler.setCustomMetric(CustomMetricId.REPORT_FILE_SIZE, fileSizeMib);
-    log.info("Uploaded {} to S3 bucket {} with filename {} and size {} MiB in {} ms",
-        sanitise(fileToUpload.getPath()), sanitise(s3Bucket), sanitise(desiredFileKey), fileSizeMib, durationMilliseconds);
+    log.atInfo()
+        .addKeyValue("event.action", "s3.upload")
+        .addKeyValue("event.type", "storage")
+        .addKeyValue("event.outcome", "success")
+        .addKeyValue("s3.bucket", s3Bucket)
+        .addKeyValue("s3.key", desiredFileKey)
+        .addKeyValue("file.size_mib", fileSizeMib)
+        .addKeyValue("upload.duration_ms", durationMilliseconds)
+        .log("Uploaded {} to S3 bucket {} with filename {} and size {} MiB in {} ms",
+            sanitise(fileToUpload.getPath()), sanitise(s3Bucket), sanitise(desiredFileKey), fileSizeMib, durationMilliseconds);
   }
 
   private void uploadErroredFile(File fileToUpload, String fileName) {
-    log.info("UTF-8 check failed and uploadUtf8Errors is enabled, attempting to upload to errors folder");
+    log.atInfo()
+        .addKeyValue("event.action", "s3.upload.error_file")
+        .addKeyValue("event.type", "storage")
+        .log("UTF-8 check failed and uploadUtf8Errors is enabled, attempting to upload to errors folder");
     var errorFileName = "reports/errors/" + fileName;
 
     var errorUpload = PutObjectRequest.builder()
@@ -121,8 +143,13 @@ public class S3ClientWrapper {
         .contentType("text/csv")
         .build();
     s3Client.putObject(errorUpload, RequestBody.fromFile(fileToUpload));
-    log.info("Uploaded non-UTF-8 file {} to S3 bucket {} with filename {}",
-        sanitise(fileToUpload.getPath()), sanitise(s3Bucket), sanitise(errorFileName));
+    log.atInfo()
+        .addKeyValue("event.action", "s3.upload.error_file")
+        .addKeyValue("event.type", "storage")
+        .addKeyValue("s3.bucket", s3Bucket)
+        .addKeyValue("s3.key", errorFileName)
+        .log("Uploaded non-UTF-8 file {} to S3 bucket {} with filename {}",
+            sanitise(fileToUpload.getPath()), sanitise(s3Bucket), sanitise(errorFileName));
 
   }
 

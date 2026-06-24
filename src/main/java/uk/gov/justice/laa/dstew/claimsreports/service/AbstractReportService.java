@@ -128,12 +128,21 @@ public abstract class AbstractReportService {
    */
   public void generateReport() {
     if (!runToday()) {
-      log.info("Report {} is not scheduled to run today", sanitise(getReportName()));
+      log.atInfo()
+          .addKeyValue("event.action", "report.schedule.skip")
+          .addKeyValue("event.type", "batch")
+          .addKeyValue("report.name", getReportName())
+          .addKeyValue("event.outcome", "skipped")
+          .log("Report {} is not scheduled to run today", sanitise(getReportName()));
       metricsHandler.setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_SKIPPED);
       return;
     }
 
-    log.info("Generating report from {}", getClass().getSimpleName());
+    log.atInfo()
+        .addKeyValue("event.action", "report.generate")
+        .addKeyValue("event.type", "batch")
+        .addKeyValue("report.name", getReportName())
+        .log("Generating report from {}", getClass().getSimpleName());
     File tempFile = createTempReportFile();
     long startTime = System.currentTimeMillis();
 
@@ -145,13 +154,24 @@ public abstract class AbstractReportService {
       }
       long endTime = System.currentTimeMillis();
       long durationMilliseconds = endTime - startTime;
-      log.info("Created {} file with filename {} in {} ms", sanitise(getReportName()), sanitise(getFullReportFileName()), durationMilliseconds);
+      log.atInfo()
+          .addKeyValue("event.action", "report.generated")
+          .addKeyValue("event.type", "batch")
+          .addKeyValue("report.name", getReportName())
+          .addKeyValue("event.outcome", "success")
+          .log("Created {} file with filename {} in {} ms", sanitise(getReportName()), sanitise(getFullReportFileName()), durationMilliseconds);
       metricsHandler.setCustomMetric(CustomMetricId.GENERATED_TIME_MS, durationMilliseconds);
       s3ClientWrapper.uploadFile(tempFile, generateS3FileKey());
       metricsHandler.setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_SUCCESSFUL);
 
     } catch (IOException | RuntimeException e) {
-      log.error("Failed to generate {}: {}", sanitise(getReportName()), sanitise(e.getMessage()));
+      log.atError()
+          .addKeyValue("event.action", "report.generate")
+          .addKeyValue("event.type", "batch")
+          .addKeyValue("report.name", getReportName())
+          .addKeyValue("event.outcome", "failure")
+          .setCause(e)
+          .log("Failed to generate {}", sanitise(getReportName()));
       throw new CsvCreationException("Failure to create " + getReportName(), e);
     } finally {
       deleteTempFile(tempFile);

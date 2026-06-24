@@ -378,5 +378,12 @@
             <!-- The check is suppressed in the next line of code after the comment -->
             <property name="influenceFormat" value="1"/>
         </module>
+        <!-- Prevent duplicate MDC keys in structured logging -->
+        <module name="Regexp">
+            <property name="id" value="DuplicateMdcKeyPattern"/>
+            <property name="format" value="addKeyValue\s*\(\s*&quot;([^&quot;]+)&quot;\s*,\s*MDC\.get\s*\(\s*&quot;\1&quot;\s*\)\s*\)"/>
+            <property name="message" value="Do not use addKeyValue with MDC.get for the same key. MDC values are automatically included in structured logging."/>
+            <property name="illegalPattern" value="true"/>
+        </module>
     </module>
 </module>

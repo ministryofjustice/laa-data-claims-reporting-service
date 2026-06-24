@@ -6,8 +6,11 @@ import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
+import java.util.UUID;
+import java.util.concurrent.TimeUnit;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.boot.ApplicationRunner;
@@ -58,11 +61,32 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
 
   @Override
   public void run(ApplicationArguments args) {
-    if (ensureReplicationHealthy()) {
-      generateReports();
-    } else {
-      log.error("Replication health check failed, reports not generated.");
-      markAllReportsFailedDueToReplication();
+    String runId = UUID.randomUUID().toString();
+    MDC.put("run_id", runId);
+    log.atInfo()
+        .addKeyValue("event.action", "job.start")
+        .addKeyValue("event.type", "batch")
+        .log("Starting claims reporting job");
+
+    try {
+      if (ensureReplicationHealthy()) {
+        generateReports();
+      } else {
+        log.atError()
+            .addKeyValue("event.action", "replication.health.check")
+            .addKeyValue("event.outcome", "failure")
+            .log("Replication health check failed, reports not generated.");
+        markAllReportsFailedDueToReplication();
+      }
+    } catch (Exception e) {
+      log.atError()
+          .addKeyValue("event.action", "job.run")
+          .addKeyValue("event.outcome", "failure")
+          .setCause(e)
+          .log("Claims reporting job failed");
+      throw e;
+    } finally {
+      MDC.remove("run_id");
     }
 
     databaseStatisticService.setDatabaseMetrics();
@@ -86,13 +110,20 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
   private static final long REPLICATION_HEALTH_CHECK_PASSED = 1;
 
   private boolean ensureReplicationHealthy() {
-    log.info("Checking replication health before generating reports...");
+    log.atInfo()
+        .addKeyValue("event.action", "replication.health.check")
+        .addKeyValue("event.type", "batch")
+        .log("Checking replication health before generating reports...");
 
     ReplicationHealthReport report = replicationHealthCheckService.checkReplicationHealth();
     boolean replicationHealthy = true;
 
     if (!report.isHealthy()) {
-      log.error("Replication health check failed:\n{}", report.summary());
+      log.atError()
+          .addKeyValue("event.action", "replication.health.check")
+          .addKeyValue("event.type", "batch")
+          .addKeyValue("event.outcome", "failure")
+          .log("Replication health check failed:\n{}", report.summary());
 
       // Even if the overall replication is unhealthy, we want to continue if
       // ignoreRowCountMismatch is set and basic WAL check passed.
@@ -113,7 +144,11 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
       return false;
     }
 
-    log.info("Replication health confirmed — proceeding with report generation.");
+    log.atInfo()
+        .addKeyValue("event.action", "replication.health.check")
+        .addKeyValue("event.type", "batch")
+        .addKeyValue("event.outcome", "success")
+        .log("Replication health confirmed — proceeding with report generation.");
     return true;
   }
 
@@ -131,22 +166,38 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
    */
   @SuppressFBWarnings(value = "SECCRLFLOG", justification = "Both arguments sanitised via sanitise() to strip CRLF before logging")
   private void generateReports() {
-    log.info("Generating {} reports...", reportServices.size());
+    log.atInfo()
+        .addKeyValue("event.action", "report.batch.start")
+        .addKeyValue("event.type", "batch")
+        .log("Generating {} reports...", reportServices.size());
     for (AbstractReportService service : reportServices) {
       metricsHandler.resetCustomMetrics();
-      var startTime = System.currentTimeMillis();
+      var startTime = System.nanoTime();
+      boolean succeeded = false;
       try {
         service.refreshDataSource();
         service.generateReport();
+        succeeded = true;
       } catch (Exception e) {
         String safeService = sanitise(service.getClass().getSimpleName());
-        String safeMessage = sanitise(e.getMessage());
-        log.error("Report generation failed for {}: {}", safeService, safeMessage, e);
+        log.atError()
+            .addKeyValue("event.action", "report.generation")
+            .addKeyValue("event.type", "batch")
+            .addKeyValue("event.outcome", "failure")
+            .addKeyValue("report.name", service.getReportName())
+            .setCause(e)
+            .log("Report generation failed for {}", safeService);
         metricsHandler.setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_FAILED);
       } finally {
-        var reportDuration = System.currentTimeMillis() - startTime;
+        long reportDuration = TimeUnit.NANOSECONDS.toMillis(System.nanoTime() - startTime);
         metricsHandler.setCustomMetric(CustomMetricId.REPORT_TOTAL_TIME_MS, reportDuration);
-        log.info("Report generation for report {} took {} ms ({} s)", sanitise(service.getReportName()), reportDuration, reportDuration / 1000);
+        log.atInfo()
+            .addKeyValue("event.action", "report.batch.complete")
+            .addKeyValue("event.type", "batch")
+            .addKeyValue("report.name", service.getReportName())
+            .addKeyValue("event.outcome", succeeded ? "success" : "failure")
+            .addKeyValue("report.duration.ms", reportDuration)
+            .log("Report generation for report {} completed", sanitise(service.getReportName()));
         metricsHandler.pushReportMetrics(service.getReportName());
       }
     }
