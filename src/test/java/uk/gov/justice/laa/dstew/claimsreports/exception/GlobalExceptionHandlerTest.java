@@ -1,10 +1,13 @@
 package uk.gov.justice.laa.dstew.claimsreports.exception;
 
 import static org.assertj.core.api.Assertions.assertThat;
+import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
+import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
+import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
 import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
@@ -12,6 +15,11 @@ import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 class GlobalExceptionHandlerTest {
 
   GlobalExceptionHandler globalExceptionHandler = new GlobalExceptionHandler();
+
+  @AfterEach
+  void tearDown() {
+    MDC.clear();
+  }
 
   @Test
   void handleItemNotFound_returnsNotFoundStatusAndErrorMessage() {
