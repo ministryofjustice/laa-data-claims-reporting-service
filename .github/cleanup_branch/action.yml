@@ -23,7 +23,7 @@ runs:
       uses: ./.github/get_release_name_to_delete
 
     - name: Authenticate to the cluster
-      uses: ministryofjustice/laa-reusable-github-actions/.github/actions/authenticate_to_cluster@718424912b7cac2b905764128f52ee7c99241507 # latest commit ID for this workflow file
+      uses: ministryofjustice/laa-reusable-github-actions/.github/actions/authenticate_to_cluster@a0bd8225ca8cc96e57a19223ce21f2ce7230833c # latest commit for repo
       with:
         kube-cert: ${{ inputs.kube-cert }}
         kube-token: ${{ inputs.kube-token }}
