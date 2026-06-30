@@ -77,6 +77,9 @@ dependencies {
 
     implementation 'tools.jackson.dataformat:jackson-dataformat-csv'
 
+    // Snyk vuln
+    implementation 'ch.qos.logback:logback-core:1.5.36'
+
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly "org.flywaydb:flyway-database-postgresql"
