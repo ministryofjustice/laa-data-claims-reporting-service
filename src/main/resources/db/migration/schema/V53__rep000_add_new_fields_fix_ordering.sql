@@ -33,10 +33,14 @@ WITH submission_periods AS (
 )
 SELECT
     -- PROVIDER DATA
+    ''                                                                      AS "Firm name", -- Enriched
     -- Firm number is not held in the Claims DS database. Users perform a lookup post-export.
     ''                                                                      AS "Firm number",
+    ''                                                                      AS "Office name", -- Enriched
     COALESCE(c.procurement_area_code, '')                                   AS "Procurement Area Code",
+    ''                                                                      AS "Procurement Area Description", -- Enriched
     COALESCE(c.access_point_code, '')                                       AS "Access Point Code",
+    ''                                                                      AS "Access Point Description", -- Enriched
     COALESCE(c.delivery_location, '')                                       AS "Delivery Location",
     -- SUBMISSION DATA
     COALESCE(sp.id::text, '')                                               AS "Submission ID",
@@ -81,6 +85,7 @@ SELECT
     COALESCE(cc.case_id, '')                                                AS "Case ID",
     COALESCE(cc.unique_case_id, '')                                         AS "Unique Case ID",
     COALESCE(c.fee_code, '')                                                AS "Fee Code",
+    COALESCE(calc.fee_code_description, '')                                 AS "Fee Code Description", -- Enriched
     COALESCE(cc.standard_fee_category_code, '')                             AS "Standard Fee Category Code",
     COALESCE(LEFT(c.matter_type_code, 4), '')                               AS "Matter Type 1",
     COALESCE(RIGHT(c.matter_type_code, 4), '')                              AS "Matter Type 2",
@@ -274,7 +279,8 @@ SELECT
                     WHEN calc.total_amount::text ~ '^[\s+-]?\d+(\.\d+)?$' THEN ROUND(calc.total_amount, 2)::text
                     ELSE NULL
                     END, '')
-        END                                                                 AS "Final Claim Value"
+        END                                                                 AS "Final Claim Value",
+    claims.convert_string_to_title_case(COALESCE(c.status::text, ''))       AS "Claim Status"
 FROM submission_periods AS sp
          JOIN claims.bulk_submission AS bs
               ON bs.id = sp.bulk_submission_id
