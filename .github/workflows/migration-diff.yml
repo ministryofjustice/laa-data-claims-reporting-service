@@ -99,12 +99,12 @@ jobs:
             if [ -z "$PRIOR_FILE" ]; then
               COMMENT_BODY+="## 📄 \`$FILENAME\`\n\n"
               COMMENT_BODY+="> ℹ️ No prior migration found for family **\`$FAMILY\`**. This appears to be the first migration for this report/table.\n\n---\n\n"
-              echo "  No prior file found for family '$FAMILY'."
+              echo "No prior file found for family '$FAMILY'."
               continue
             fi
 
             PRIOR_FILENAME=$(basename "$PRIOR_FILE")
-            echo "  Prior file: $PRIOR_FILENAME"
+            echo "Prior file: $PRIOR_FILENAME"
 
             # ----------------------------------------------------------------
             # Retrieve both file contents from git (avoids working-tree noise)
