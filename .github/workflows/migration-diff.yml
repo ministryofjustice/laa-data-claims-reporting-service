@@ -1,0 +1,162 @@
+name: Migration Diff
+
+on:
+  pull_request:
+    paths:
+      - 'src/main/resources/db/migration/schema/V*.sql'
+
+permissions:
+  contents: read
+  pull-requests: write
+
+jobs:
+  migration-diff:
+    name: Diff new migrations against prior related files
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout full history
+        uses: actions/checkout@9c091bb21b7c1c1d1991bb908d89e4e9dddfe3e0 # v7.0.0
+        with:
+          fetch-depth: 0
+
+      - name: Find new migration files in this PR
+        id: new-migrations
+        env:
+          BASE_REF: ${{ github.base_ref }}
+        run: |
+          # List files added (A) in this PR that match the migration pattern
+          mapfile -t NEW_FILES < <(
+            git diff --name-only --diff-filter=A "origin/${BASE_REF}...HEAD" \
+              | grep -E 'V[0-9]+__.*\.sql$'
+          )
+
+          if [ ${#NEW_FILES[@]} -eq 0 ]; then
+            echo "No new migration files found in this PR."
+            echo "has_migrations=false" >> "$GITHUB_OUTPUT"
+          else
+            echo "Found ${#NEW_FILES[@]} new migration file(s):"
+            printf '  %s\n' "${NEW_FILES[@]}"
+            # Newline-separated list for the next step
+            printf '%s\n' "${NEW_FILES[@]}" > /tmp/new_migrations.txt
+            echo "has_migrations=true" >> "$GITHUB_OUTPUT"
+          fi
+
+      - name: Generate diffs and post PR comment
+        if: steps.new-migrations.outputs.has_migrations == 'true'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          PR_NUMBER: ${{ github.event.pull_request.number }}
+          REPO: ${{ github.repository }}
+        run: |
+          COMMENT_BODY=""
+
+          while IFS= read -r NEW_FILE; do
+            FILENAME=$(basename "$NEW_FILE")
+
+            # ----------------------------------------------------------------
+            # Extract the version number and description from the filename.
+            # Pattern: V<number>__<description>.sql
+            # ----------------------------------------------------------------
+            VERSION=$(echo "$FILENAME" | grep -oP '^V\K[0-9]+')
+            DESCRIPTION=$(echo "$FILENAME" | sed 's/^V[0-9]*__//' | sed 's/\.sql$//')
+
+            # ----------------------------------------------------------------
+            # Determine the "family" key used to find related prior migrations.
+            #
+            # Strategy:
+            #   1. If the description contains a repXXX token, use that as the
+            #      family key (e.g. rep000, rep014).
+            #   2. Otherwise fall back to the full description so that plain
+            #      table-change migrations (e.g. allow_null_for_bulk_submission_id)
+            #      are still surfaced — though they usually won't have a prior match.
+            # ----------------------------------------------------------------
+            FAMILY=$(echo "$DESCRIPTION" | grep -oP 'rep\d+' | head -1)
+            if [ -z "$FAMILY" ]; then
+              FAMILY="$DESCRIPTION"
+            fi
+
+            echo "--- Processing: $FILENAME (version=$VERSION, family=$FAMILY) ---"
+
+            # ----------------------------------------------------------------
+            # Find the most recent prior migration file for the same family.
+            # "Prior" means a lower version number that already exists on the
+            # base branch (i.e. not part of this PR).
+            # ----------------------------------------------------------------
+            MIGRATION_DIR=$(dirname "$NEW_FILE")
+
+            # List all migration files in the same directory on the base branch
+            # that share the same family key and have a lower version number.
+            PRIOR_FILE=$(
+              git ls-tree -r --name-only "origin/${{ github.base_ref }}" -- "$MIGRATION_DIR" \
+                | grep -E "V[0-9]+__.*${FAMILY}.*\.sql$" \
+                | awk -F'[V_]' '{ print $2, $0 }' \
+                | sort -n \
+                | awk -v ver="$VERSION" '$1 < ver { last=$0 }  END { if(last) print last }' \
+                | sed 's/^[0-9]* //'
+            )
+
+            if [ -z "$PRIOR_FILE" ]; then
+              COMMENT_BODY+="## 📄 \`$FILENAME\`\n\n"
+              COMMENT_BODY+="> ℹ️ No prior migration found for family **\`$FAMILY\`**. This appears to be the first migration for this report/table.\n\n---\n\n"
+              echo "No prior file found for family '$FAMILY'."
+              continue
+            fi
+
+            PRIOR_FILENAME=$(basename "$PRIOR_FILE")
+            echo "Prior file: $PRIOR_FILENAME"
+
+            # ----------------------------------------------------------------
+            # Retrieve both file contents from git (avoids working-tree noise)
+            # ----------------------------------------------------------------
+            git show "origin/${{ github.base_ref }}:${PRIOR_FILE}" > /tmp/prior.sql
+            git show "HEAD:${NEW_FILE}"                            > /tmp/new.sql
+
+            # Unified diff; allow failure (diff exits 1 when files differ)
+            DIFF_OUTPUT=$(diff -u \
+              --label "$PRIOR_FILENAME (prior)" \
+              --label "$FILENAME (new)" \
+              /tmp/prior.sql /tmp/new.sql || true)
+
+            if [ -z "$DIFF_OUTPUT" ]; then
+              DIFF_OUTPUT="(no differences — files are identical)"
+            fi
+
+            # Count changed lines for a summary
+            ADDED=$(echo "$DIFF_OUTPUT"   | grep -c '^+[^+]' || true)
+            REMOVED=$(echo "$DIFF_OUTPUT" | grep -c '^-[^-]' || true)
+
+            COMMENT_BODY+="## 📄 \`$FILENAME\`\n\n"
+            COMMENT_BODY+="**Comparing against:** \`$PRIOR_FILENAME\`  \n"
+            COMMENT_BODY+="**Changes:** +${ADDED} / -${REMOVED} lines\n\n"
+            COMMENT_BODY+="<details>\n<summary>View diff</summary>\n\n\`\`\`diff\n"
+            COMMENT_BODY+="${DIFF_OUTPUT}\n"
+            COMMENT_BODY+="\`\`\`\n</details>\n\n---\n\n"
+
+          done < /tmp/new_migrations.txt
+
+          # ----------------------------------------------------------------
+          # Post or update a single comment on the PR.
+          # We look for an existing comment from this workflow to avoid spam.
+          # ----------------------------------------------------------------
+          HEADER="<!-- migration-diff-bot -->"
+          FULL_COMMENT="${HEADER}\n# 🗄️ Migration Diff Report\n\n${COMMENT_BODY}"
+
+          # Find existing comment ID (if any)
+          EXISTING_ID=$(
+            gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" \
+              --jq ".[] | select(.body | startswith(\"${HEADER}\")) | .id" \
+              | head -1
+          )
+
+          if [ -n "$EXISTING_ID" ]; then
+            echo "Updating existing comment $EXISTING_ID"
+            gh api "repos/${REPO}/issues/comments/${EXISTING_ID}" \
+              -X PATCH \
+              -f body="$(printf '%b' "$FULL_COMMENT")"
+          else
+            echo "Creating new PR comment"
+            gh api "repos/${REPO}/issues/${PR_NUMBER}/comments" \
+              -X POST \
+              -f body="$(printf '%b' "$FULL_COMMENT")"
+          fi
