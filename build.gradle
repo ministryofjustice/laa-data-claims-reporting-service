@@ -64,7 +64,7 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    implementation(platform 'software.amazon.awssdk:bom:2.46.17')
+    implementation(platform 'software.amazon.awssdk:bom:2.46.21')
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:sts'
 
@@ -78,11 +78,11 @@ dependencies {
     implementation 'tools.jackson.dataformat:jackson-dataformat-csv'
 
     // Snyk vulns
-    implementation 'ch.qos.logback:logback-core:1.5.36'
+    implementation 'ch.qos.logback:logback-core:1.5.37'
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.23'
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
-    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'org.postgresql:postgresql:42.7.12' // override until LAA plugin updated
     runtimeOnly "org.flywaydb:flyway-database-postgresql"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
