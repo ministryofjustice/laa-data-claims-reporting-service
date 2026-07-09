@@ -1,5 +1,4 @@
 # Specify java runtime base image
-# 25.0.3-alpine3.23
 FROM amazoncorretto:25.0.3-alpine3.23@sha256:5b46c94a34bc1182bfe7c9a3661818af0c5ff34510f1b28abe138c13efa338a7
 
 # Set up working directory in the container
