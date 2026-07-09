@@ -79,6 +79,7 @@ dependencies {
 
     // Snyk vulns
     implementation 'ch.qos.logback:logback-core:1.5.37'
+    implementation 'ch.qos.logback:logback-classic:1.5.37' // override until fix available
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.23'
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
