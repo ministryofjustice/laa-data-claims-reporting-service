@@ -82,13 +82,14 @@ INSERT INTO submission (
 
 -- Claim
 INSERT INTO claim (
-    id, submission_id, status, line_number, matter_type_code, created_by_user_id, dscc_number, created_on, updated_on
+    id, submission_id, status, line_number, matter_type_code, fee_code, created_by_user_id, dscc_number, created_on, updated_on
 ) VALUES (
              '33333333-3333-3333-3333-333333333333',
              '22222222-2222-2222-2222-222222222222',
              'VALID',
              1,
              'MT001',
+             'FEE002',
              'test_user',
              NULL,
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day',
@@ -100,6 +101,7 @@ INSERT INTO claim (
              'VALID',
              1,
              'MT001',
+             'FEE002',
              'test_user',
              'DSCC123456',
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day',
@@ -111,6 +113,7 @@ INSERT INTO claim (
              'VALID',
              1,
              'MT001',
+             'FEE003',
              'test_user',
              NULL,
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day',
@@ -122,6 +125,7 @@ INSERT INTO claim (
              'VOID',
              2,
              'MT001',
+             'FEE004',
              'test_user',
              NULL,
              TIMESTAMP '2025-11-21 06:00:00' - interval '1 day',
@@ -133,6 +137,7 @@ INSERT INTO claim (
              'VALID',
              1,
              'MT001',
+             'FEE002',
              'test_user',
              NULL,
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day',
