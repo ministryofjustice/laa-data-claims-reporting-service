@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.2.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.1.0...v1.2.0) (2026-07-10)
+
+
+### Features
+
+* **LPF-1527:** Replace Is Void with Claim Status ([#209](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/209)) ([ecf46a9](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/ecf46a95fc36bed33954fe9b609535d4c2998c00))
+
+
+### Bug Fixes
+
+* **LPF-0000:** Fix snyk issues ([#213](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/213)) ([09dd89f](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/09dd89fc7e9df0ddb506c4a67dcc98abeed0d58b))
+
 ## [1.1.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.0.0...v1.1.0) (2026-07-02)
 
 
