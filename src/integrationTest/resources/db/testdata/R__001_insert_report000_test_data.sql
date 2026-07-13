@@ -80,6 +80,26 @@ INSERT INTO submission (
              'test provider user'
          );
 
+-- Matter Start
+INSERT INTO matter_start (
+    id, submission_id, schedule_reference, category_code, procurement_area_code,
+    access_point_code, delivery_location, created_by_user_id, created_on,
+    updated_by_user_id, updated_on, number_of_matter_starts
+) VALUES (
+             'aaaaaaa1-1111-1111-1111-111111111111',
+             '22222222-2222-2222-2222-222222222222',
+             'MSCH-001',
+             'CAT-001',
+             'PA-001',
+             'AP-001',
+             'DL-001',
+             'test_user',
+             '2025-11-21 05:00:00',
+             NULL,
+             NULL,
+             17
+         );
+
 -- Claim
 INSERT INTO claim (
     id, submission_id, status, line_number, matter_type_code, fee_code, created_by_user_id, dscc_number, created_on, updated_on
