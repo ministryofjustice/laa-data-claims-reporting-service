@@ -1,5 +1,8 @@
 package uk.gov.justice.laa.dstew.claimsreports.runner;
 
+import static org.assertj.core.api.Assertions.assertThat;
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
+
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -10,16 +13,13 @@ import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
 import java.util.stream.Collectors;
-
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
-
-import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.DeleteObjectsRequest;
 import software.amazon.awssdk.services.s3.model.GetObjectRequest;
@@ -29,7 +29,6 @@ import software.amazon.awssdk.services.s3.model.ObjectIdentifier;
 import software.amazon.awssdk.services.s3.model.S3Object;
 import uk.gov.justice.laa.dstew.claimsreports.IntegrationTestBase;
 import uk.gov.justice.laa.dstew.claimsreports.service.AbstractReportService;
-import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
 
 /**
  * Integration tests for the ClaimsReportingServiceRunner.
