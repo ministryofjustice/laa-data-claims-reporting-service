@@ -2,11 +2,9 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
-
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
-
-import lombok.extern.slf4j.Slf4j;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
@@ -55,10 +53,10 @@ public class Report002Service extends AbstractReportService {
   @Override
   protected String getOrderByClause() {
     return " to_char(to_date(\"Submission for date\", 'MON-YYYY'), 'YYYYMM') NULLS LAST,"
-      + "    \"Office code\","
-      + "    \"Category code\","
-      + "    \"Procurement area code\","
-      + "    \"Access point code\"";
+        + "    \"Office code\","
+        + "    \"Category code\","
+        + "    \"Procurement area code\","
+        + "    \"Access point code\"";
   }
 
   @Override
