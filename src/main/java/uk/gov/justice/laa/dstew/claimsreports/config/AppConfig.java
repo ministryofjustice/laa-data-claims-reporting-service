@@ -90,6 +90,10 @@ public class AppConfig {
   @Getter
   private boolean forceRunReport000;
 
+  @Value("${feature.force-run-rep002:false}")
+  @Getter
+  private boolean forceRunReport002;
+
   @Value("${feature.upload-utf-8-failures-to-s3:false}")
   private boolean uploadUtf8FailuresToS3;
 

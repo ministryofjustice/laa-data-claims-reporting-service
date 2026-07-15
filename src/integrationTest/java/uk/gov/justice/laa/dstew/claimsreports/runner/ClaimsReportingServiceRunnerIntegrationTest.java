@@ -48,7 +48,7 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
 
   @Value("${S3_REPORT_STORE}")
   private String bucketName;
-  private static final int NUMBER_OF_REPORTS = 4;
+  private static final int NUMBER_OF_REPORTS = 5;
 
   @Autowired
   private ClaimsReportingServiceRunner serviceRunner;
