@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.3.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.2.0...v1.3.0) (2026-07-15)
+
+
+### Features
+
+* **LPF-1530:** Create REP002 ([#215](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/215)) ([3446718](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/34467187609428d8b93d430b3c06fa4ee4ae2efd))
+
 ## [1.2.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.1.0...v1.2.0) (2026-07-10)
 
 
