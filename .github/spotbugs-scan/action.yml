@@ -24,6 +24,8 @@ runs:
         echo "Running SpotBugs security analysis..."
         ./gradlew spotbugsMain
       shell: bash
+      with:
+        github_token: ${{ inputs.github_token }}
 
     - name: Upload SpotBugs results to GitHub Code Scanning
       uses: github/codeql-action/upload-sarif@87557b9c84dde89fdd9b10e88954ac2f4248e463 # v4.36.1
