@@ -1,6 +1,11 @@
 name: SpotBugs Security Scan
 description: Run SpotBugs/FindSecBugs security analysis and upload SARIF to GitHub Code Scanning
 
+inputs:
+  github_token:
+    description: 'GitHub token for authentication to private package'
+    required: true
+
 runs:
   using: 'composite'
   steps:
@@ -14,6 +19,7 @@ runs:
       uses: gradle/actions/setup-gradle@3f131e8634966bd73d06cc69884922b02e6faf92 # v6.2.0
 
     - name: Run SpotBugs security scan and generate SARIF report
+      id: spotbugs
       run: |
         echo "Running SpotBugs security analysis..."
         ./gradlew spotbugsMain
@@ -46,4 +52,3 @@ runs:
           echo "❌ SARIF file not found"
         fi
       shell: bash
-
