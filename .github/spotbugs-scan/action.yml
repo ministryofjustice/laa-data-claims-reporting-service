@@ -24,7 +24,7 @@ runs:
         echo "Running SpotBugs security analysis..."
         ./gradlew spotbugsMain
       shell: bash
-      with:
+      env:
         GITHUB_TOKEN: ${{ inputs.github_token }}
 
     - name: Upload SpotBugs results to GitHub Code Scanning
