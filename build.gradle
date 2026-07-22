@@ -2,7 +2,7 @@ plugins {
     id 'io.freefair.lombok' version '9.5.0'
     // plugin version set in settings.gradle
     id 'uk.gov.laa.springboot.laa-spring-boot-gradle-plugin'
-    id 'com.github.spotbugs' version '6.5.8'
+    id 'com.github.spotbugs' version '6.5.9'
 }
 
 test {
@@ -64,7 +64,7 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    implementation(platform 'software.amazon.awssdk:bom:2.47.5')
+    implementation(platform 'software.amazon.awssdk:bom:2.48.3')
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:sts'
 
@@ -83,8 +83,8 @@ dependencies {
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.24'
     // Need until Spring Boot catches up
     implementation 'org.apache.httpcomponents.core5:httpcore5-h2:5.4.3'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.21.5'
-    implementation 'tools.jackson.core:jackson-databind:3.1.5'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.1'
+    implementation 'tools.jackson.core:jackson-databind:3.2.1'
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
     runtimeOnly 'org.postgresql:postgresql:42.7.13' // override until LAA plugin updated
