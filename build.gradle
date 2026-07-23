@@ -84,9 +84,16 @@ dependencies {
     implementation 'ch.qos.logback:logback-classic:1.5.38' // override until fix available
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.24'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.1'
-    // These two MUST be kept in sync or they will break the build.
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.22'
+    // The 3.x Jacksons MUST be kept in sync or they will break the build.
     implementation 'tools.jackson.core:jackson-databind:3.2.1'
+    implementation 'tools.jackson.core:jackson-core:3.2.1'
     implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.2.1' // Until Spring Boot gets to 3.1.5
+    // Need until AWS SDK reaches 4.2.16.Final or higher
+    implementation 'io.netty:netty-codec:4.2.16.Final'
+    implementation 'io.netty:netty-codec-compression:4.2.16.Final'
+    implementation 'io.netty:netty-codec-http:4.2.16.Final'
+    implementation 'io.netty:netty-codec-http2:4.2.16.Final'
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
     runtimeOnly 'org.postgresql:postgresql:42.7.13' // override until LAA plugin updated
