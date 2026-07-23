@@ -1,7 +1,7 @@
 plugins {
     id 'io.freefair.lombok' version '9.5.0'
     // plugin version set in settings.gradle
-    id 'uk.gov.laa.springboot.laa-spring-boot-gradle-plugin'
+    id 'uk.gov.justice.service.laa.laa-spring-boot-gradle-plugin'
     id 'com.github.spotbugs' version '6.5.9'
 }
 
