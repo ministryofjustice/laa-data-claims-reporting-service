@@ -5,6 +5,10 @@ plugins {
     id 'com.github.spotbugs' version '6.5.9'
 }
 
+checkstyle {
+    toolVersion = '11.0.0' // Overriding until Common Plugin catches up
+}
+
 test {
     useJUnitPlatform()
     finalizedBy jacocoTestReport
@@ -75,20 +79,18 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-micrometer-tracing-brave'
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 
-    implementation 'tools.jackson.dataformat:jackson-dataformat-csv'
-
     // Snyk vulns
     implementation 'ch.qos.logback:logback-core:1.5.38'
     implementation 'ch.qos.logback:logback-classic:1.5.38' // override until fix available
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.24'
-    // Need until Spring Boot catches up
-    implementation 'org.apache.httpcomponents.core5:httpcore5-h2:5.4.3'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.1'
+    // These two MUST be kept in sync or they will break the build.
     implementation 'tools.jackson.core:jackson-databind:3.2.1'
+    implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.2.1' // Until Spring Boot gets to 3.1.5
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
     runtimeOnly 'org.postgresql:postgresql:42.7.13' // override until LAA plugin updated
-    runtimeOnly "org.flywaydb:flyway-database-postgresql"
+    runtimeOnly "org.flywaydb:flyway-database-postgresql:13.0.0" // Override until Spring updates
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
