@@ -4,7 +4,6 @@ import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfigurat
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_FAILED;
 import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.util.List;
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -164,7 +163,6 @@ public class ClaimsReportingServiceRunner implements ApplicationRunner {
    * <p>The implementation assumes that the report services extend from the AbstractReportService base class,
    * which provides the necessary methods for refreshing materialized views and generating reports.
    */
-  @SuppressFBWarnings(value = "SECCRLFLOG", justification = "Both arguments sanitised via sanitise() to strip CRLF before logging")
   private void generateReports() {
     log.atInfo()
         .addKeyValue("event.action", "report.batch.start")
