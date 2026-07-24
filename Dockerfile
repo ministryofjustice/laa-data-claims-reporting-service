@@ -9,7 +9,7 @@ WORKDIR /opt/laa-data-reporting-service/claims-reporting/
 COPY /build/libs/laa-data-claims-reporting-service-1.0.0.jar app.jar
 
 # Create a group and non-root user
-RUN addgroup -S appgroup && adduser -u 1001 -S appuser -G appgroup
+RUN addgroup -g 1001 -S appgroup && adduser -u 1001 -S appuser -G appgroup
 
 # Set the default user
 USER 1001
