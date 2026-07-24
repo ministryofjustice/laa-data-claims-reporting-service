@@ -27,4 +27,14 @@ spec:
                 {{ include "data-claims-reporting.dbConnectionDetails" . | nindent 16 }}
               resources:
                 {{ toYaml .Values.resources | nindent 16 }}
+              securityContext:
+                runAsUser: 1001
+                runAsGroup: 1001
+                capabilities:
+                  drop:
+                    - ALL
+                runAsNonRoot: true
+                allowPrivilegeEscalation: false
+                seccompProfile:
+                  type: RuntimeDefault
           restartPolicy: OnFailure
