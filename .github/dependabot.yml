@@ -5,24 +5,15 @@
 
 version: 2
 
-registries:
-  spring-boot-common-github-packages:
-    type: maven-repository
-    url: https://maven.pkg.github.com/ministryofjustice/laa-spring-boot-common
-    username: ${{ secrets.TOKEN_USER }}
-    password: ${{ secrets.DEPENDABOT_PAT }}
-
 updates:
   - package-ecosystem: "gradle"
     directory: "/"
     schedule:
       interval: "weekly"
     commit-message:
-      prefix: "chore(bot)"
+      prefix: "fix(bot)"
     cooldown:
       default-days: 3
-    registries:
-      - spring-boot-common-github-packages
     groups:
       gradle-updates:
         exclude-patterns:
