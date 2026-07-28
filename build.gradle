@@ -68,7 +68,7 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    implementation(platform 'software.amazon.awssdk:bom:2.48.3')
+    implementation(platform 'software.amazon.awssdk:bom:2.49.3')
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:sts'
 
@@ -80,8 +80,8 @@ dependencies {
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 
     // Snyk vulns
-    implementation 'ch.qos.logback:logback-core:1.5.38'
-    implementation 'ch.qos.logback:logback-classic:1.5.38' // override until fix available
+    implementation 'ch.qos.logback:logback-core:1.6.0'
+    implementation 'ch.qos.logback:logback-classic:1.6.0' // override until fix available
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.24'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.1'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.22'
