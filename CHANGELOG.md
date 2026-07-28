@@ -1,5 +1,19 @@
 # Changelog
 
+## [1.4.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.3.0...v1.4.0) (2026-07-28)
+
+
+### Features
+
+* **LPF-1493:** Fix aggregation logic REP012 ([#225](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/225)) ([9438b15](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/9438b157702bd0af8489fb8cd263b45bf6bd7c97))
+
+
+### Bug Fixes
+
+* **bot:** Bump the gradle-updates group with 3 updates ([#228](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/228)) ([8760d83](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/8760d83091ab5f6aeb9a92119e0773cab1986abd))
+* **bot:** Bump the minor group with 2 updates ([#229](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/229)) ([c956c2a](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/c956c2acb6dc7fd97ac2c9eb1201dcd3fea028ec))
+* **LPF-1538:** Harden container defaults ([#223](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/223)) ([8c3e905](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/8c3e9054e34a595fec68f8ca07176f080a225655))
+
 ## [1.3.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.2.0...v1.3.0) (2026-07-15)
 
 
