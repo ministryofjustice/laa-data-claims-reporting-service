@@ -24,6 +24,9 @@ public class Report000IntegrationTest extends IntegrationTestBase {
   public static final String CLAIM_ID_FOR_VOIDED_CLAIM = "33333333-3333-3333-3333-333333333336";
   public static final String CLAIM_ID_WITH_MULTIPLE_FEES_AND_ASSESSMENTS = "33333333-3333-3333-3333-333333333337";
   public static final String CLAIM_SUMMARY_FEE_ID_FOR_SINGLE_FEE_CLAIM = "66666666-6666-6666-6666-666666666667";
+  public static final String AMENDED_CLAIM_ID = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeeee";
+  public static final String AMENDED_CLAIM_SUMMARY_FEE_ID_OLD = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeee1";
+  public static final String AMENDED_CLAIM_SUMMARY_FEE_ID_LATEST = "aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeee2";
 
   @Test
   void claimDataIsReturnedIfNoAssessmentDataPresent() {
@@ -239,6 +242,125 @@ public class Report000IntegrationTest extends IntegrationTestBase {
         .isEqualTo("0");
     assertThat(row.get("Assessed Total Inc VAT"))
         .isEqualTo("0");
+  }
+
+  @Test
+  void amendedClaimUsesLatestFeeRecordsAndAssessmentForFinalClaimValue() {
+    jdbcTemplate.update(
+        """
+            INSERT INTO claims.claim
+            (id, submission_id, status, line_number, matter_type_code, fee_code, unique_file_number, is_amended,
+             created_by_user_id, created_on, updated_on)
+            VALUES (?::uuid, '22222222-2222-2222-2222-222222222222'::uuid, 'VALID', 99, 'MT001', 'FEE500',
+                    'UFN-AMEND-001', TRUE, 'integration_test_user', now() - interval '2 days', now())
+            """,
+        AMENDED_CLAIM_ID);
+
+    jdbcTemplate.update(
+        """
+            INSERT INTO claims.client
+            (id, claim_id, client_forename, client_surname, client_date_of_birth, unique_client_number, client_postcode,
+             gender_code, ethnicity_code, is_legally_aided, client_type_code, home_office_client_number,
+             cla_reference_number, cla_exemption_code, created_by_user_id, created_on, updated_on)
+            VALUES ('aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeee3'::uuid, ?::uuid, 'Amend', 'Client', DATE '1990-01-01',
+                    'UCN-AMEND-1', 'AB1 2CD', 'M', 'White', TRUE, 'Type1', 'HO999', 'CLA999', 'EX999',
+                    'integration_test_user', now() - interval '2 days', now())
+            """,
+        AMENDED_CLAIM_ID);
+
+    jdbcTemplate.update(
+        """
+            INSERT INTO claims.claim_case
+            (id, claim_id, case_id, unique_case_id, case_stage_code, stage_reached_code, outcome_code,
+             created_by_user_id, created_on)
+            VALUES ('aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeee4'::uuid, ?::uuid, 'CASE-AMEND-1', 'UCASE-AMEND-1',
+                    'STAGE1', 'REACHED1', 'SUCCESS', 'integration_test_user', now() - interval '2 days')
+            """,
+        AMENDED_CLAIM_ID);
+
+    jdbcTemplate.update(
+        """
+            INSERT INTO claims.claim_summary_fee
+            (id, claim_id, advice_time, travel_time, waiting_time, net_profit_costs_amount, net_disbursement_amount,
+             net_counsel_costs_amount, disbursements_vat_amount, travel_waiting_costs_amount, net_waiting_costs_amount,
+             is_vat_applicable, is_tolerance_applicable, created_by_user_id, created_on, updated_on)
+            VALUES (?::uuid, ?::uuid, 20, 15, 10, 500, 100, 50, 10, 5, 2, TRUE, FALSE,
+                    'integration_test_user', now() - interval '2 days', now() - interval '2 days')
+            """,
+        AMENDED_CLAIM_SUMMARY_FEE_ID_OLD,
+        AMENDED_CLAIM_ID);
+
+    jdbcTemplate.update(
+        """
+            INSERT INTO claims.claim_summary_fee
+            (id, claim_id, advice_time, travel_time, waiting_time, net_profit_costs_amount, net_disbursement_amount,
+             net_counsel_costs_amount, disbursements_vat_amount, travel_waiting_costs_amount, net_waiting_costs_amount,
+             is_vat_applicable, is_tolerance_applicable, created_by_user_id, created_on, updated_on)
+            VALUES (?::uuid, ?::uuid, 80, 45, 25, 900, 150, 75, 20, 15, 11, TRUE, TRUE,
+                    'integration_test_user', now() - interval '1 day', now())
+            """,
+        AMENDED_CLAIM_SUMMARY_FEE_ID_LATEST,
+        AMENDED_CLAIM_ID);
+
+    jdbcTemplate.update(
+        """
+            INSERT INTO claims.calculated_fee_detail
+            (id, claim_summary_fee_id, claim_id, fee_code, fee_type, created_by_user_id, created_on, updated_by_user_id, updated_on,
+             fee_code_description, category_of_law, total_amount)
+            VALUES ('aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeee5'::uuid, ?::uuid, ?::uuid, 'FEE500', 'TypeA',
+                    'integration_test_user', now() - interval '2 days', 'integration_test_user', now() - interval '2 days',
+                    'Old amendment fee', 'AAP', 1111.11)
+            """,
+        AMENDED_CLAIM_SUMMARY_FEE_ID_OLD,
+        AMENDED_CLAIM_ID);
+
+    jdbcTemplate.update(
+        """
+            INSERT INTO claims.calculated_fee_detail
+            (id, claim_summary_fee_id, claim_id, fee_code, fee_type, created_by_user_id, created_on, updated_by_user_id, updated_on,
+             fee_code_description, category_of_law, total_amount)
+            VALUES ('aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeee6'::uuid, ?::uuid, ?::uuid, 'FEE501', 'TypeB',
+                    'integration_test_user', now() - interval '1 day', 'integration_test_user', now(),
+                    'Latest amendment fee', 'IMMAS', 2222.22)
+            """,
+        AMENDED_CLAIM_SUMMARY_FEE_ID_LATEST,
+        AMENDED_CLAIM_ID);
+
+    List<Map<String, Object>> rows = getDataForClaimId(AMENDED_CLAIM_ID);
+    assertThat(rows).hasSize(1);
+    Map<String, Object> row = rows.getFirst();
+
+    assertThat(row.get("Amended Flag")).isEqualTo("Yes");
+    assertThat(row.get("Unique File Number")).isEqualTo("UFN-AMEND-001");
+    assertThat(row.get("Fee Code")).isEqualTo("FEE500");
+    assertThat(row.get("Fee Code Description")).isEqualTo("Latest amendment fee");
+    assertThat(row.get("Travel Time")).isEqualTo("45");
+    assertThat(new BigDecimal(row.get("Initial Calculated Claim Value").toString()))
+        .isEqualByComparingTo("2222.22");
+    assertThat(new BigDecimal(row.get("Final Claim Value").toString()))
+        .isEqualByComparingTo("2222.22");
+
+    jdbcTemplate.update(
+        """
+            INSERT INTO claims.assessment
+            (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
+             allowed_total_vat, allowed_total_incl_vat, created_by_user_id, created_on)
+            VALUES ('aaaaaaaa-bbbb-4ccc-8ddd-eeeeeeeeeee7'::uuid, ?::uuid, ?::uuid, 'PAID_IN_FULL', 123.45, 2500.00,
+                    123.45, 1999.99, 'integration_test_user', now() + interval '1 minute')
+            """,
+        AMENDED_CLAIM_ID,
+        AMENDED_CLAIM_SUMMARY_FEE_ID_LATEST);
+
+    rows = getDataForClaimId(AMENDED_CLAIM_ID);
+    assertThat(rows).hasSize(1);
+    row = rows.getFirst();
+
+    assertThat(new BigDecimal(row.get("Initial Calculated Claim Value").toString()))
+        .isEqualByComparingTo("2222.22");
+    assertThat(new BigDecimal(row.get("Allowed Total Inc VAT").toString()))
+        .isEqualByComparingTo("1999.99");
+    assertThat(new BigDecimal(row.get("Final Claim Value").toString()))
+        .isEqualByComparingTo("1999.99");
   }
 
   @ParameterizedTest(name = "{index} => feeCode={0}")
