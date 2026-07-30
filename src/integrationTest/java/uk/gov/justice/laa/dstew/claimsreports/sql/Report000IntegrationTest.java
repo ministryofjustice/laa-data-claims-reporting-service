@@ -34,8 +34,8 @@ public class Report000IntegrationTest extends IntegrationTestBase {
     Map<String, Object> row = rows.getFirst();
     assertThat(row.get("Claim ID"))
         .isEqualTo(CLAIM_ID_WITH_SINGLE_FEE_AND_NO_ASSESSMENTS);
-    // Fee Code here comes from claim not calculated_fee_detail table, whereas description comes from calculated_fee_detail table. This is because the fee code in claim table is the latest fee code, whereas the description in calculated_fee_detail table
-    // Hence divergence between the two values in this test data.
+    // Fee Code here comes from claim not calculated_fee_detail table, whereas description comes from calculated_fee_detail table.
+    // Hence, divergence between the two values in this test data.
     assertThat(row.get("Fee Code"))
         .isEqualTo("FEE002");
     assertThat(row.get("Fee Code Description"))
