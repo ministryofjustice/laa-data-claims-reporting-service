@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.5.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.4.0...v1.5.0) (2026-07-31)
+
+
+### Features
+
+* **LPF-1492:** REP000 support claim amendments in extract ([#230](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/230)) ([ade38b4](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/ade38b4bfc588d64f1c72890ccb3f6ea36a24e5d))
+
+
+### Bug Fixes
+
+* **LPF-1494:** handle multiple CFDs in REP013 ([#231](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/231)) ([fa80feb](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/fa80febcb3d97908c070e3d6237b523f5ce481d8))
+
 ## [1.4.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.3.0...v1.4.0) (2026-07-28)
 
 
