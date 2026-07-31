@@ -102,9 +102,11 @@ class Report013IntegrationTest extends IntegrationTestBase {
 
     assertThat(crimeRow.get("FEB-2025"))
         .isNull();
-
+    // 2500 from the third (latest) Calculated Fee Detail for claim 33333333-3333-3333-3333-333333333333
+    // 3500 from the second (latest) Calculated Fee Detail for claim 33333333-3333-3333-3333-333333333334
+    // 120.33 from the second (latest) Assessment for claim 33333333-3333-3333-3333-333333333337
     assertThat(crimeRow.get("APR-2025"))
-        .isEqualTo("11722.33");
+        .isEqualTo("6120.33");
 
     assertThat(crimeRow.get("MAY-2025"))
         .isEqualTo("0.00");
