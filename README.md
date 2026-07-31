@@ -155,10 +155,17 @@ If you need to run REP000 on a date that is not the 21st of the month for many d
 ##### One-off basis
 If on dev or staging you just need to run REP000 as a one-off, you can create a temporary Kubernetes job 
 ```
-kubectl -n {namespace} create job {give a job name here} --from=cronjob/{cronjob to copy} --dry-run=client -o yaml \
-| kubectl -n {namespace} set env --local -f - FORCE_RUN_REP000="true" -o yaml \
-| kubectl -n {namespace} apply -f -
+NS={namespace}
+CRONJOB={cronjob to copy}
+JOB={give a job name here}
+
+kubectl -n "$NS" create job "$JOB" --from=cronjob/"$CRONJOB" --dry-run=client -o yaml \
+  | kubectl set env --local -f - FORCE_RUN_REP000=true -o yaml \
+  | kubectl apply -f -
 ```
+
+### Downloading reports from S3
+Follow instructions on [confluence page](https://dsdmoj.atlassian.net/wiki/spaces/LPF/pages/6021087732/How+to+get+report+from+S3+directly)
 
 # Releases
 
