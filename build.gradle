@@ -63,12 +63,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.0.3'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.0'
 
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    implementation(platform 'software.amazon.awssdk:bom:2.49.3')
+    implementation(platform 'software.amazon.awssdk:bom:2.50.2')
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:sts'
 
@@ -80,8 +80,8 @@ dependencies {
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 
     // Snyk vulns
-    implementation 'ch.qos.logback:logback-core:1.6.0'
-    implementation 'ch.qos.logback:logback-classic:1.6.0' // override until fix available
+    implementation 'ch.qos.logback:logback-core:1.6.1'
+    implementation 'ch.qos.logback:logback-classic:1.6.1' // override until fix available
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.24'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.1'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.22'
@@ -99,7 +99,7 @@ dependencies {
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
     runtimeOnly 'org.postgresql:postgresql:42.7.13' // override until LAA plugin updated
-    runtimeOnly "org.flywaydb:flyway-database-postgresql:13.0.0" // Override until Spring updates
+    runtimeOnly "org.flywaydb:flyway-database-postgresql:13.1.0" // Override until Spring updates
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
