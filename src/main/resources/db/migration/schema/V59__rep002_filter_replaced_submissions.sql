@@ -17,7 +17,12 @@ WITH latest_valid_submissions AS (
         END AS submission_period_date
     FROM claims.submission AS s
     WHERE s.status = 'VALIDATION_SUCCEEDED'
-      AND claims.submission_is_not_replaced(s.id)
+            AND NOT EXISTS (
+                    SELECT 1
+                    FROM claims.submission AS newer
+                    WHERE newer.previous_submission_id = s.id
+                        AND newer.status = 'VALIDATION_SUCCEEDED'
+            )
 ),
 submission_matter_starts AS (
     SELECT
