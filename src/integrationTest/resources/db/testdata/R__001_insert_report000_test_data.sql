@@ -45,9 +45,9 @@ INSERT INTO submission (
              NULL,
              'test_user',
              '2025-11-21 05:00:00',
-          'test provider user'
+             'test provider user'
          ),
-      (
+         (
              '22222222-2222-2222-2222-222222222223',
              '11111111-1111-1111-1111-111111111112',
              'OA001',
@@ -63,7 +63,7 @@ INSERT INTO submission (
              '2025-11-21 05:00:00',
              'test provider user'
          ),
-      (
+         (
              '22222222-2222-2222-2222-222222222224',
              '11111111-1111-1111-1111-111111111112',
              'OA001',
@@ -115,7 +115,7 @@ INSERT INTO claim (
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day',
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          ),
-      (
+         (
              '33333333-3333-3333-3333-333333333334',
              '22222222-2222-2222-2222-222222222222',
              'VALID',
@@ -127,7 +127,7 @@ INSERT INTO claim (
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day',
              NULL
          ),
-      (
+         (
              '33333333-3333-3333-3333-333333333335',
              '22222222-2222-2222-2222-222222222224',
              'VALID',
@@ -188,8 +188,8 @@ INSERT INTO client (
              'test_user',
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day',
              NULL
-       ),
-      (
+         ),
+         (
              '44444444-4444-4444-4444-444444444445',
              '33333333-3333-3333-3333-333333333334',
              'John',
@@ -265,7 +265,7 @@ INSERT INTO claim_case (
              'test_user',
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          ),
-      (
+         (
              '55555555-5555-5555-5555-555555555556',
              '33333333-3333-3333-3333-333333333334',
              'CASE001',
@@ -301,7 +301,7 @@ INSERT INTO claim_case (
              'test_user',
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          ),
-        (
+         (
              '55555555-5555-5555-5555-555555555559',
              '33333333-3333-3333-3333-333333333337',
              'CASE001',
@@ -326,12 +326,12 @@ INSERT INTO claim_summary_fee (
              TRUE, FALSE, 'test_user',
              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day', TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          ),
-      (
+         (
              '66666666-6666-6666-6666-666666666667',
              '33333333-3333-3333-3333-333333333334',
              60, 30, 15, 1000, 200,
-          500, 100, 50, 20,
-          TRUE, FALSE, 'test_user',
+             500, 100, 50, 20,
+             TRUE, FALSE, 'test_user',
              TIMESTAMP '2025-11-21 05:00:00' - interval '2 day', TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          ),
          (
@@ -350,7 +350,7 @@ INSERT INTO claim_summary_fee (
              TRUE, FALSE, 'test_user',
              TIMESTAMP '2025-11-21 05:00:00' - interval '2 day', NULL
          ),
-        (
+         (
              '66666666-6666-6666-6666-666666666670',
              '33333333-3333-3333-3333-333333333337',
              60, 30, 15, 1000, 200,
@@ -382,34 +382,34 @@ INSERT INTO calculated_fee_detail (
       ('99999999-9999-9999-9999-99999999999b', '66666666-6666-6666-6666-666666666669', '33333333-3333-3333-3333-333333333336',
        'FEE004', 'TypeA', 'test_user', '2025-10-22 11:00:00+00', 'test_user', '2025-10-22 11:30:00+00',
        'Description 4', 'HOU', 4500),
-       ('77777777-7777-7777-7777-77777777777a', '66666666-6666-6666-6666-666666666666',
-        '33333333-3333-3333-3333-333333333337',
-        'FEE001', 'TypeA', 'test_user', '2025-10-20 09:00:00+00', 'test_user', '2025-10-20 09:30:00+00',
-        'Description 1', 'INVEST', 1502),
-       ('88888888-8888-8888-8888-88888888888a', '66666666-6666-6666-6666-666666666666',
-        '33333333-3333-3333-3333-333333333337',
-        'FEE002', 'TypeB', 'test_user', '2025-10-21 10:00:00+00', 'test_user', '2025-10-21 10:30:00+00',
-        'Description 2', 'IMMAS', 2100),
-       ('99999999-9999-9999-9999-99999999999c', '66666666-6666-6666-6666-666666666666',
-        '33333333-3333-3333-3333-333333333337',
-        'FEE003', 'TypeC', 'test_user', '2025-10-22 11:00:00+00', 'test_user', '2025-10-22 11:30:00+00',
-        'Description 3', 'HOU', 2500);
+      ('77777777-7777-7777-7777-77777777777a', '66666666-6666-6666-6666-666666666666',
+       '33333333-3333-3333-3333-333333333337',
+       'FEE001', 'TypeA', 'test_user', '2025-10-20 09:00:00+00', 'test_user', '2025-10-20 09:30:00+00',
+       'Description 1', 'INVEST', 1502),
+      ('88888888-8888-8888-8888-88888888888a', '66666666-6666-6666-6666-666666666666',
+       '33333333-3333-3333-3333-333333333337',
+       'FEE002', 'TypeB', 'test_user', '2025-10-21 10:00:00+00', 'test_user', '2025-10-21 10:30:00+00',
+       'Description 2', 'IMMAS', 2100),
+      ('99999999-9999-9999-9999-99999999999c', '66666666-6666-6666-6666-666666666666',
+       '33333333-3333-3333-3333-333333333337',
+       'FEE003', 'TypeC', 'test_user', '2025-10-22 11:00:00+00', 'test_user', '2025-10-22 11:30:00+00',
+       'Description 3', 'HOU', 2500);
 
 
 INSERT INTO claims.assessment (
-  		id, claim_id, claim_summary_fee_id, assessment_outcome, fixed_fee_amount, net_travel_costs_amount,
-  		net_waiting_costs_amount, net_profit_costs_amount, disbursement_amount, disbursement_vat_amount,
-  		net_cost_of_counsel_amount, detention_travel_and_waiting_costs_amount, is_vat_applicable,
-  		bolt_on_adjourned_hearing_fee, jr_form_filling_amount, bolt_on_cmrh_oral_fee, bolt_on_cmrh_telephone_fee,
-  		bolt_on_substantive_hearing_fee, bolt_on_home_office_interview_fee, assessed_total_vat, assessed_total_incl_vat,
-  		allowed_total_vat, allowed_total_incl_vat, assessment_type, assessment_reason, created_by_user_id, created_on, updated_by_user_id, updated_on
-  		) VALUES
-        ('12345555-7777-7777-7777-777777777778', '33333333-3333-3333-3333-333333333337', '66666666-6666-6666-6666-666666666666',
-        'REDUCED_TO_FIXED_FEE', 33.23, 44.43, 43.44, 40.20, 12.0, 33.12, 12.33, 3.12, TRUE, 12.3, 45.6, 3.86, 0.90, 33.30, 44.4,
-        33.12, 2.94, 3.33, 33.12, 'ESCAPE_FEE_ASSESSMENT', 'Provider request', 'test_user', '2025-10-22 11:00:00+00', 'test_user', '2025-10-22 11:30:00+00'),
-       ('12345555-7777-7777-7777-777777777777', '33333333-3333-3333-3333-333333333337', '66666666-6666-6666-6666-666666666666',
-        'PAID_IN_FULL', 233.33, 43.44, 44.43, 2.40, 0.12, 123.33, 33.12, 12.3, TRUE, 3.12, 6.45, 86.3, 9.00, 3.33, 4.44,
-        12.33, 94.2, 33.3, 120.33, 'ESCAPE_FEE_ASSESSMENT', 'Escape Fee Case Assessment', 'test_user', '2025-10-22 11:01:00+00', 'test_user', '2025-10-22 11:31:00+00'),
-       ('12345555-7777-7777-7777-777777777779', '33333333-3333-3333-3333-333333333336', '66666666-6666-6666-6666-666666666669',
-        'NILLED', 0, 0, 0, 0, 0, 0, 0, 0, TRUE, 0, 0, 0, 0, 0, 0,
-        0, 0, 0, 0, 'VOID', 'Provider request', 'test_user', '2025-10-23 12:34:04+00', 'test_user', '2025-10-23 12:34:04+00');
+    id, claim_id, claim_summary_fee_id, assessment_outcome, fixed_fee_amount, net_travel_costs_amount,
+    net_waiting_costs_amount, net_profit_costs_amount, disbursement_amount, disbursement_vat_amount,
+    net_cost_of_counsel_amount, detention_travel_and_waiting_costs_amount, is_vat_applicable,
+    bolt_on_adjourned_hearing_fee, jr_form_filling_amount, bolt_on_cmrh_oral_fee, bolt_on_cmrh_telephone_fee,
+    bolt_on_substantive_hearing_fee, bolt_on_home_office_interview_fee, assessed_total_vat, assessed_total_incl_vat,
+    allowed_total_vat, allowed_total_incl_vat, assessment_type, assessment_reason, created_by_user_id, created_on, updated_by_user_id, updated_on
+) VALUES
+      ('12345555-7777-7777-7777-777777777778', '33333333-3333-3333-3333-333333333337', '66666666-6666-6666-6666-666666666666',
+       'REDUCED_TO_FIXED_FEE', 33.23, 44.43, 43.44, 40.20, 12.0, 33.12, 12.33, 3.12, TRUE, 12.3, 45.6, 3.86, 0.90, 33.30, 44.4,
+       33.12, 2.94, 3.33, 33.12, 'ESCAPE_FEE_ASSESSMENT', 'Provider request', 'test_user', '2025-10-22 11:00:00+00', 'test_user', '2025-10-22 11:30:00+00'),
+      ('12345555-7777-7777-7777-777777777777', '33333333-3333-3333-3333-333333333337', '66666666-6666-6666-6666-666666666666',
+       'PAID_IN_FULL', 233.33, 43.44, 44.43, 2.40, 0.12, 123.33, 33.12, 12.3, TRUE, 3.12, 6.45, 86.3, 9.00, 3.33, 4.44,
+       12.33, 94.2, 33.3, 120.33, 'ESCAPE_FEE_ASSESSMENT', 'Escape Fee Case Assessment', 'test_user', '2025-10-22 11:01:00+00', 'test_user', '2025-10-22 11:31:00+00'),
+      ('12345555-7777-7777-7777-777777777779', '33333333-3333-3333-3333-333333333336', '66666666-6666-6666-6666-666666666669',
+       'NILLED', 0, 0, 0, 0, 0, 0, 0, 0, TRUE, 0, 0, 0, 0, 0, 0,
+       0, 0, 0, 0, 'VOID', 'Provider request', 'test_user', '2025-10-23 12:34:04+00', 'test_user', '2025-10-23 12:34:04+00');
