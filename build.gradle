@@ -2,7 +2,7 @@ plugins {
     id 'io.freefair.lombok' version '9.5.0'
     // plugin version set in settings.gradle
     id 'uk.gov.justice.service.laa.laa-spring-boot-gradle-plugin'
-    id 'com.github.spotbugs' version '6.5.9'
+    id 'com.github.spotbugs' version '6.5.10'
 }
 
 checkstyle {
@@ -68,7 +68,7 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    implementation(platform 'software.amazon.awssdk:bom:2.50.2')
+    implementation(platform 'software.amazon.awssdk:bom:2.51.3')
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:sts'
 
@@ -90,16 +90,16 @@ dependencies {
     implementation 'tools.jackson.core:jackson-core:3.2.1'
     implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.2.1' // Until Spring Boot gets to 3.1.5
     // Need until AWS SDK reaches 4.2.16.Final or higher
-    implementation 'io.netty:netty-codec:4.2.16.Final'
-    implementation 'io.netty:netty-codec-compression:4.2.16.Final'
-    implementation 'io.netty:netty-codec-http:4.2.16.Final'
-    implementation 'io.netty:netty-codec-http2:4.2.16.Final'
+    implementation 'io.netty:netty-codec:4.2.17.Final'
+    implementation 'io.netty:netty-codec-compression:4.2.17.Final'
+    implementation 'io.netty:netty-codec-http:4.2.17.Final'
+    implementation 'io.netty:netty-codec-http2:4.2.17.Final'
     // Need until AWS SDK reaches 5.4.3 or higher
     implementation 'org.apache.httpcomponents.core5:httpcore5-h2:5.4.3'
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
     runtimeOnly 'org.postgresql:postgresql:42.7.13' // override until LAA plugin updated
-    runtimeOnly "org.flywaydb:flyway-database-postgresql:13.1.0" // Override until Spring updates
+    runtimeOnly "org.flywaydb:flyway-database-postgresql:13.2.0" // Override until Spring updates
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
