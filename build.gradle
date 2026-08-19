@@ -68,7 +68,7 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    implementation(platform 'software.amazon.awssdk:bom:2.51.3')
+    implementation(platform 'software.amazon.awssdk:bom:2.53.1')
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:sts'
 
@@ -80,15 +80,15 @@ dependencies {
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 
     // Snyk vulns
-    implementation 'ch.qos.logback:logback-core:1.6.1'
-    implementation 'ch.qos.logback:logback-classic:1.6.1' // override until fix available
+    implementation 'ch.qos.logback:logback-core:1.6.3'
+    implementation 'ch.qos.logback:logback-classic:1.6.3' // override until fix available
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.24'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.1'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.22'
     // The 3.x Jacksons MUST be kept in sync or they will break the build.
-    implementation 'tools.jackson.core:jackson-databind:3.2.1'
-    implementation 'tools.jackson.core:jackson-core:3.2.1'
-    implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.2.1' // Until Spring Boot gets to 3.1.5
+    implementation 'tools.jackson.core:jackson-databind:3.2.2'
+    implementation 'tools.jackson.core:jackson-core:3.2.2'
+    implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.2.2' // Until Spring Boot gets to 3.1.5
     // Need until AWS SDK reaches 4.2.16.Final or higher
     implementation 'io.netty:netty-codec:4.2.17.Final'
     implementation 'io.netty:netty-codec-compression:4.2.17.Final'
@@ -99,7 +99,7 @@ dependencies {
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
     runtimeOnly 'org.postgresql:postgresql:42.7.13' // override until LAA plugin updated
-    runtimeOnly "org.flywaydb:flyway-database-postgresql:13.2.0" // Override until Spring updates
+    runtimeOnly "org.flywaydb:flyway-database-postgresql:13.3.0" // Override until Spring updates
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'
