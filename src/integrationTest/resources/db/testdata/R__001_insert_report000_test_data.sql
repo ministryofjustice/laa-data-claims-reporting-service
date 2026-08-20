@@ -83,7 +83,7 @@ INSERT INTO submission (
 -- Matter Start
 INSERT INTO matter_start (
     id, submission_id, schedule_reference, category_code, procurement_area_code,
-    access_point_code, delivery_location, created_by_user_id, created_on,
+    access_point_code, delivery_location, mediation_type, created_by_user_id, created_on,
     updated_by_user_id, updated_on, number_of_matter_starts
 ) VALUES (
              'aaaaaaa1-1111-1111-1111-111111111111',
@@ -93,11 +93,27 @@ INSERT INTO matter_start (
              'PA-001',
              'AP-001',
              'DL-001',
+             '',
              'test_user',
              '2025-11-21 05:00:00',
              NULL,
              NULL,
              17
+         ),
+         (
+             'bbbbbbb1-1111-1111-1111-111111111111',
+             '22222222-2222-2222-2222-222222222222',
+             '',
+             '',
+             '',
+             '',
+             '',
+             'MED-001',
+             'test_user',
+             '2025-11-21 05:00:00',
+             NULL,
+             NULL,
+             15
          );
 
 -- Claim
