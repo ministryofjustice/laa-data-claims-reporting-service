@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.1](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.6.0...v1.6.1) (2026-08-20)
+
+
+### Bug Fixes
+
+* **bot:** Bump the gradle-updates group with 8 updates ([#241](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/241)) ([490b3e2](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/490b3e23733a9db39e3976ec88afceb716fafede))
+
 ## [1.6.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.5.3...v1.6.0) (2026-08-20)
 
 
