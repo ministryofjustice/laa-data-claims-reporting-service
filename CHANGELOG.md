@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.6.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.5.3...v1.6.0) (2026-08-20)
+
+
+### Features
+
+* **LPF-1603:** add schedule ref and mediation type to REP002 ([#244](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/244)) ([e3bbf9a](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/e3bbf9aca6923e685522c0c0cb913a61d53d1510))
+
 ## [1.5.3](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.5.2...v1.5.3) (2026-08-12)
 
 
