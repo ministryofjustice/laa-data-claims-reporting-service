@@ -62,6 +62,8 @@ class Report002IntegrationTest extends IntegrationTestBase {
           "Procurement area desc",
           "Access point code",
           "Access point desc",
+          "Schedule reference",
+          "Mediation type",
           "New cases count"
       );
       assertThat(row.get("Firm name")).isEqualTo("");
@@ -74,6 +76,8 @@ class Report002IntegrationTest extends IntegrationTestBase {
       assertThat(row.get("Category code")).isEqualTo("CAT-INT-001");
       assertThat(row.get("Procurement area code")).isEqualTo("PA-INT-001");
       assertThat(row.get("Access point code")).isEqualTo("AP-INT-001");
+      assertThat(row.get("Schedule reference")).isEqualTo("SCHED-REP002-1");
+      assertThat(row.get("Mediation type")).isEqualTo("");
       assertThat(((Number) row.get("New cases count")).intValue()).isEqualTo(17);
     } finally {
       jdbcTemplate.update("DELETE FROM claims.matter_start WHERE id = ?", matterStartId);
