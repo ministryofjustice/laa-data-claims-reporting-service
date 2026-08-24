@@ -206,10 +206,7 @@ public class CsvFileValidator {
    */
   public boolean checkHeaders(File fileToUpload, List<String> expectedHeaders) {
     try {
-      var csvMapper = new CsvMapper();
-      var csvReader = csvMapper.readerFor(Map.class).with(CsvSchema.emptySchema().withHeader());
-      Map<String, Object> firstDataRow = csvReader.readValue(fileToUpload);
-      String[] actualHeaders = firstDataRow.keySet().toArray(String[]::new);
+      String[] actualHeaders = readHeaders(fileToUpload).toArray(String[]::new);
       boolean headersMatch = Arrays.equals(actualHeaders, expectedHeaders.toArray(String[]::new));
 
       if (!headersMatch) {
@@ -246,10 +243,7 @@ public class CsvFileValidator {
    */
   public boolean checkCsvHeaders(File fileToUpload, List<String> expectedHeaders, Pattern additionalHeaderPattern) {
     try {
-      var csvMapper = new CsvMapper();
-      var csvReader = csvMapper.readerFor(Map.class).with(CsvSchema.emptySchema().withHeader());
-      Map<String, Object> firstDataRow = csvReader.readValue(fileToUpload);
-      var actualHeaders = List.copyOf(firstDataRow.keySet());
+      var actualHeaders = readHeaders(fileToUpload);
       boolean headersMatch = actualHeaders.size() > expectedHeaders.size()
           && actualHeaders.subList(0, expectedHeaders.size()).equals(expectedHeaders)
           && actualHeaders.subList(expectedHeaders.size(), actualHeaders.size()).stream()
@@ -262,6 +256,23 @@ public class CsvFileValidator {
           .setCause(e)
           .log("Failed to read CSV headers from file {}", sanitise(fileToUpload.getPath()));
       return false;
+    }
+  }
+
+  private List<String> readHeaders(File fileToUpload) {
+    var csvMapper = new CsvMapper();
+    var csvReader = csvMapper.readerFor(Map.class).with(CsvSchema.emptySchema().withHeader());
+    try (var csvRows = csvReader.readValues(fileToUpload)) {
+      if (!csvRows.hasNextValue()) {
+        return List.of();
+      }
+      Object firstDataRow = csvRows.nextValue();
+      if (!(firstDataRow instanceof Map<?, ?> row)) {
+        return List.of();
+      }
+      return row.keySet().stream()
+          .map(String.class::cast)
+          .toList();
     }
   }
 

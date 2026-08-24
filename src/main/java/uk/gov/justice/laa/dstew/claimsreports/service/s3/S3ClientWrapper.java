@@ -114,11 +114,13 @@ public class S3ClientWrapper {
       throw new CsvUploadException("File '" + fileName + "' is not UTF-8 encoded");
     }
 
-    boolean headersValid = additionalHeaderPattern == null
-            ? csvFileValidator.checkCsvHeaders(fileToUpload, expectedHeaders)
-            : csvFileValidator.checkCsvHeaders(fileToUpload, expectedHeaders, additionalHeaderPattern);
-    if (!expectedHeaders.isEmpty() && !headersValid) {
-      throw new CsvUploadException("CSV headers do not match expected headers for file: " + fileName);
+    if (!expectedHeaders.isEmpty()) {
+      boolean headersValid = additionalHeaderPattern == null
+          ? csvFileValidator.checkCsvHeaders(fileToUpload, expectedHeaders)
+          : csvFileValidator.checkCsvHeaders(fileToUpload, expectedHeaders, additionalHeaderPattern);
+      if (!headersValid) {
+        throw new CsvUploadException("CSV headers do not match expected headers for file: " + fileName);
+      }
     }
     long encodingDuration = System.currentTimeMillis() - encodingCheckStart;
     log.atInfo()
