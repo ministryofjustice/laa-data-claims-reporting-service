@@ -64,13 +64,13 @@ public class Report002Service extends AbstractReportService {
         + "    \"Access point code\"";
   }
 
-        @Override
-        protected List<String> getExpectedCsvHeaders() {
-          return List.of(
-          "Firm name", "Firm number", "File name", "Office code", "Submission for date",
-          "Category code", "Procurement area code", "Procurement area desc", "Access point code",
-          "Access point desc", "Schedule reference", "Mediation type", "New cases count");
-        }
+  @Override
+  protected List<String> getExpectedCsvHeaders() {
+    return List.of(
+    "Firm name", "Firm number", "File name", "Office code", "Submission for date",
+    "Category code", "Procurement area code", "Procurement area desc", "Access point code",
+    "Access point desc", "Schedule reference", "Mediation type", "New cases count");
+  }
 
   @Override
   protected boolean runToday() {

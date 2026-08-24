@@ -50,7 +50,7 @@ class ClaimsReportingServiceRunnerTest {
   private ClaimsReportingServiceRunner runner;
 
   @BeforeEach
-  void setUp() {
+  void setUpRunner() {
     MockitoAnnotations.openMocks(this);
 
     // Inject a list of mocked report services

@@ -57,12 +57,12 @@ public class Report012Service extends AbstractReportService {
         + "    \"Area of law\"";
   }
 
-        @Override
-        protected List<String> getExpectedCsvHeaders() {
-          return List.of(
-          "Provider office account number", "Submission month", "Area of law",
-          "Original submission value", "Date submission was uploaded");
-        }
+  @Override
+  protected List<String> getExpectedCsvHeaders() {
+    return List.of(
+    "Provider office account number", "Submission month", "Area of law",
+    "Original submission value", "Date submission was uploaded");
+  }
 
   // Daily report
   @Override

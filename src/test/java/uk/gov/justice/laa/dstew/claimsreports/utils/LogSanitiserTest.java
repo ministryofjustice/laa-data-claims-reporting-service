@@ -119,7 +119,7 @@ class LogSanitiserTest {
 
         @Test
         @DisplayName("should prevent instantiation via reflection")
-        void shouldHavePrivateConstructor() throws Exception {
+        void shouldHavePrivateConstructor() throws ReflectiveOperationException {
             Constructor<LogSanitiser> constructor =
                     LogSanitiser.class.getDeclaredConstructor();
 

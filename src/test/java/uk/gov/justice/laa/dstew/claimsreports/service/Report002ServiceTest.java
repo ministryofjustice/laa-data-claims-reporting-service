@@ -36,7 +36,7 @@ class Report002ServiceTest {
   private AppConfig appConfig;
 
   @BeforeEach
-  void setUp() {
+  void setUpReport002Service() {
     jdbcTemplate = mock(JdbcTemplate.class);
     creationService = mock(CsvCreationService.class);
     s3ClientWrapper = mock(S3ClientWrapper.class);

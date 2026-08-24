@@ -1,7 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.runner;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
 
 import java.io.InputStream;
 import java.nio.file.Files;
@@ -12,7 +11,6 @@ import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.tuple.Pair;
 import org.junit.jupiter.api.AfterEach;
@@ -89,13 +87,7 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
-  void shouldGenerateAllReportsAndUploadCSVsToS3() throws Exception {
-    log.info("Detected report service implementations: {}",
-        sanitise(reportServices.stream()
-            .map(s -> s.getClass().getSimpleName())
-            .collect(Collectors.joining(", ")))
-    );
-
+  void shouldGenerateAllReportsAndUploadCSVsToS3() throws java.io.IOException {
     //Assert that expected number of reportServices were autowired
     assertThat(reportServices)
         .isNotEmpty()
@@ -111,8 +103,6 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
     List<String> uploadedFiles = listResponse.contents().stream()
         .map(S3Object::key)
         .toList();
-
-    log.info("Uploaded report files: {}", sanitise(uploadedFiles.toString()));
 
     //Assert that expected number of reports were generated
     assertThat(uploadedFiles)
@@ -139,7 +129,6 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
           .as("CSV file comparison for " + uploadedKey)
           .hasSameTextualContentAs(expectedFile.toFile());
 
-      log.info("CSV file '{}' matches expected content.", sanitise(uploadedKey));
     }
 
   }
@@ -161,8 +150,6 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
     List<String> uploadedFiles = listResponse.contents().stream()
         .map(S3Object::key)
         .toList();
-
-    log.info("Uploaded report files: {}", sanitise(uploadedFiles.toString()));
 
     //Assert that no reports were generated
     assertThat(uploadedFiles)

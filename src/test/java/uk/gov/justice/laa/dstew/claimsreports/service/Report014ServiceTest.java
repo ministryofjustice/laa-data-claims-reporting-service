@@ -33,7 +33,7 @@ class Report014ServiceTest {
   private S3ClientWrapper s3ClientWrapper;
 
   @BeforeEach
-  void setUp() {
+  void setUpReport014Service() {
     jdbcTemplate = mock(JdbcTemplate.class);
     creationService = mock(CsvCreationService.class);
     s3ClientWrapper = mock(S3ClientWrapper.class);

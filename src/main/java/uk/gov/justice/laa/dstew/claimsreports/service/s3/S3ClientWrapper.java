@@ -100,8 +100,8 @@ public class S3ClientWrapper {
     }
 
     boolean headersValid = additionalHeaderPattern == null
-      ? csvFileValidator.checkCsvHeaders(fileToUpload, expectedHeaders)
-      : csvFileValidator.checkCsvHeaders(fileToUpload, expectedHeaders, additionalHeaderPattern);
+            ? csvFileValidator.checkCsvHeaders(fileToUpload, expectedHeaders)
+            : csvFileValidator.checkCsvHeaders(fileToUpload, expectedHeaders, additionalHeaderPattern);
     if (!expectedHeaders.isEmpty() && !headersValid) {
       throw new CsvUploadException("CSV headers do not match expected headers for file: " + fileName);
     }

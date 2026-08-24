@@ -168,7 +168,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
         'OA001',
         'MAR-2025',
         'LEGAL HELP',
-        '%s',
+        ?,
         'CSN001',
         NULL,
         FALSE,
@@ -177,7 +177,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
         'integration_test_user',
         '2025-11-21 05:00:00',
         'test provider user')
-    """.formatted(submissionStatus));
+      """, submissionStatus);
 
     jdbcTemplate.update("""
       INSERT INTO claims.claim (
@@ -185,12 +185,12 @@ class Report014IntegrationTest extends IntegrationTestBase {
       ) VALUES (
           'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5',
           'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB1',
-          '%s',
+            ?,
           1,
           'MT001',
           'integration_test_user',
           TIMESTAMP '2025-11-21 05:00:00' - interval '1 day')
-      """.formatted(claimStatus));
+          """, claimStatus);
 
     jdbcTemplate.update("""
     INSERT INTO claims.claim_case (

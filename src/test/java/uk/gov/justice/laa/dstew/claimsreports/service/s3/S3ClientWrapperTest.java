@@ -51,7 +51,7 @@ class S3ClientWrapperTest {
 
   @SneakyThrows
   @BeforeEach
-  void beforeEach() {
+  void setUpS3ClientWrapper() {
     testFilePath = Path.of(getClass().getClassLoader().getResource("testReport.csv").toURI());
     testReport = testFilePath.toFile();
     reset(csvFileValidator, metricsHandler, s3Client);

@@ -32,7 +32,7 @@ class AbstractReportServiceTest {
   private Clock fixedClock;
 
   @BeforeEach
-  void setUp() {
+  void setUpAbstractReportService() {
     jdbcTemplate = mock(JdbcTemplate.class);
     s3ClientWrapper = mock(S3ClientWrapper.class);
     csvCreationService = mock(CsvCreationService.class);
