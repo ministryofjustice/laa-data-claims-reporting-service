@@ -172,13 +172,12 @@ public abstract class AbstractReportService {
           .log("Created {} file with filename {} in {} ms", sanitise(getReportName()), sanitise(getFullReportFileName()), durationMilliseconds);
       metricsHandler.setCustomMetric(CustomMetricId.GENERATED_TIME_MS, durationMilliseconds);
       var expectedHeaders = getExpectedCsvHeaders();
-      if (expectedHeaders.isEmpty()) {
-        s3ClientWrapper.uploadFile(tempFile, generateS3FileKey());
-      } else if (getAdditionalCsvHeaderPattern() != null) {
-        s3ClientWrapper.uploadFile(tempFile, generateS3FileKey(), expectedHeaders, getAdditionalCsvHeaderPattern());
-      } else {
-        s3ClientWrapper.uploadFile(tempFile, generateS3FileKey(), expectedHeaders);
-      }
+      s3ClientWrapper.uploadFile(
+          tempFile,
+          generateS3FileKey(),
+          expectedHeaders,
+          getAdditionalCsvHeaderPattern()
+      );
       metricsHandler.setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_SUCCESSFUL);
 
     } catch (IOException | RuntimeException e) {

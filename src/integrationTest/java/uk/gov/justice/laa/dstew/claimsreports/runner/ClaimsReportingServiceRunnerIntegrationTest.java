@@ -2,6 +2,7 @@ package uk.gov.justice.laa.dstew.claimsreports.runner;
 
 import static org.assertj.core.api.Assertions.assertThat;
 
+import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -87,7 +88,7 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
-  void shouldGenerateAllReportsAndUploadCSVsToS3() throws java.io.IOException {
+  void shouldGenerateAllReportsAndUploadCSVsToS3() throws IOException {
     //Assert that expected number of reportServices were autowired
     assertThat(reportServices)
         .isNotEmpty()

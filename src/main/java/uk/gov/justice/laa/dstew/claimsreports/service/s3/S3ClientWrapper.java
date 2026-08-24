@@ -68,18 +68,7 @@ public class S3ClientWrapper {
    * @param desiredFileKey - the file key (folder + name) to use on S3.
    */
   public void uploadFile(File fileToUpload, String desiredFileKey) {
-    uploadFile(fileToUpload, desiredFileKey, List.of());
-  }
-
-  /**
-   * Upload a generated CSV file after validating that its headers match the expected headers.
-   *
-   * @param fileToUpload the CSV file we have just generated
-   * @param desiredFileKey the file key to use on S3
-   * @param expectedHeaders the expected CSV headers in order
-   */
-  public void uploadFile(File fileToUpload, String desiredFileKey, List<String> expectedHeaders) {
-    uploadFile(fileToUpload, desiredFileKey, expectedHeaders, null);
+    uploadFile(fileToUpload, desiredFileKey, List.of(), null);
   }
 
   /**
@@ -114,7 +103,7 @@ public class S3ClientWrapper {
       throw new CsvUploadException("File '" + fileName + "' is not UTF-8 encoded");
     }
 
-    if (!expectedHeaders.isEmpty()) {
+    if (expectedHeaders != null && !expectedHeaders.isEmpty()) {
       boolean headersValid = additionalHeaderPattern == null
           ? csvFileValidator.checkCsvHeaders(fileToUpload, expectedHeaders)
           : csvFileValidator.checkCsvHeaders(fileToUpload, expectedHeaders, additionalHeaderPattern);

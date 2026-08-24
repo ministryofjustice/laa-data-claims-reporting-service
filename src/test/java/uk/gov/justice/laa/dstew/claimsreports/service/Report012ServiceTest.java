@@ -2,6 +2,7 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -11,8 +12,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.List;
 import java.time.ZoneOffset;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -69,7 +70,7 @@ class Report012ServiceTest {
     );
     verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/daily/report_012_2025-12-22.csv"), eq(List.of(
       "Provider office account number", "Submission month", "Area of law",
-      "Original submission value", "Date submission was uploaded")));
+      "Original submission value", "Date submission was uploaded")), isNull());
   }
 
 }

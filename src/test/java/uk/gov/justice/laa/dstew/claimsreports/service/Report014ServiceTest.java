@@ -4,8 +4,8 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.time.Clock;
 import java.time.Instant;
-import java.util.List;
 import java.time.ZoneOffset;
+import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.core.env.Environment;
@@ -16,6 +16,7 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -37,10 +38,10 @@ class Report014ServiceTest {
     jdbcTemplate = mock(JdbcTemplate.class);
     creationService = mock(CsvCreationService.class);
     s3ClientWrapper = mock(S3ClientWrapper.class);
-      MetricsHandler metricsHandler = mock(MetricsHandler.class);
+    MetricsHandler metricsHandler = mock(MetricsHandler.class);
 
     Instant fixedNow = Instant.parse("2025-12-22T10:00:00Z");
-      Clock fixedClock = Clock.fixed(fixedNow, ZoneOffset.UTC);
+    Clock fixedClock = Clock.fixed(fixedNow, ZoneOffset.UTC);
 
     service = new Report014Service(jdbcTemplate, s3ClientWrapper, creationService, metricsHandler, fixedClock);
   }
@@ -69,7 +70,7 @@ class Report014ServiceTest {
       "Office Account Number", "Submission Period", "Area of Law", "Client Forename",
       "Client Surname", "Unique Client Number", "Unique File Number", "Amendment Date",
       "Amendment Time", "Value before Amendment", "Value after Amendment", "Difference",
-      "Assessment Type", "Assessment Reason", "Submission ID", "Claim ID", "Assessment ID")));
+      "Assessment Type", "Assessment Reason", "Submission ID", "Claim ID", "Assessment ID")), isNull());
   }
 
 }

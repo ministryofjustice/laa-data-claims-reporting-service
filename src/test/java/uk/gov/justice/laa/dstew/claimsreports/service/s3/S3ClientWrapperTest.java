@@ -181,7 +181,7 @@ class S3ClientWrapperTest {
     when(csvFileValidator.checkCsvHeaders(testReport, List.of("Expected header"))).thenReturn(false);
 
     assertThrows(CsvUploadException.class,
-        () -> s3ClientWrapper.uploadFile(testReport, "filename.csv", List.of("Expected header")));
+      () -> s3ClientWrapper.uploadFile(testReport, "filename.csv", List.of("Expected header"), null));
 
     verify(s3Client, never()).putObject(any(PutObjectRequest.class), any(RequestBody.class));
   }
