@@ -3,6 +3,8 @@ package uk.gov.justice.laa.dstew.claimsreports.service.s3;
 import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
 
 import java.io.File;
+import java.util.List;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
@@ -66,6 +68,15 @@ public class S3ClientWrapper {
    * @param desiredFileKey - the file key (folder + name) to use on S3.
    */
   public void uploadFile(File fileToUpload, String desiredFileKey) {
+    uploadFile(fileToUpload, desiredFileKey, List.of());
+  }
+
+  public void uploadFile(File fileToUpload, String desiredFileKey, List<String> expectedHeaders) {
+    uploadFile(fileToUpload, desiredFileKey, expectedHeaders, null);
+  }
+
+  public void uploadFile(File fileToUpload, String desiredFileKey, List<String> expectedHeaders,
+                         Pattern additionalHeaderPattern) {
     String fileName = fileToUpload.getName();
 
     if (!csvFileValidator.checkMimeTypeIsCsv(fileToUpload)) {
@@ -86,6 +97,13 @@ public class S3ClientWrapper {
         uploadErroredFile(fileToUpload, fileName);
       }
       throw new CsvUploadException("File '" + fileName + "' is not UTF-8 encoded");
+    }
+
+    boolean headersValid = additionalHeaderPattern == null
+      ? csvFileValidator.checkCsvHeaders(fileToUpload, expectedHeaders)
+      : csvFileValidator.checkCsvHeaders(fileToUpload, expectedHeaders, additionalHeaderPattern);
+    if (!expectedHeaders.isEmpty() && !headersValid) {
+      throw new CsvUploadException("CSV headers do not match expected headers for file: " + fileName);
     }
     long encodingDuration = System.currentTimeMillis() - encodingCheckStart;
     log.atInfo()

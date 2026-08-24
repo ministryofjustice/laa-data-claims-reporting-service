@@ -13,6 +13,8 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.List;
+import java.util.regex.Pattern;
 import lombok.AllArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -95,6 +97,14 @@ public abstract class AbstractReportService {
    */
   protected abstract String getReportFolder();
 
+  protected List<String> getExpectedCsvHeaders() {
+    return List.of();
+  }
+
+  protected Pattern getAdditionalCsvHeaderPattern() {
+    return null;
+  }
+
   /**
    * Gets the intended file extension of the report.
    * At present every report is a csv
@@ -161,7 +171,14 @@ public abstract class AbstractReportService {
           .addKeyValue("event.outcome", "success")
           .log("Created {} file with filename {} in {} ms", sanitise(getReportName()), sanitise(getFullReportFileName()), durationMilliseconds);
       metricsHandler.setCustomMetric(CustomMetricId.GENERATED_TIME_MS, durationMilliseconds);
-      s3ClientWrapper.uploadFile(tempFile, generateS3FileKey());
+      var expectedHeaders = getExpectedCsvHeaders();
+      if (expectedHeaders.isEmpty()) {
+        s3ClientWrapper.uploadFile(tempFile, generateS3FileKey());
+      } else if (getAdditionalCsvHeaderPattern() != null) {
+        s3ClientWrapper.uploadFile(tempFile, generateS3FileKey(), expectedHeaders, getAdditionalCsvHeaderPattern());
+      } else {
+        s3ClientWrapper.uploadFile(tempFile, generateS3FileKey(), expectedHeaders);
+      }
       metricsHandler.setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_SUCCESSFUL);
 
     } catch (IOException | RuntimeException e) {

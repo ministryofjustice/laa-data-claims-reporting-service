@@ -2,6 +2,7 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import java.time.Clock;
 import java.time.LocalDate;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -62,6 +63,14 @@ public class Report002Service extends AbstractReportService {
         + "    \"Procurement area code\","
         + "    \"Access point code\"";
   }
+
+        @Override
+        protected List<String> getExpectedCsvHeaders() {
+          return List.of(
+          "Firm name", "Firm number", "File name", "Office code", "Submission for date",
+          "Category code", "Procurement area code", "Procurement area desc", "Access point code",
+          "Access point desc", "Schedule reference", "Mediation type", "New cases count");
+        }
 
   @Override
   protected boolean runToday() {

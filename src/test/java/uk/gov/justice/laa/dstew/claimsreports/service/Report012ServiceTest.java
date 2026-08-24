@@ -11,6 +11,7 @@ import java.io.BufferedWriter;
 import java.io.File;
 import java.time.Clock;
 import java.time.Instant;
+import java.util.List;
 import java.time.ZoneOffset;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -66,7 +67,9 @@ class Report012ServiceTest {
         any(BufferedWriter.class),
         any()
     );
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/daily/report_012_2025-12-22.csv"));
+    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/daily/report_012_2025-12-22.csv"), eq(List.of(
+      "Provider office account number", "Submission month", "Area of law",
+      "Original submission value", "Date submission was uploaded")));
   }
 
 }

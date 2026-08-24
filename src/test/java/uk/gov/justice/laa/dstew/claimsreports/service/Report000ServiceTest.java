@@ -5,6 +5,7 @@ import java.io.File;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -75,7 +76,9 @@ class Report000ServiceTest {
         any(BufferedWriter.class),
         any()
     );
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/monthly/report_000_2025-12-21.csv"));
+    var headers = org.mockito.ArgumentCaptor.forClass(List.class);
+    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/monthly/report_000_2025-12-21.csv"), headers.capture());
+    Assertions.assertEquals(174, headers.getValue().size());
   }
 
   @Test

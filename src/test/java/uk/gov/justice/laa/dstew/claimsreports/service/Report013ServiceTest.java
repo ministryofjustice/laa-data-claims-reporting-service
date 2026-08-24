@@ -12,6 +12,8 @@ import java.io.File;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
+import java.util.regex.Pattern;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -64,7 +66,8 @@ class Report013ServiceTest {
         any(BufferedWriter.class),
         any()
     );
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/daily/report_013_2025-12-22.csv"));
+    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/daily/report_013_2025-12-22.csv"),
+      eq(List.of("Provider Office Account Number", "Area of Law")), any(Pattern.class));
   }
 
 }
