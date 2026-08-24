@@ -9,6 +9,9 @@ spec:
     spec:
       template:
         spec:
+          securityContext:
+            fsGroup: 1001
+            fsGroupChangePolicy: OnRootMismatch
           # This gives the pod aws permissions and access to envs like AWS_REGION
           serviceAccountName: {{ .Values.serviceAccount.name }}
           containers:
@@ -21,10 +24,15 @@ spec:
                   value: {{ .Values.s3.bucketName | quote }}
                 - name: GATEWAY_ADDRESS
                   value: {{ .Values.pushgatewayAddress }}
+                - name: JAVA_TOOL_OPTIONS
+                  value: -Djava.io.tmpdir=/tmp
                 - name: SPRING_PROFILES_ACTIVE
                   value: {{ .Values.service.profile | quote }}
                 # Intellij complains about the below line being an invalid element, but it's fine with helm so ignore that
                 {{ include "data-claims-reporting.dbConnectionDetails" . | nindent 16 }}
+              volumeMounts:
+                - name: tmp
+                  mountPath: /tmp
               resources:
                 {{ toYaml .Values.resources | nindent 16 }}
               securityContext:
@@ -35,6 +43,10 @@ spec:
                     - ALL
                 runAsNonRoot: true
                 allowPrivilegeEscalation: false
+                readOnlyRootFilesystem: true
                 seccompProfile:
                   type: RuntimeDefault
+          volumes:
+            - name: tmp
+              emptyDir: {}
           restartPolicy: OnFailure
