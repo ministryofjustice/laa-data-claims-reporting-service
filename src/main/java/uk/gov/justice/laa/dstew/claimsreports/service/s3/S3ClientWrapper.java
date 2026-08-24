@@ -71,10 +71,25 @@ public class S3ClientWrapper {
     uploadFile(fileToUpload, desiredFileKey, List.of());
   }
 
+  /**
+   * Upload a generated CSV file after validating that its headers match the expected headers.
+   *
+   * @param fileToUpload the CSV file we have just generated
+   * @param desiredFileKey the file key to use on S3
+   * @param expectedHeaders the expected CSV headers in order
+   */
   public void uploadFile(File fileToUpload, String desiredFileKey, List<String> expectedHeaders) {
     uploadFile(fileToUpload, desiredFileKey, expectedHeaders, null);
   }
 
+  /**
+   * Upload a generated CSV file after validating fixed headers and any additional patterned headers.
+   *
+   * @param fileToUpload the CSV file we have just generated
+   * @param desiredFileKey the file key to use on S3
+   * @param expectedHeaders the expected fixed CSV headers in order
+   * @param additionalHeaderPattern pattern that any additional CSV headers must match
+   */
   public void uploadFile(File fileToUpload, String desiredFileKey, List<String> expectedHeaders,
                          Pattern additionalHeaderPattern) {
     String fileName = fileToUpload.getName();

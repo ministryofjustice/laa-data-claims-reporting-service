@@ -236,6 +236,14 @@ public class CsvFileValidator {
     return checkHeaders(fileToUpload, expectedHeaders);
   }
 
+  /**
+   * Check that the CSV file starts with expected headers and any remaining headers match a pattern.
+   *
+   * @param fileToUpload file to check
+   * @param expectedHeaders expected fixed headers in their required order
+   * @param additionalHeaderPattern pattern that any additional headers must match
+   * @return true if the fixed and patterned headers match, false otherwise
+   */
   public boolean checkCsvHeaders(File fileToUpload, List<String> expectedHeaders, Pattern additionalHeaderPattern) {
     try {
       var csvMapper = new CsvMapper();
