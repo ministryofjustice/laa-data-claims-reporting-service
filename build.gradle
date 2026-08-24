@@ -85,6 +85,7 @@ dependencies {
     implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.24'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.1'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.22'
+    implementation 'io.micrometer:micrometer-core:1.17.1' // override until fix available
     // The 3.x Jacksons MUST be kept in sync or they will break the build.
     implementation 'tools.jackson.core:jackson-databind:3.2.2'
     implementation 'tools.jackson.core:jackson-core:3.2.2'
