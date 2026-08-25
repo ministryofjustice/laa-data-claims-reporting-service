@@ -14,9 +14,15 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvSchema;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
 
 /**
@@ -189,6 +195,84 @@ public class CsvFileValidator {
     }
 
     return true;
+  }
+
+  /**
+   * Check that the first row of the file contains the expected CSV headers.
+   *
+   * @param fileToUpload file to check
+   * @param expectedHeaders expected headers in their required order
+   * @return true if the headers match, false otherwise
+   */
+  private boolean checkHeaders(File fileToUpload, List<String> expectedHeaders) {
+    try {
+      List<String> actualHeaders = readHeaders(fileToUpload);
+      boolean headersMatch = actualHeaders.equals(expectedHeaders);
+
+      if (!headersMatch) {
+        log.atError()
+            .addKeyValue("event.action", "csv.validation.failure")
+            .addKeyValue("event.type", "batch")
+            .addKeyValue("expected.headers", expectedHeaders)
+            .addKeyValue("actual.headers", actualHeaders)
+            .log("CSV headers do not match expected headers for file {}", sanitise(fileToUpload.getPath()));
+      }
+
+      return headersMatch;
+    } catch (JacksonException e) {
+      log.atError()
+          .addKeyValue("event.action", "csv.validation.failure")
+          .addKeyValue("event.type", "batch")
+          .setCause(e)
+          .log("Failed to read CSV headers from file {}", sanitise(fileToUpload.getPath()));
+      return false;
+    }
+  }
+
+  public boolean checkCsvHeaders(File fileToUpload, List<String> expectedHeaders) {
+    return checkHeaders(fileToUpload, expectedHeaders);
+  }
+
+  /**
+   * Check that the CSV file starts with expected fixed headers and any remaining headers match a pattern.
+   *
+   * @param fileToUpload file to check
+   * @param expectedFixedHeaders expected fixed headers in their required order
+   * @param additionalHeaderPattern pattern that any additional headers must match
+   * @return true if the fixed and patterned headers match, false otherwise
+   */
+  public boolean checkCsvHeaders(File fileToUpload, List<String> expectedFixedHeaders, Pattern additionalHeaderPattern) {
+    try {
+      var actualHeaders = readHeaders(fileToUpload);
+      return actualHeaders.size() > expectedFixedHeaders.size()
+          && actualHeaders.subList(0, expectedFixedHeaders.size()).equals(expectedFixedHeaders)
+          && actualHeaders.subList(expectedFixedHeaders.size(), actualHeaders.size()).stream()
+              .allMatch(header -> additionalHeaderPattern.matcher(header).matches());
+    } catch (JacksonException e) {
+      log.atError()
+          .addKeyValue("event.action", "csv.validation.failure")
+          .addKeyValue("event.type", "batch")
+          .setCause(e)
+          .log("Failed to read CSV headers from file {}", sanitise(fileToUpload.getPath()));
+      return false;
+    }
+  }
+
+  private List<String> readHeaders(File fileToUpload) {
+    var csvMapper = new CsvMapper();
+    var csvReader = csvMapper.readerFor(Map.class).with(CsvSchema.emptySchema().withHeader());
+    try (var csvRows = csvReader.readValues(fileToUpload)) {
+      if (!csvRows.hasNextValue()) {
+        return List.of();
+      }
+      Object firstDataRow = csvRows.nextValue();
+      if (!(firstDataRow instanceof Map<?, ?> row)) {
+        return List.of();
+      }
+      return row.keySet().stream()
+          .map(String.class::cast)
+          .toList();
+    }
   }
 
 }

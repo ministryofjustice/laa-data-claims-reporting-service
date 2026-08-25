@@ -1,8 +1,8 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import java.time.Clock;
+import java.util.List;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.core.env.Environment;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
@@ -59,6 +59,15 @@ public class Report014Service extends AbstractReportService {
         + " to_date(\"Amendment Date\", 'DD/MM/YYYY'),"
         + " to_timestamp(\"Amendment Time\", 'HH24:MI:SS')::time,"
         + " \"Assessment ID\"";
+  }
+
+  @Override
+  protected List<String> getExpectedCsvHeaders() {
+    return List.of(
+    "Office Account Number", "Submission Period", "Area of Law", "Client Forename",
+    "Client Surname", "Unique Client Number", "Unique File Number", "Amendment Date",
+    "Amendment Time", "Value before Amendment", "Value after Amendment", "Difference",
+    "Assessment Type", "Assessment Reason", "Submission ID", "Claim ID", "Assessment ID");
   }
 
   // Daily report

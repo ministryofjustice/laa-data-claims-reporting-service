@@ -2,11 +2,13 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
@@ -24,6 +26,8 @@ import static org.mockito.Mockito.*;
  */
 class AbstractReportServiceTest {
 
+  private static final String TEMP_REPORT_PREFIX = "test_report_2025-12-21_";
+
   private TestReportService service;
   private JdbcTemplate jdbcTemplate;
   private CsvCreationService csvCreationService;
@@ -32,7 +36,9 @@ class AbstractReportServiceTest {
   private Clock fixedClock;
 
   @BeforeEach
-  void setUp() {
+  @SneakyThrows
+  void setUpAbstractReportService() {
+    deleteTempReportFiles();
     jdbcTemplate = mock(JdbcTemplate.class);
     s3ClientWrapper = mock(S3ClientWrapper.class);
     csvCreationService = mock(CsvCreationService.class);
@@ -72,13 +78,7 @@ class AbstractReportServiceTest {
     Assertions.assertThrows(CsvCreationException.class, () -> service.generateReport());
 
     // And ensure it cleans up after itself
-    Path tempDir = Path.of(System.getProperty("java.io.tmpdir"));
-    try (var stream = Files.list(tempDir)) {
-      assertFalse(stream.anyMatch(file -> {
-        var fileName = file.getFileName();
-        return fileName != null && fileName.toString().endsWith(".csv");
-      }));
-    }
+    assertNoTempReportFiles();
   }
 
   @Test
@@ -87,19 +87,45 @@ class AbstractReportServiceTest {
 
     verify(csvCreationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_000 ORDER BY  test_order_by_column"),
         any(BufferedWriter.class), any());
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/daily/test_report_2025-12-21.csv"));
+    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/daily/test_report_2025-12-21.csv"), eq(List.of()), isNull());
   }
 
   @SneakyThrows
   @Test
   void generateReport_shouldDeleteTheTempFileWhenFinished(){
     service.generateReport();
+    assertNoTempReportFiles();
+  }
+
+  @SneakyThrows
+  private void assertNoTempReportFiles() {
     Path tempDir = Path.of(System.getProperty("java.io.tmpdir"));
     try (var stream = Files.list(tempDir)) {
       assertFalse(stream.anyMatch(file -> {
         var fileName = file.getFileName();
-        return fileName != null && fileName.toString().endsWith(".csv");
+        return fileName != null && fileName.toString().startsWith(TEMP_REPORT_PREFIX) && fileName.toString().endsWith(".csv");
       }));
+    }
+  }
+
+  @SneakyThrows
+  private void deleteTempReportFiles() {
+    Path tempDir = Path.of(System.getProperty("java.io.tmpdir"));
+    try (var stream = Files.list(tempDir)) {
+      stream
+          .filter(file -> {
+            var fileName = file.getFileName();
+            return fileName != null
+                && fileName.toString().startsWith(TEMP_REPORT_PREFIX)
+                && fileName.toString().endsWith(".csv");
+          })
+          .forEach(file -> {
+            try {
+              Files.deleteIfExists(file);
+            } catch (IOException e) {
+              throw new RuntimeException("Failed to delete temp report file: " + file, e);
+            }
+          });
     }
   }
 

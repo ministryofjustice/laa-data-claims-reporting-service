@@ -2,6 +2,7 @@ package uk.gov.justice.laa.dstew.claimsreports.service.s3;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
+import java.util.List;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
@@ -27,6 +28,7 @@ import static org.junit.jupiter.api.Assertions.assertThrows;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyDouble;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
@@ -49,7 +51,7 @@ class S3ClientWrapperTest {
 
   @SneakyThrows
   @BeforeEach
-  void beforeEach() {
+  void setUpS3ClientWrapper() {
     testFilePath = Path.of(getClass().getClassLoader().getResource("testReport.csv").toURI());
     testReport = testFilePath.toFile();
     reset(csvFileValidator, metricsHandler, s3Client);
@@ -171,6 +173,18 @@ class S3ClientWrapperTest {
     assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
   }
 
+  @Test
+  void uploadFile_shouldNotUploadWhenHeadersDoNotMatch() {
+    when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(true);
+    when(csvFileValidator.checkFileExtension("testReport.csv", "filename.csv")).thenReturn(true);
+    when(csvFileValidator.checkUtf8Encoded(testReport)).thenReturn(true);
+    when(csvFileValidator.checkCsvHeaders(testReport, List.of("Expected header"))).thenReturn(false);
+
+    assertThrows(CsvUploadException.class,
+      () -> s3ClientWrapper.uploadFile(testReport, "filename.csv", List.of("Expected header"), null));
+
+    verify(s3Client, never()).putObject(any(PutObjectRequest.class), any(RequestBody.class));
+  }
   @SneakyThrows
   private String getRequestBodyContents(RequestBody requestBody) {
     var outputStream = new ByteArrayOutputStream();

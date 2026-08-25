@@ -5,6 +5,7 @@ import java.io.File;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -17,6 +18,7 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 import static org.mockito.Mockito.any;
 import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -38,7 +40,7 @@ class Report000ServiceTest {
   private AppConfig appConfig;
 
   @BeforeEach
-  void setUp() {
+  void setUpReport000Service() {
     jdbcTemplate = mock(JdbcTemplate.class);
     creationService = mock(CsvCreationService.class);
     s3ClientWrapper = mock(S3ClientWrapper.class);
@@ -75,7 +77,9 @@ class Report000ServiceTest {
         any(BufferedWriter.class),
         any()
     );
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/monthly/report_000_2025-12-21.csv"));
+    var headers = org.mockito.ArgumentCaptor.forClass(List.class);
+    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/monthly/report_000_2025-12-21.csv"), headers.capture(), isNull());
+    Assertions.assertEquals(174, headers.getValue().size());
   }
 
   @Test

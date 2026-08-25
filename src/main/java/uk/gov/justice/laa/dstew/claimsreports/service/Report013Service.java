@@ -1,6 +1,8 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import java.time.Clock;
+import java.util.List;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -56,6 +58,16 @@ public class Report013Service extends AbstractReportService {
   @Override
   protected String getOrderByClause() {
     return " \"Provider Office Account Number\", \"Area of Law\"";
+  }
+
+  @Override
+  protected List<String> getExpectedCsvHeaders() {
+    return List.of("Provider Office Account Number", "Area of Law");
+  }
+
+  @Override
+  protected Pattern getAdditionalCsvHeaderPattern() {
+    return Pattern.compile("(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-\\d{4}");
   }
 
   // Daily report

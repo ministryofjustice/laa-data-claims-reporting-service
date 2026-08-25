@@ -7,17 +7,19 @@ import java.io.OutputStream;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
-import lombok.SneakyThrows;
+import java.util.regex.Pattern;
+
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import lombok.SneakyThrows;
+import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
 import static uk.gov.justice.laa.dstew.claimsreports.service.CsvFileValidator.BUFFER_SIZE;
 
 @ExtendWith(MockitoExtension.class)
@@ -131,6 +133,72 @@ class CsvFileValidatorTest {
   @Test
   void checkFileExtension_shouldErrorIfTryingToUploadFileThatIsNotCsv() {
     assertThrows(CsvUploadException.class, () -> csvFileValidator.checkFileExtension("blah.csv", "bash.exe"));
+  }
+
+  @SneakyThrows
+  @Test
+  void checkCsvHeaders_shouldReturnTrueWhenHeadersMatch() {
+    var path = Files.createTempFile("headers-match", ".csv");
+    Files.writeString(path, "\"First name\",Age\nAlice,42\n");
+
+    assertTrue(csvFileValidator.checkCsvHeaders(path.toFile(), Arrays.asList("First name", "Age")));
+    Files.deleteIfExists(path);
+  }
+
+  @SneakyThrows
+  @Test
+  void checkCsvHeaders_shouldReturnFalseWhenHeadersDoNotMatch() {
+    var path = Files.createTempFile("headers-mismatch", ".csv");
+    Files.writeString(path, "\"First name\",Age\nAlice,42\n");
+
+    assertFalse(csvFileValidator.checkCsvHeaders(path.toFile(), Arrays.asList("First name", "Name")));
+    Files.deleteIfExists(path);
+  }
+
+  @SneakyThrows
+  @Test
+  void checkCsvHeaders_shouldValidateDynamicHeadersAfterExpectedPrefix() {
+    var path = Files.createTempFile("dynamic-headers", ".csv");
+    Files.writeString(path, "\"Provider Office Account Number\",\"Area of Law\",APR-2025\n001,CIVIL,1\n");
+
+    assertTrue(csvFileValidator.checkCsvHeaders(path.toFile(),
+        Arrays.asList("Provider Office Account Number", "Area of Law"),
+        Pattern.compile("(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-\\d{4}")));
+    Files.deleteIfExists(path);
+  }
+
+  @SneakyThrows
+  @Test
+  void checkCsvHeaders_shouldRejectDynamicHeadersWhenNoAdditionalHeadersExist() {
+    var path = Files.createTempFile("missing-dynamic-headers", ".csv");
+    Files.writeString(path, "\"Provider Office Account Number\",\"Area of Law\"\n");
+
+    assertFalse(csvFileValidator.checkCsvHeaders(path.toFile(),
+        Arrays.asList("Provider Office Account Number", "Area of Law"),
+        Pattern.compile("(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-\\d{4}")));
+    Files.deleteIfExists(path);
+  }
+
+  @SneakyThrows
+  @Test
+  void checkCsvHeaders_shouldReturnFalseWhenFileCannotBeParsed() {
+    var path = Files.createTempFile("unparsable-headers", ".csv");
+    Files.writeString(path, "\"Unterminated header,Age\nAlice,42\n");
+
+    assertFalse(csvFileValidator.checkCsvHeaders(path.toFile(), Arrays.asList("Unterminated header", "Age")));
+    Files.deleteIfExists(path);
+  }
+
+  @SneakyThrows
+  @Test
+  void checkCsvHeaders_withPattern_shouldReturnFalseWhenFileCannotBeParsed() {
+    var path = Files.createTempFile("unparsable-dynamic-headers", ".csv");
+    Files.writeString(path, "\"Unterminated header,Age\nAlice,42\n");
+
+    assertFalse(csvFileValidator.checkCsvHeaders(path.toFile(),
+        Arrays.asList("Unterminated header"),
+        Pattern.compile("Age")));
+    Files.deleteIfExists(path);
   }
 
 

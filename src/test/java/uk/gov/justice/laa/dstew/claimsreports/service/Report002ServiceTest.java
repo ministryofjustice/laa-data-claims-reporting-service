@@ -5,12 +5,14 @@ import java.io.File;
 import java.time.Clock;
 import java.time.Instant;
 import java.time.ZoneOffset;
+import java.util.List;
 
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.ArgumentMatchers.isNull;
 import static org.mockito.Mockito.mock;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
@@ -35,7 +37,7 @@ class Report002ServiceTest {
   private AppConfig appConfig;
 
   @BeforeEach
-  void setUp() {
+  void setUpReport002Service() {
     jdbcTemplate = mock(JdbcTemplate.class);
     creationService = mock(CsvCreationService.class);
     s3ClientWrapper = mock(S3ClientWrapper.class);
@@ -73,7 +75,10 @@ class Report002ServiceTest {
         any(BufferedWriter.class),
         any()
     );
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/monthly/report_002_2025-12-21.csv"));
+    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/monthly/report_002_2025-12-21.csv"), eq(List.of(
+      "Firm name", "Firm number", "File name", "Office code", "Submission for date",
+      "Category code", "Procurement area code", "Procurement area desc", "Access point code",
+      "Access point desc", "Schedule reference", "Mediation type", "New cases count")), isNull());
   }
 
   @Test

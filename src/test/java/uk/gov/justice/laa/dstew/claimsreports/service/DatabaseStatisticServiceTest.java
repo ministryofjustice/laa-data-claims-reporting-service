@@ -1,5 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -33,7 +34,11 @@ class DatabaseStatisticServiceTest {
   private DatabaseStatisticService databaseStatisticService;
 
   @BeforeEach
-  void beforeEach() {
+  @SuppressFBWarnings(
+      value = "SECSQLISPRJDBC",
+      justification = "Mockito stubs match SQL constants passed by production code; no SQL is executed in this unit test."
+  )
+  void setUpDatabaseStatisticService() {
     reset(jdbcTemplate, metricsHandler);
     when(jdbcTemplate.queryForObject(anyString(), eq(Double.class))).thenReturn(null);
   }

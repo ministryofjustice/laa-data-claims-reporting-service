@@ -54,7 +54,7 @@ public class CsvRowCallbackHandlerTest {
   private final Map<String, String> expectedDataRow = new LinkedHashMap<>();
 
   @BeforeEach
-  void setup() {
+  void setUpCsvRowCallbackHandler() {
     row = new LinkedHashMap<>();
     stringWriter = new StringWriter();
     writer = new BufferedWriter(stringWriter);
