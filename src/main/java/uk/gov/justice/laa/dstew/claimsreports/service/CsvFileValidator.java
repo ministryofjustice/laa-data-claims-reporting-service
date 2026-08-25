@@ -244,11 +244,10 @@ public class CsvFileValidator {
   public boolean checkCsvHeaders(File fileToUpload, List<String> expectedHeaders, Pattern additionalHeaderPattern) {
     try {
       var actualHeaders = readHeaders(fileToUpload);
-      boolean headersMatch = actualHeaders.size() > expectedHeaders.size()
+      return actualHeaders.size() > expectedHeaders.size()
           && actualHeaders.subList(0, expectedHeaders.size()).equals(expectedHeaders)
           && actualHeaders.subList(expectedHeaders.size(), actualHeaders.size()).stream()
               .allMatch(header -> additionalHeaderPattern.matcher(header).matches());
-      return headersMatch;
     } catch (RuntimeException e) {
       log.atError()
           .addKeyValue("event.action", "csv.validation.failure")
@@ -263,13 +262,6 @@ public class CsvFileValidator {
     var csvMapper = new CsvMapper();
     var csvReader = csvMapper.readerFor(Map.class).with(CsvSchema.emptySchema().withHeader());
     try (var csvRows = csvReader.readValues(fileToUpload)) {
-      var schema = csvRows.getParser().getSchema();
-      if (schema instanceof CsvSchema csvSchema && csvSchema.size() > 0) {
-        return java.util.stream.IntStream.range(0, csvSchema.size())
-            .mapToObj(i -> csvSchema.column(i).getName())
-            .toList();
-      }
-
       if (!csvRows.hasNextValue()) {
         return List.of();
       }
@@ -280,8 +272,6 @@ public class CsvFileValidator {
       return row.keySet().stream()
           .map(String.class::cast)
           .toList();
-    } catch (IOException e) {
-      throw new RuntimeException(e);
     }
   }
 

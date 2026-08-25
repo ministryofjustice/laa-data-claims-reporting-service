@@ -2,6 +2,7 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import java.io.BufferedWriter;
 import java.io.File;
+import java.io.IOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
@@ -121,7 +122,7 @@ class AbstractReportServiceTest {
           .forEach(file -> {
             try {
               Files.deleteIfExists(file);
-            } catch (java.io.IOException e) {
+            } catch (IOException e) {
               throw new RuntimeException("Failed to delete temp report file: " + file, e);
             }
           });
