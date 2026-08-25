@@ -179,6 +179,28 @@ class CsvFileValidatorTest {
     Files.deleteIfExists(path);
   }
 
+  @SneakyThrows
+  @Test
+  void checkCsvHeaders_shouldReturnFalseWhenFileCannotBeParsed() {
+    var path = Files.createTempFile("unparsable-headers", ".csv");
+    Files.writeString(path, "\"Unterminated header,Age\nAlice,42\n");
+
+    assertFalse(csvFileValidator.checkCsvHeaders(path.toFile(), Arrays.asList("Unterminated header", "Age")));
+    Files.deleteIfExists(path);
+  }
+
+  @SneakyThrows
+  @Test
+  void checkCsvHeaders_withPattern_shouldReturnFalseWhenFileCannotBeParsed() {
+    var path = Files.createTempFile("unparsable-dynamic-headers", ".csv");
+    Files.writeString(path, "\"Unterminated header,Age\nAlice,42\n");
+
+    assertFalse(csvFileValidator.checkCsvHeaders(path.toFile(),
+        Arrays.asList("Unterminated header"),
+        Pattern.compile("Age")));
+    Files.deleteIfExists(path);
+  }
+
 
   @Test
   void checkMimeTypeIsCsv_shouldReturnTrueForCsvMimeType() {

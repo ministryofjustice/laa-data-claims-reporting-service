@@ -14,13 +14,13 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
-import java.util.Arrays;
 import java.util.List;
 import java.util.Locale;
 import java.util.Map;
 import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
 import tools.jackson.dataformat.csv.CsvMapper;
 import tools.jackson.dataformat.csv.CsvSchema;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
@@ -204,22 +204,22 @@ public class CsvFileValidator {
    * @param expectedHeaders expected headers in their required order
    * @return true if the headers match, false otherwise
    */
-  public boolean checkHeaders(File fileToUpload, List<String> expectedHeaders) {
+  private boolean checkHeaders(File fileToUpload, List<String> expectedHeaders) {
     try {
-      String[] actualHeaders = readHeaders(fileToUpload).toArray(String[]::new);
-      boolean headersMatch = Arrays.equals(actualHeaders, expectedHeaders.toArray(String[]::new));
+      List<String> actualHeaders = readHeaders(fileToUpload);
+      boolean headersMatch = actualHeaders.equals(expectedHeaders);
 
       if (!headersMatch) {
         log.atError()
             .addKeyValue("event.action", "csv.validation.failure")
             .addKeyValue("event.type", "batch")
             .addKeyValue("expected.headers", expectedHeaders)
-            .addKeyValue("actual.headers", Arrays.asList(actualHeaders))
+            .addKeyValue("actual.headers", actualHeaders)
             .log("CSV headers do not match expected headers for file {}", sanitise(fileToUpload.getPath()));
       }
 
       return headersMatch;
-    } catch (RuntimeException e) {
+    } catch (JacksonException e) {
       log.atError()
           .addKeyValue("event.action", "csv.validation.failure")
           .addKeyValue("event.type", "batch")
@@ -234,21 +234,21 @@ public class CsvFileValidator {
   }
 
   /**
-   * Check that the CSV file starts with expected headers and any remaining headers match a pattern.
+   * Check that the CSV file starts with expected fixed headers and any remaining headers match a pattern.
    *
    * @param fileToUpload file to check
-   * @param expectedHeaders expected fixed headers in their required order
+   * @param expectedFixedHeaders expected fixed headers in their required order
    * @param additionalHeaderPattern pattern that any additional headers must match
    * @return true if the fixed and patterned headers match, false otherwise
    */
-  public boolean checkCsvHeaders(File fileToUpload, List<String> expectedHeaders, Pattern additionalHeaderPattern) {
+  public boolean checkCsvHeaders(File fileToUpload, List<String> expectedFixedHeaders, Pattern additionalHeaderPattern) {
     try {
       var actualHeaders = readHeaders(fileToUpload);
-      return actualHeaders.size() > expectedHeaders.size()
-          && actualHeaders.subList(0, expectedHeaders.size()).equals(expectedHeaders)
-          && actualHeaders.subList(expectedHeaders.size(), actualHeaders.size()).stream()
+      return actualHeaders.size() > expectedFixedHeaders.size()
+          && actualHeaders.subList(0, expectedFixedHeaders.size()).equals(expectedFixedHeaders)
+          && actualHeaders.subList(expectedFixedHeaders.size(), actualHeaders.size()).stream()
               .allMatch(header -> additionalHeaderPattern.matcher(header).matches());
-    } catch (RuntimeException e) {
+    } catch (JacksonException e) {
       log.atError()
           .addKeyValue("event.action", "csv.validation.failure")
           .addKeyValue("event.type", "batch")
