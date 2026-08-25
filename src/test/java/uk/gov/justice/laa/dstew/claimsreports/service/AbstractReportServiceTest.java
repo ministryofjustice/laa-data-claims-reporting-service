@@ -114,9 +114,17 @@ class AbstractReportServiceTest {
       stream
           .filter(file -> {
             var fileName = file.getFileName();
-            return fileName != null && fileName.toString().startsWith(TEMP_REPORT_PREFIX) && fileName.toString().endsWith(".csv");
+            return fileName != null
+                && fileName.toString().startsWith(TEMP_REPORT_PREFIX)
+                && fileName.toString().endsWith(".csv");
           })
-          .forEach(file -> file.toFile().delete());
+          .forEach(file -> {
+            try {
+              Files.deleteIfExists(file);
+            } catch (java.io.IOException e) {
+              throw new RuntimeException("Failed to delete temp report file: " + file, e);
+            }
+          });
     }
   }
 
