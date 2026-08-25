@@ -263,6 +263,13 @@ public class CsvFileValidator {
     var csvMapper = new CsvMapper();
     var csvReader = csvMapper.readerFor(Map.class).with(CsvSchema.emptySchema().withHeader());
     try (var csvRows = csvReader.readValues(fileToUpload)) {
+      var schema = csvRows.getParser().getSchema();
+      if (schema instanceof CsvSchema csvSchema && csvSchema.size() > 0) {
+        return java.util.stream.IntStream.range(0, csvSchema.size())
+            .mapToObj(i -> csvSchema.column(i).getName())
+            .toList();
+      }
+
       if (!csvRows.hasNextValue()) {
         return List.of();
       }
@@ -273,6 +280,8 @@ public class CsvFileValidator {
       return row.keySet().stream()
           .map(String.class::cast)
           .toList();
+    } catch (IOException e) {
+      throw new RuntimeException(e);
     }
   }
 
