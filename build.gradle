@@ -2,7 +2,7 @@ plugins {
     id 'io.freefair.lombok' version '9.5.0'
     // plugin version set in settings.gradle
     id 'uk.gov.justice.service.laa.laa-spring-boot-gradle-plugin'
-    id 'com.github.spotbugs' version '6.5.10'
+    id 'com.github.spotbugs' version '6.5.11'
 }
 
 checkstyle {
@@ -68,7 +68,7 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    implementation(platform 'software.amazon.awssdk:bom:2.53.1')
+    implementation(platform 'software.amazon.awssdk:bom:2.54.2')
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:sts'
 
@@ -82,8 +82,8 @@ dependencies {
     // Snyk vulns
     implementation 'ch.qos.logback:logback-core:1.6.3'
     implementation 'ch.qos.logback:logback-classic:1.6.3' // override until fix available
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.24'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.1'
+    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.25'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.2'
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.22'
     // The 3.x Jacksons MUST be kept in sync or they will break the build.
     implementation 'tools.jackson.core:jackson-databind:3.2.2'
@@ -97,10 +97,13 @@ dependencies {
     implementation 'io.netty:netty-handler:4.2.17.Final'
     // Need until AWS SDK reaches 5.4.3 or higher
     implementation 'org.apache.httpcomponents.core5:httpcore5-h2:5.4.3'
-    // Need until Spring reaches 1.17.1 or higher
+    // Need until Spring Boot reaches 1.17.1 or higher
     implementation 'io.micrometer:micrometer-core:1.17.1'
-    // Need until Spring reaches 1.7.1 or higher
+    // Need until Spring Boot reaches 1.7.1 or higher
     implementation 'io.micrometer:micrometer-tracing-bridge-brave:1.7.1'
+    // Need until Spring Boot reaches 7.0.9 or higher
+    implementation 'org.springframework:spring-beans:7.0.9'
+    implementation 'org.springframework:spring-expression:7.0.9'
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
     runtimeOnly 'org.postgresql:postgresql:42.7.13' // override until LAA plugin updated
