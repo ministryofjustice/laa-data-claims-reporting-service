@@ -1,5 +1,18 @@
 # Changelog
 
+## [1.7.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.6.1...v1.7.0) (2026-08-27)
+
+
+### Features
+
+* **LPF-1550:** repeatable report definitions ([#253](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/253)) ([a60bf63](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/a60bf6360cf29a0912002f18816ecbab0cfc0f46))
+
+
+### Bug Fixes
+
+* **bot:** Bump the gradle-updates group with 5 updates ([#251](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/251)) ([d4fb9f8](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/d4fb9f8a8aafe5556bc4652a39dc7d536747fdab))
+* **LPF-000:** snyk high vuln ([#248](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/248)) ([1ce28f5](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/1ce28f506b778c3e69b7ba54b4a2f60d02541b35))
+
 ## [1.6.1](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.6.0...v1.6.1) (2026-08-20)
 
 
