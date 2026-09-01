@@ -56,3 +56,4 @@ feature:
   ignore-replication-rowcount-mismatch: ${FEATURE_IGNORE_REPLICATION_ROWCOUNT_MISMATCH:false}
   force-run-rep000: ${FORCE_RUN_REP000:false}
   force-run-rep002: ${FORCE_RUN_REP002:false}
+  enable-rep012-xlsx: ${FEATURE_ENABLE_REP012_XLSX:false}

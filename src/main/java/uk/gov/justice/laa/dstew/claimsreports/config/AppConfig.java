@@ -97,4 +97,8 @@ public class AppConfig {
   @Value("${feature.upload-utf-8-failures-to-s3:false}")
   private boolean uploadUtf8FailuresToS3;
 
+  @Value("${feature.enable-rep012-xlsx:false}")
+  @Getter
+  private boolean enableRep012Xlsx;
+
 }
