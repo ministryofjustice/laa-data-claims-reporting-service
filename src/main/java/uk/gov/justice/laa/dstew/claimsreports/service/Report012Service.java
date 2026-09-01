@@ -1,10 +1,13 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import java.io.File;
+import java.io.IOException;
 import java.time.Clock;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
@@ -20,9 +23,22 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 @Service
 public class Report012Service extends AbstractReportService {
 
+  private final AppConfig appConfig;
+  private final ExcelCreationService excelCreationService;
+
+  /**
+   * Creates Report012Service.
+   */
   public Report012Service(JdbcTemplate jdbcTemplate,
-                          S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService, MetricsHandler metricsHandler, Clock clock) {
+                          S3ClientWrapper s3ClientWrapper,
+                          CsvCreationService csvCreationService,
+                          MetricsHandler metricsHandler,
+                          Clock clock,
+                          AppConfig appConfig,
+                          ExcelCreationService excelCreationService) {
     super(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, clock);
+    this.appConfig = appConfig;
+    this.excelCreationService = excelCreationService;
   }
 
   @Override
@@ -68,5 +84,29 @@ public class Report012Service extends AbstractReportService {
   @Override
   protected boolean runToday() {
     return true;
+  }
+
+  @Override
+  protected String getReportFileExtension() {
+    return appConfig.isEnableRep012Xlsx() ? ".xlsx" : ".csv";
+  }
+
+  @Override
+  protected void writeReportToTempFile(String sql, File tempFile) throws IOException {
+    if (appConfig.isEnableRep012Xlsx()) {
+      excelCreationService.buildExcelFromData(sql, tempFile, getReportName());
+      return;
+    }
+    super.writeReportToTempFile(sql, tempFile);
+  }
+
+  @Override
+  protected void uploadReportFile(File tempFile, String s3FileKey) {
+    if (appConfig.isEnableRep012Xlsx()) {
+      s3ClientWrapper.uploadFile(tempFile, s3FileKey,
+          "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      return;
+    }
+    super.uploadReportFile(tempFile, s3FileKey);
   }
 }
