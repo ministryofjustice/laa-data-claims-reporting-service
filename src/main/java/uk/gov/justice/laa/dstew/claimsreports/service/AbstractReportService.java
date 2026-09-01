@@ -1,15 +1,11 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
-import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Transactional;
-import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
-import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId;
-import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
-import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
+import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_SKIPPED;
+import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_SUCCESSFUL;
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitiseForFilename;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -19,11 +15,14 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.regex.Pattern;
-
-import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_SKIPPED;
-import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_SUCCESSFUL;
-import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
-import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitiseForFilename;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
+import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId;
+import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
+import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
  * AbstractReportService serves as a base class for implementing report generation services

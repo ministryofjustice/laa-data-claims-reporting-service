@@ -2,10 +2,10 @@ package uk.gov.justice.laa.dstew.claimsreports.service.s3;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.List;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -197,10 +197,11 @@ class S3ClientWrapperTest {
     when(csvFileValidator.checkCsvHeaders(testReport, List.of("Expected header"))).thenReturn(false);
 
     assertThrows(CsvUploadException.class,
-      () -> s3ClientWrapper.uploadFile(testReport, "filename.csv", List.of("Expected header"), null));
+        () -> s3ClientWrapper.uploadFile(testReport, "filename.csv", List.of("Expected header"), null));
 
     verify(s3Client, never()).putObject(any(PutObjectRequest.class), any(RequestBody.class));
   }
+
   @SneakyThrows
   private String getRequestBodyContents(RequestBody requestBody) {
     var outputStream = new ByteArrayOutputStream();
