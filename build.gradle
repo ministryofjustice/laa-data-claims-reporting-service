@@ -80,6 +80,7 @@ dependencies {
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 
     implementation 'tools.jackson.dataformat:jackson-dataformat-csv'
+    implementation 'org.apache.poi:poi-ooxml:5.4.1'
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
     runtimeOnly 'org.postgresql:postgresql'
