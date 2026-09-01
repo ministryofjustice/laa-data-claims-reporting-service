@@ -174,6 +174,22 @@ class S3ClientWrapperTest {
   }
 
   @Test
+  void uploadFile_shouldUploadWithoutCsvValidationWhenContentTypeProvided() {
+    var mockResponse = PutObjectResponse.builder().build();
+    when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class))).thenReturn(mockResponse);
+
+    s3ClientWrapper.uploadFile(testReport, "reports/daily/report_012.xlsx",
+        "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+
+    var captorPutObjectRequest = ArgumentCaptor.forClass(PutObjectRequest.class);
+    verify(s3Client).putObject(captorPutObjectRequest.capture(), any(RequestBody.class));
+    assertEquals("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
+        captorPutObjectRequest.getValue().contentType());
+    verify(csvFileValidator, never()).checkMimeTypeIsCsv(any(File.class));
+    verify(csvFileValidator, never()).checkUtf8Encoded(any(File.class));
+  }
+
+  @Test
   void uploadFile_shouldNotUploadWhenHeadersDoNotMatch() {
     when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(true);
     when(csvFileValidator.checkFileExtension("testReport.csv", "filename.csv")).thenReturn(true);
