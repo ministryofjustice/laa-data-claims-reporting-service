@@ -1,11 +1,15 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
-import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_SKIPPED;
-import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_SUCCESSFUL;
-import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
-import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitiseForFilename;
-
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import lombok.AllArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
+import org.springframework.jdbc.core.JdbcTemplate;
+import org.springframework.transaction.annotation.Transactional;
+import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
+import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId;
+import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
+import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -15,14 +19,11 @@ import java.time.Clock;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.regex.Pattern;
-import lombok.AllArgsConstructor;
-import lombok.extern.slf4j.Slf4j;
-import org.springframework.jdbc.core.JdbcTemplate;
-import org.springframework.transaction.annotation.Transactional;
-import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
-import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId;
-import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
-import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
+
+import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_SKIPPED;
+import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_SUCCESSFUL;
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitise;
+import static uk.gov.justice.laa.dstew.claimsreports.utils.LogSanitiser.sanitiseForFilename;
 
 /**
  * AbstractReportService serves as a base class for implementing report generation services
@@ -111,7 +112,7 @@ public abstract class AbstractReportService {
    *
    * @return the report's expected file extension
    */
-  private String getReportFileExtension() {
+  protected String getReportFileExtension() {
     return ".csv";
   }
 
@@ -158,10 +159,7 @@ public abstract class AbstractReportService {
 
     try {
       final String sql = buildReportSql(getDataSourceName(), getOrderByClause());
-
-      try (BufferedWriter writer = Files.newBufferedWriter(tempFile.toPath())) {
-        csvCreationService.buildCsvFromData(sql, writer, getReportName());
-      }
+      writeReportToTempFile(sql, tempFile);
       long endTime = System.currentTimeMillis();
       long durationMilliseconds = endTime - startTime;
       log.atInfo()
@@ -171,13 +169,7 @@ public abstract class AbstractReportService {
           .addKeyValue("event.outcome", "success")
           .log("Created {} file with filename {} in {} ms", sanitise(getReportName()), sanitise(getFullReportFileName()), durationMilliseconds);
       metricsHandler.setCustomMetric(CustomMetricId.GENERATED_TIME_MS, durationMilliseconds);
-      var expectedHeaders = getExpectedCsvHeaders();
-      s3ClientWrapper.uploadFile(
-          tempFile,
-          generateS3FileKey(),
-          expectedHeaders,
-          getAdditionalCsvHeaderPattern()
-      );
+      uploadReportFile(tempFile, generateS3FileKey());
       metricsHandler.setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_SUCCESSFUL);
 
     } catch (IOException | RuntimeException e) {
@@ -212,6 +204,22 @@ public abstract class AbstractReportService {
 
   private String buildReportSql(String dataSourceName, String orderByClause) {
     return String.format("SELECT * FROM %s ORDER BY %s", dataSourceName, orderByClause);
+  }
+
+  protected void writeReportToTempFile(String sql, File tempFile) throws IOException {
+    try (BufferedWriter writer = Files.newBufferedWriter(tempFile.toPath())) {
+      csvCreationService.buildCsvFromData(sql, writer, getReportName());
+    }
+  }
+
+  protected void uploadReportFile(File tempFile, String s3FileKey) {
+    var expectedHeaders = getExpectedCsvHeaders();
+    s3ClientWrapper.uploadFile(
+        tempFile,
+        s3FileKey,
+        expectedHeaders,
+        getAdditionalCsvHeaderPattern()
+    );
   }
 
   private void deleteTempFile(File tempFile) {
