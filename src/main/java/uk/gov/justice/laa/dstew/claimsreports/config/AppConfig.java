@@ -70,6 +70,9 @@ public class AppConfig {
   @Value("${csv-creation.data-chunk-size:1000}")
   private int dataChunkSize;
 
+  @Value("${excel-creation.row-access-window-size:100}")
+  private int excelRowAccessWindowSize;
+
   @Bean
   public S3ClientWrapper createS3ClientWrapper(@Value("${AWS_REGION}") String awsRegion, @Value("${S3_REPORT_STORE}") String bucketName,
                                                MetricsHandler metricsHandler, CsvFileValidator csvFileValidator) {
