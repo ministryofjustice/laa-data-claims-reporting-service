@@ -19,17 +19,18 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
  * Configuration class for setting up S3-related beans for use in a local development environment
  * leveraging Localstack.
  *
- * <p>This class is only active when the 'local' Spring profile is active.
- * It configures the necessary beans to connect to a Localstack S3 service, provide file upload
- * functionality, and create the required S3 bucket if it does not already exist.
+ * <p>This class is only active when the 'local' Spring profile is active. It configures the
+ * necessary beans to connect to a Localstack S3 service, provide file upload functionality, and
+ * create the required S3 bucket if it does not already exist.
  */
 @Configuration
 @Profile("local") // Only active for the 'local' profile
 public class LocalstackS3Config {
 
   /**
-   * Creates and configures an instance of {@link S3Client} for integration with Localstack's S3 service.
-   * The client is set up with static credentials, a custom endpoint, and path-style access enabled.
+   * Creates and configures an instance of {@link S3Client} for integration with Localstack's S3
+   * service. The client is set up with static credentials, a custom endpoint, and path-style access
+   * enabled.
    *
    * @param endpoint the custom endpoint URL of the Localstack S3 service.
    * @param region the AWS region to be used by the S3 client.
@@ -48,24 +49,20 @@ public class LocalstackS3Config {
         .endpointOverride(URI.create(endpoint))
         .region(Region.of(region))
         .credentialsProvider(
-            StaticCredentialsProvider.create(
-                AwsBasicCredentials.create(accessKey, secretKey)))
-        .serviceConfiguration(
-            S3Configuration.builder()
-                .pathStyleAccessEnabled(true)
-                .build()
-        )
+            StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
+        .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build())
         .build();
   }
 
   /**
    * Creates and initializes an instance of {@link S3ClientWrapper}, which wraps an {@link S3Client}
-   * and provides additional functionalities specific to the application's requirements.
-   * This method also ensures that the specified S3 bucket exists, creating it if necessary.
+   * and provides additional functionalities specific to the application's requirements. This method
+   * also ensures that the specified S3 bucket exists, creating it if necessary.
    *
-   * @param localstackS3Client the {@link S3Client} instance configured to interact with the S3 service,
-   *                           typically pointed at a Localstack environment for local development.
-   * @param bucketName the name of the S3 bucket that the {@link S3ClientWrapper} will interact with.
+   * @param localstackS3Client the {@link S3Client} instance configured to interact with the S3
+   *     service, typically pointed at a Localstack environment for local development.
+   * @param bucketName the name of the S3 bucket that the {@link S3ClientWrapper} will interact
+   *     with.
    * @return a configured {@link S3ClientWrapper} instance.
    */
   @Bean
@@ -74,8 +71,7 @@ public class LocalstackS3Config {
       @Value("${S3_REPORT_STORE}") String bucketName,
       MetricsHandler metricsHandler,
       CsvFileValidator csvFileValidator,
-      @Value("${feature.upload-utf-8-failures-to-s3:false}") boolean uploadUtf8FailuresToS3
-  ) {
+      @Value("${feature.upload-utf-8-failures-to-s3:false}") boolean uploadUtf8FailuresToS3) {
 
     // create bucket if it doesn't exist
     try {
@@ -84,7 +80,7 @@ public class LocalstackS3Config {
       // ignore
     }
 
-    return new S3ClientWrapper(localstackS3Client, bucketName, metricsHandler, csvFileValidator, uploadUtf8FailuresToS3);
+    return new S3ClientWrapper(
+        localstackS3Client, bucketName, metricsHandler, csvFileValidator, uploadUtf8FailuresToS3);
   }
-
 }

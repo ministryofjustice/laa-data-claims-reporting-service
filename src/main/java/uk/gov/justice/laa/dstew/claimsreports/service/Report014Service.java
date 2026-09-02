@@ -9,22 +9,21 @@ import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
- * Report014Service is responsible for generating and managing report_014.
- * This service extends the AbstractReportService and provides
- * an implementation for the report generation process.
- * Responsibilities:
- * - Implements report generation logic for Report014 data.
- * - Utilizes the inherited functionality to refresh materialized views as needed.
+ * Report014Service is responsible for generating and managing report_014. This service extends the
+ * AbstractReportService and provides an implementation for the report generation process.
+ * Responsibilities: - Implements report generation logic for Report014 data. - Utilizes the
+ * inherited functionality to refresh materialized views as needed.
  */
 @Slf4j
 @Service
 public class Report014Service extends AbstractReportService {
 
-  public Report014Service(JdbcTemplate jdbcTemplate,
-                          S3ClientWrapper s3ClientWrapper,
-                          CsvCreationService csvCreationService,
-                          MetricsHandler metricsHandler,
-                          Clock clock) {
+  public Report014Service(
+      JdbcTemplate jdbcTemplate,
+      S3ClientWrapper s3ClientWrapper,
+      CsvCreationService csvCreationService,
+      MetricsHandler metricsHandler,
+      Clock clock) {
     super(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, clock);
   }
 
@@ -64,10 +63,23 @@ public class Report014Service extends AbstractReportService {
   @Override
   protected List<String> getExpectedCsvHeaders() {
     return List.of(
-    "Office Account Number", "Submission Period", "Area of Law", "Client Forename",
-    "Client Surname", "Unique Client Number", "Unique File Number", "Amendment Date",
-    "Amendment Time", "Value before Amendment", "Value after Amendment", "Difference",
-    "Assessment Type", "Assessment Reason", "Submission ID", "Claim ID", "Assessment ID");
+        "Office Account Number",
+        "Submission Period",
+        "Area of Law",
+        "Client Forename",
+        "Client Surname",
+        "Unique Client Number",
+        "Unique File Number",
+        "Amendment Date",
+        "Amendment Time",
+        "Value before Amendment",
+        "Value after Amendment",
+        "Difference",
+        "Assessment Type",
+        "Assessment Reason",
+        "Submission ID",
+        "Claim ID",
+        "Assessment ID");
   }
 
   // Daily report

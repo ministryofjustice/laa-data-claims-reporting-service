@@ -10,19 +10,21 @@ import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
- * Report013Service is responsible for generating and managing report_013.
- * This service extends the AbstractReportService and provides
- * an implementation for the report generation process.
- * Responsibilities:
- * - Implements report generation logic for Report013 data.
- * - Utilizes the inherited functionality to refresh materialized views as needed.
+ * Report013Service is responsible for generating and managing report_013. This service extends the
+ * AbstractReportService and provides an implementation for the report generation process.
+ * Responsibilities: - Implements report generation logic for Report013 data. - Utilizes the
+ * inherited functionality to refresh materialized views as needed.
  */
 @Slf4j
 @Service
 public class Report013Service extends AbstractReportService {
 
-  public Report013Service(JdbcTemplate jdbcTemplate,
-                          S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService, MetricsHandler metricsHandler, Clock clock) {
+  public Report013Service(
+      JdbcTemplate jdbcTemplate,
+      S3ClientWrapper s3ClientWrapper,
+      CsvCreationService csvCreationService,
+      MetricsHandler metricsHandler,
+      Clock clock) {
     super(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, clock);
   }
 
@@ -32,12 +34,13 @@ public class Report013Service extends AbstractReportService {
   }
 
   /**
-   * This is a complex report with variable columns and needs a stored function.
-   * The function refreshes the underlying report data in a table, rather than a materialised view.
+   * This is a complex report with variable columns and needs a stored function. The function
+   * refreshes the underlying report data in a table, rather than a materialised view.
    */
   @Override
   protected String getRefreshCommand() {
-    return "SELECT claims.refresh_report013()"; //The "SELECT" statement actually runs the stored function
+    return "SELECT claims.refresh_report013()"; // The "SELECT" statement actually runs the stored
+    // function
   }
 
   @Override

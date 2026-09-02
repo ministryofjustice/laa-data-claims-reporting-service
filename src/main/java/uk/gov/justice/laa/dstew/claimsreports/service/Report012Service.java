@@ -9,19 +9,21 @@ import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
- * Report012Service is responsible for generating and managing report_012.
- * This service extends the AbstractReportService and provides
- * an implementation for the report generation process.
- * Responsibilities:
- * - Implements report generation logic for Report012 data.
- * - Utilizes the inherited functionality to refresh materialized views as needed.
+ * Report012Service is responsible for generating and managing report_012. This service extends the
+ * AbstractReportService and provides an implementation for the report generation process.
+ * Responsibilities: - Implements report generation logic for Report012 data. - Utilizes the
+ * inherited functionality to refresh materialized views as needed.
  */
 @Slf4j
 @Service
 public class Report012Service extends AbstractReportService {
 
-  public Report012Service(JdbcTemplate jdbcTemplate,
-                          S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService, MetricsHandler metricsHandler, Clock clock) {
+  public Report012Service(
+      JdbcTemplate jdbcTemplate,
+      S3ClientWrapper s3ClientWrapper,
+      CsvCreationService csvCreationService,
+      MetricsHandler metricsHandler,
+      Clock clock) {
     super(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, clock);
   }
 
@@ -60,8 +62,11 @@ public class Report012Service extends AbstractReportService {
   @Override
   protected List<String> getExpectedCsvHeaders() {
     return List.of(
-    "Provider office account number", "Submission month", "Area of law",
-    "Original submission value", "Date submission was uploaded");
+        "Provider office account number",
+        "Submission month",
+        "Area of law",
+        "Original submission value",
+        "Date submission was uploaded");
   }
 
   // Daily report

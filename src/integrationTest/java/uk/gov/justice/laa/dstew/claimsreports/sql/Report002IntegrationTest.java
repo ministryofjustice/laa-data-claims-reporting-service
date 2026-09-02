@@ -1,12 +1,11 @@
 package uk.gov.justice.laa.dstew.claimsreports.sql;
 
+import static org.assertj.core.api.Assertions.assertThat;
+
 import java.util.List;
 import java.util.Map;
 import java.util.UUID;
-
-import static org.assertj.core.api.Assertions.assertThat;
 import org.junit.jupiter.api.Test;
-
 import uk.gov.justice.laa.dstew.claimsreports.IntegrationTestBase;
 
 class Report002IntegrationTest extends IntegrationTestBase {
@@ -31,14 +30,14 @@ class Report002IntegrationTest extends IntegrationTestBase {
         "AP-INT-001",
         "LOC-001",
         "integration_test_user",
-        17
-    );
+        17);
 
     try {
       jdbcTemplate.update("REFRESH MATERIALIZED VIEW claims.mvw_report_002");
 
-      List<Map<String, Object>> rows = jdbcTemplate.queryForList(
-          """
+      List<Map<String, Object>> rows =
+          jdbcTemplate.queryForList(
+              """
               SELECT *
               FROM claims.mvw_report_002
               WHERE "Office code" = 'OA001'
@@ -46,26 +45,25 @@ class Report002IntegrationTest extends IntegrationTestBase {
                 AND "Category code" = 'CAT-INT-001'
                 AND "Procurement area code" = 'PA-INT-001'
                 AND "Access point code" = 'AP-INT-001'
-              """
-      );
+              """);
 
       assertThat(rows).hasSize(1);
       Map<String, Object> row = rows.getFirst();
-      assertThat(row.keySet()).containsExactly(
-          "Firm name",
-          "Firm number",
-          "File name",
-          "Office code",
-          "Submission for date",
-          "Category code",
-          "Procurement area code",
-          "Procurement area desc",
-          "Access point code",
-          "Access point desc",
-          "Schedule reference",
-          "Mediation type",
-          "New cases count"
-      );
+      assertThat(row.keySet())
+          .containsExactly(
+              "Firm name",
+              "Firm number",
+              "File name",
+              "Office code",
+              "Submission for date",
+              "Category code",
+              "Procurement area code",
+              "Procurement area desc",
+              "Access point code",
+              "Access point desc",
+              "Schedule reference",
+              "Mediation type",
+              "New cases count");
       assertThat(row.get("Firm name")).isEqualTo("");
       assertThat(row.get("Firm number")).isEqualTo("");
       assertThat(row.get("File name")).isEqualTo("");
@@ -111,8 +109,7 @@ class Report002IntegrationTest extends IntegrationTestBase {
         1,
         null,
         "integration_test_user",
-        "integration_test_provider"
-    );
+        "integration_test_provider");
 
     jdbcTemplate.update(
         """
@@ -130,8 +127,7 @@ class Report002IntegrationTest extends IntegrationTestBase {
         "AP-DEDUP",
         "DL-OLD",
         "integration_test_user",
-        17
-    );
+        17);
 
     jdbcTemplate.update(
         """
@@ -149,14 +145,14 @@ class Report002IntegrationTest extends IntegrationTestBase {
         "AP-DEDUP",
         "DL-NEW",
         "integration_test_user",
-        17
-    );
+        17);
 
     try {
       jdbcTemplate.update("REFRESH MATERIALIZED VIEW claims.mvw_report_002");
 
-      List<Map<String, Object>> rows = jdbcTemplate.queryForList(
-          """
+      List<Map<String, Object>> rows =
+          jdbcTemplate.queryForList(
+              """
               SELECT *
               FROM claims.mvw_report_002
               WHERE "Office code" = 'OA001'
@@ -164,12 +160,14 @@ class Report002IntegrationTest extends IntegrationTestBase {
                 AND "Category code" = 'CAT-DEDUP'
                 AND "Procurement area code" = 'PA-DEDUP'
                 AND "Access point code" = 'AP-DEDUP'
-              """
-      );
+              """);
 
       assertThat(rows).hasSize(1);
     } finally {
-      jdbcTemplate.update("DELETE FROM claims.matter_start WHERE id IN (?, ?)", olderMatterStartId, newerMatterStartId);
+      jdbcTemplate.update(
+          "DELETE FROM claims.matter_start WHERE id IN (?, ?)",
+          olderMatterStartId,
+          newerMatterStartId);
       jdbcTemplate.update("DELETE FROM claims.submission WHERE id = ?", newerSubmissionId);
       jdbcTemplate.update("REFRESH MATERIALIZED VIEW claims.mvw_report_002");
     }
@@ -200,8 +198,7 @@ class Report002IntegrationTest extends IntegrationTestBase {
         1,
         "[{\"field\":\"status\",\"error\":\"invalid\"}]",
         "integration_test_user",
-        "integration_test_provider"
-    );
+        "integration_test_provider");
 
     jdbcTemplate.update(
         """
@@ -219,14 +216,14 @@ class Report002IntegrationTest extends IntegrationTestBase {
         "AP-KEEP-OLDER",
         "DL-KEEP-OLDER",
         "integration_test_user",
-        29
-    );
+        29);
 
     try {
       jdbcTemplate.update("REFRESH MATERIALIZED VIEW claims.mvw_report_002");
 
-      List<Map<String, Object>> rows = jdbcTemplate.queryForList(
-          """
+      List<Map<String, Object>> rows =
+          jdbcTemplate.queryForList(
+              """
               SELECT *
               FROM claims.mvw_report_002
               WHERE "Office code" = 'OA001'
@@ -234,14 +231,14 @@ class Report002IntegrationTest extends IntegrationTestBase {
                 AND "Category code" = 'CAT-KEEP-OLDER'
                 AND "Procurement area code" = 'PA-KEEP-OLDER'
                 AND "Access point code" = 'AP-KEEP-OLDER'
-              """
-      );
+              """);
 
       assertThat(rows).hasSize(1);
       assertThat(((Number) rows.getFirst().get("New cases count")).intValue()).isEqualTo(29);
     } finally {
       jdbcTemplate.update("DELETE FROM claims.matter_start WHERE id = ?", olderMatterStartId);
-      jdbcTemplate.update("DELETE FROM claims.submission WHERE id = ?", failedReplacementSubmissionId);
+      jdbcTemplate.update(
+          "DELETE FROM claims.submission WHERE id = ?", failedReplacementSubmissionId);
       jdbcTemplate.update("REFRESH MATERIALIZED VIEW claims.mvw_report_002");
     }
   }

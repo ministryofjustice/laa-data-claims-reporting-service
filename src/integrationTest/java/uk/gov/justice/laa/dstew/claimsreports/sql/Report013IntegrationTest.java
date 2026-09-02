@@ -17,12 +17,13 @@ class Report013IntegrationTest extends IntegrationTestBase {
     // When
     insertAreaOfLawTestData();
 
-    List<Map<String, Object>> areaOfLawCounts = jdbcTemplate.queryForList("""
+    List<Map<String, Object>> areaOfLawCounts =
+        jdbcTemplate.queryForList(
+            """
         SELECT "Area of Law", count(*)
         FROM claims.report_013
         GROUP BY "Area of Law"
-        """
-        );
+        """);
 
     // Then
     assertThat(areaOfLawCounts).isNotNull();
@@ -31,22 +32,19 @@ class Report013IntegrationTest extends IntegrationTestBase {
 
     Map<String, Long> countsByAreaOfLaw =
         areaOfLawCounts.stream()
-            .collect(Collectors.toMap(
-                row -> (String) row.get("Area of Law"),
-                row -> ((Number) row.get("count")).longValue()
-            ));
+            .collect(
+                Collectors.toMap(
+                    row -> (String) row.get("Area of Law"),
+                    row -> ((Number) row.get("count")).longValue()));
 
-    assertThat(countsByAreaOfLaw)
-        .containsKeys("LEGAL_HELP", "CRIME_LOWER");
+    assertThat(countsByAreaOfLaw).containsKeys("LEGAL_HELP", "CRIME_LOWER");
 
     assertThat(countsByAreaOfLaw.get("LEGAL_HELP")).isEqualTo(1L);
     assertThat(countsByAreaOfLaw.get("CRIME_LOWER")).isEqualTo(1L);
 
-    long totalRows =
-        countsByAreaOfLaw.values().stream().mapToLong(Long::longValue).sum();
+    long totalRows = countsByAreaOfLaw.values().stream().mapToLong(Long::longValue).sum();
 
     assertThat(totalRows).isEqualTo(2L);
-
   }
 
   @Test
@@ -56,28 +54,23 @@ class Report013IntegrationTest extends IntegrationTestBase {
     jdbcTemplate.execute("SELECT claims.refresh_report013()");
 
     // Then
-    List<Map<String, Object>> report013Rows = jdbcTemplate.queryForList("""
+    List<Map<String, Object>> report013Rows =
+        jdbcTemplate.queryForList(
+            """
         SELECT *
         FROM claims.report_013
         ORDER BY "Area of Law"
-        """
-    );
+        """);
 
     assertThat(report013Rows).isNotEmpty();
 
     Map<String, Object> firstRow = report013Rows.getFirst();
 
     // Column count
-    assertThat(firstRow)
-        .hasSize(4);
+    assertThat(firstRow).hasSize(4);
 
     assertThat(firstRow.keySet())
-        .containsExactly(
-            "Provider Office Account Number",
-            "Area of Law",
-            "APR-2025",
-            "MAY-2025"
-        );
+        .containsExactly("Provider Office Account Number", "Area of Law", "APR-2025", "MAY-2025");
 
     Map<String, Object> civilRow =
         report013Rows.stream()
@@ -85,14 +78,11 @@ class Report013IntegrationTest extends IntegrationTestBase {
             .findFirst()
             .orElseThrow();
 
-    assertThat(civilRow.get("FEB-2025"))
-        .isNull();
+    assertThat(civilRow.get("FEB-2025")).isNull();
 
-    assertThat( civilRow.get("APR-2025"))
-        .isEqualTo("");
+    assertThat(civilRow.get("APR-2025")).isEqualTo("");
 
-    assertThat(civilRow.get("MAY-2025"))
-        .isEqualTo("0.00");
+    assertThat(civilRow.get("MAY-2025")).isEqualTo("0.00");
 
     Map<String, Object> crimeRow =
         report013Rows.stream()
@@ -100,17 +90,15 @@ class Report013IntegrationTest extends IntegrationTestBase {
             .findFirst()
             .orElseThrow();
 
-    assertThat(crimeRow.get("FEB-2025"))
-        .isNull();
-    // 2500 from the third (latest) Calculated Fee Detail for claim 33333333-3333-3333-3333-333333333333
-    // 3500 from the second (latest) Calculated Fee Detail for claim 33333333-3333-3333-3333-333333333334
+    assertThat(crimeRow.get("FEB-2025")).isNull();
+    // 2500 from the third (latest) Calculated Fee Detail for claim
+    // 33333333-3333-3333-3333-333333333333
+    // 3500 from the second (latest) Calculated Fee Detail for claim
+    // 33333333-3333-3333-3333-333333333334
     // 120.33 from the second (latest) Assessment for claim 33333333-3333-3333-3333-333333333337
-    assertThat(crimeRow.get("APR-2025"))
-        .isEqualTo("6120.33");
+    assertThat(crimeRow.get("APR-2025")).isEqualTo("6120.33");
 
-    assertThat(crimeRow.get("MAY-2025"))
-        .isEqualTo("0.00");
-
+    assertThat(crimeRow.get("MAY-2025")).isEqualTo("0.00");
   }
 
   @Test
@@ -118,29 +106,24 @@ class Report013IntegrationTest extends IntegrationTestBase {
     // When
     insertDataToReplaceSubmission();
 
-    List<Map<String, Object>> report013Rows = jdbcTemplate.queryForList("""
+    List<Map<String, Object>> report013Rows =
+        jdbcTemplate.queryForList(
+            """
         SELECT *
         FROM claims.report_013
         ORDER BY "Area of Law"
-        """
-    );
+        """);
 
     // Then
     assertThat(report013Rows).isNotEmpty();
 
     Map<String, Object> firstRow = report013Rows.getFirst();
 
-// Column count
-    assertThat(firstRow)
-        .hasSize(4);
+    // Column count
+    assertThat(firstRow).hasSize(4);
 
     assertThat(firstRow.keySet())
-        .containsExactly(
-            "Provider Office Account Number",
-            "Area of Law",
-            "APR-2025",
-            "MAY-2025"
-        );
+        .containsExactly("Provider Office Account Number", "Area of Law", "APR-2025", "MAY-2025");
 
     Map<String, Object> crimeRow =
         report013Rows.stream()
@@ -148,15 +131,11 @@ class Report013IntegrationTest extends IntegrationTestBase {
             .findFirst()
             .orElseThrow();
 
-    assertThat(crimeRow.get("FEB-2025"))
-        .isNull();
+    assertThat(crimeRow.get("FEB-2025")).isNull();
 
-    assertThat(crimeRow.get("APR-2025"))
-        .isEqualTo("1501.00");
+    assertThat(crimeRow.get("APR-2025")).isEqualTo("1501.00");
 
-    assertThat(crimeRow.get("MAY-2025"))
-        .isEqualTo("0.00");
-
+    assertThat(crimeRow.get("MAY-2025")).isEqualTo("0.00");
   }
 
   @Test
@@ -164,13 +143,14 @@ class Report013IntegrationTest extends IntegrationTestBase {
     // When
     insertBigNumber();
 
-    List<Map<String, Object>> report013Rows = jdbcTemplate.queryForList("""
+    List<Map<String, Object>> report013Rows =
+        jdbcTemplate.queryForList(
+            """
         SELECT *
         FROM claims.report_013
         WHERE "Provider Office Account Number" = 'BIGONE'
         ORDER BY "Area of Law"
-        """
-    );
+        """);
 
     // Then
     assertThat(report013Rows).isNotEmpty();
@@ -181,14 +161,12 @@ class Report013IntegrationTest extends IntegrationTestBase {
             .findFirst()
             .orElseThrow();
 
-    assertThat(crimeRow.get("APR-2025"))
-        .isEqualTo("10000000000000000.00");
-
+    assertThat(crimeRow.get("APR-2025")).isEqualTo("10000000000000000.00");
   }
 
-
   private void insertAreaOfLawTestData() {
-    jdbcTemplate.update("""
+    jdbcTemplate.update(
+        """
     INSERT INTO claims.submission (
         id, bulk_submission_id, office_account_number, submission_period, area_of_law, status, crime_lower_schedule_number,
         previous_submission_id, is_nil_submission, number_of_claims, error_messages, created_by_user_id, created_on, provider_user_id
@@ -209,7 +187,8 @@ class Report013IntegrationTest extends IntegrationTestBase {
         'test provider user')
     """);
 
-    jdbcTemplate.update("""
+    jdbcTemplate.update(
+        """
       INSERT INTO claims.claim (
           id, submission_id, status, line_number, matter_type_code, created_by_user_id, created_on
       ) VALUES (
@@ -222,7 +201,8 @@ class Report013IntegrationTest extends IntegrationTestBase {
           TIMESTAMP '2025-11-21 05:00:00' - interval '1 day')
       """);
 
-    jdbcTemplate.update("""
+    jdbcTemplate.update(
+        """
     INSERT INTO claims.claim_case (
         id, claim_id, case_id, unique_case_id, case_stage_code, stage_reached_code, outcome_code, created_by_user_id, created_on
     ) VALUES (
@@ -242,7 +222,8 @@ class Report013IntegrationTest extends IntegrationTestBase {
   }
 
   private void insertDataToReplaceSubmission() {
-    jdbcTemplate.update("""
+    jdbcTemplate.update(
+        """
     INSERT INTO claims.submission (
         id, bulk_submission_id, office_account_number, submission_period, area_of_law, status, crime_lower_schedule_number,
         previous_submission_id, is_nil_submission, number_of_claims, error_messages, created_by_user_id, created_on, provider_user_id
@@ -263,7 +244,8 @@ class Report013IntegrationTest extends IntegrationTestBase {
         'test provider user')
     """);
 
-    jdbcTemplate.update("""
+    jdbcTemplate.update(
+        """
       INSERT INTO claims.claim (
           id, submission_id, status, line_number, matter_type_code, created_by_user_id, created_on
       ) VALUES (
@@ -276,7 +258,8 @@ class Report013IntegrationTest extends IntegrationTestBase {
           TIMESTAMP '2025-11-21 05:00:00' - interval '1 day')
       """);
 
-    jdbcTemplate.update("""
+    jdbcTemplate.update(
+        """
     INSERT INTO claims.claim_case (
         id, claim_id, case_id, unique_case_id, case_stage_code, stage_reached_code, outcome_code, created_by_user_id, created_on
     ) VALUES (
@@ -292,8 +275,8 @@ class Report013IntegrationTest extends IntegrationTestBase {
          )
     """);
 
-
-    jdbcTemplate.update("""
+    jdbcTemplate.update(
+        """
       INSERT INTO claims.claim_summary_fee (
           id, claim_id, advice_time, travel_time, waiting_time, net_profit_costs_amount, net_disbursement_amount,
           net_counsel_costs_amount, disbursements_vat_amount, travel_waiting_costs_amount, net_waiting_costs_amount,
@@ -308,7 +291,8 @@ class Report013IntegrationTest extends IntegrationTestBase {
            )
       """);
 
-    jdbcTemplate.update("""
+    jdbcTemplate.update(
+        """
       INSERT INTO claims.calculated_fee_detail (
           id, claim_summary_fee_id, claim_id, fee_code, fee_type, created_by_user_id, created_on, updated_by_user_id, updated_on,
           fee_code_description, category_of_law, total_amount
@@ -320,7 +304,8 @@ class Report013IntegrationTest extends IntegrationTestBase {
   }
 
   private void insertBigNumber() {
-    jdbcTemplate.update("""
+    jdbcTemplate.update(
+        """
     INSERT INTO claims.submission (
         id, bulk_submission_id, office_account_number, submission_period, area_of_law, status, crime_lower_schedule_number,
         previous_submission_id, is_nil_submission, number_of_claims, error_messages, created_by_user_id, created_on, provider_user_id
@@ -341,7 +326,8 @@ class Report013IntegrationTest extends IntegrationTestBase {
         'test provider user')
     """);
 
-    jdbcTemplate.update("""
+    jdbcTemplate.update(
+        """
       INSERT INTO claims.claim (
           id, submission_id, status, line_number, matter_type_code, created_by_user_id, created_on
       ) VALUES (
@@ -354,7 +340,8 @@ class Report013IntegrationTest extends IntegrationTestBase {
           TIMESTAMP '2025-11-21 05:00:00' - interval '1 day')
       """);
 
-    jdbcTemplate.update("""
+    jdbcTemplate.update(
+        """
     INSERT INTO claims.claim_case (
         id, claim_id, case_id, unique_case_id, case_stage_code, stage_reached_code, outcome_code, created_by_user_id, created_on
     ) VALUES (
@@ -370,8 +357,8 @@ class Report013IntegrationTest extends IntegrationTestBase {
          )
     """);
 
-
-    jdbcTemplate.update("""
+    jdbcTemplate.update(
+        """
       INSERT INTO claims.claim_summary_fee (
           id, claim_id, advice_time, travel_time, waiting_time, net_profit_costs_amount, net_disbursement_amount,
           net_counsel_costs_amount, disbursements_vat_amount, travel_waiting_costs_amount, net_waiting_costs_amount,
@@ -386,7 +373,8 @@ class Report013IntegrationTest extends IntegrationTestBase {
            )
       """);
 
-    jdbcTemplate.update("""
+    jdbcTemplate.update(
+        """
       INSERT INTO claims.calculated_fee_detail (
           id, claim_summary_fee_id, claim_id, fee_code, fee_type, created_by_user_id, created_on, updated_by_user_id, updated_on,
           fee_code_description, category_of_law, total_amount
@@ -396,5 +384,4 @@ class Report013IntegrationTest extends IntegrationTestBase {
 
     jdbcTemplate.execute("SELECT claims.refresh_report013()");
   }
-
 }

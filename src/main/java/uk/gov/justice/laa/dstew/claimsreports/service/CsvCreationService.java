@@ -22,9 +22,7 @@ import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 
-/**
- * Data access object class to provide interface between application and database layer.
- */
+/** Data access object class to provide interface between application and database layer. */
 @Service
 @Slf4j
 @AllArgsConstructor
@@ -36,9 +34,8 @@ public class CsvCreationService {
   private final MetricsHandler metricsHandler;
 
   /**
-   * Builds CSV from data retrieved from SQL query
-   * Returns data in chunks, size defined in application config, to ensure
-   * good performance for large datasets.
+   * Builds CSV from data retrieved from SQL query Returns data in chunks, size defined in
+   * application config, to ensure good performance for large datasets.
    *
    * @param sqlQuery query for retrieving dataset
    * @param writer writes string buffer into csv file
@@ -54,11 +51,12 @@ public class CsvCreationService {
 
     try (writer) {
       Map<String, String> row = new LinkedHashMap<>();
-      var handler = new CsvRowCallbackHandler(writer, row, appConfig.getBufferFlushFrequency(), csvMapper);
+      var handler =
+          new CsvRowCallbackHandler(writer, row, appConfig.getBufferFlushFrequency(), csvMapper);
 
       jdbcTemplate.query(
-          (Connection con) -> buildPreparedStatement(sqlQuery, con, appConfig.getDataChunkSize()), handler
-      );
+          (Connection con) -> buildPreparedStatement(sqlQuery, con, appConfig.getDataChunkSize()),
+          handler);
 
       writer.flush();
       log.info("CSV creation completed for {}", sanitise(reportName));
@@ -77,30 +75,27 @@ public class CsvCreationService {
 
   /**
    * Creates a prepared statement that fetches data from the database in defined chunks,
-   * specifically to provide performance improvements for large data sets.
-   * Setting autocommit to false, in combination with fetch size,
-   * ensures data is retrieved in chunks.
+   * specifically to provide performance improvements for large data sets. Setting autocommit to
+   * false, in combination with fetch size, ensures data is retrieved in chunks.
    *
    * @param sqlQuery SELECT statement for report data
    * @param con database connection
-   *
    * @return {PreparedStatement}
    */
   @SuppressFBWarnings(
       value = "SQL_INJECTION_JDBC",
-      justification = "Report SQL is assembled from validated service-owned identifiers before reaching this method."
-  )
+      justification =
+          "Report SQL is assembled from validated service-owned identifiers before reaching this method.")
   private PreparedStatement buildPreparedStatement(
       String sqlQuery, Connection con, int dataChunkSize) {
     try {
       con.setAutoCommit(false);
-      PreparedStatement statement = con.prepareStatement(sqlQuery,
-          ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
+      PreparedStatement statement =
+          con.prepareStatement(sqlQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY);
       statement.setFetchSize(dataChunkSize);
       return statement;
     } catch (SQLException ex) {
       throw new CsvCreationException("Failed on creation of prepared statement", ex);
     }
   }
-
 }

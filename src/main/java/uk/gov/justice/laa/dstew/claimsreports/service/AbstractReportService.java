@@ -25,10 +25,10 @@ import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
- * AbstractReportService serves as a base class for implementing report generation services
- * with support for operations on materialized views. This class provides a framework for
- * refreshing materialized views and generating reports. Subclasses should provide specific
- * implementations for the abstract methods as needed.
+ * AbstractReportService serves as a base class for implementing report generation services with
+ * support for operations on materialized views. This class provides a framework for refreshing
+ * materialized views and generating reports. Subclasses should provide specific implementations for
+ * the abstract methods as needed.
  */
 @Slf4j
 @Transactional
@@ -41,7 +41,7 @@ public abstract class AbstractReportService {
   protected MetricsHandler metricsHandler;
   protected Clock clock;
 
-  //Abstract methods (implemented by subclasses) to provide relevant details for individual reports
+  // Abstract methods (implemented by subclasses) to provide relevant details for individual reports
 
   protected abstract String getDataSourceName();
 
@@ -49,14 +49,11 @@ public abstract class AbstractReportService {
 
   protected abstract String getOrderByClause();
 
-  /**
-   * Refreshes the associated materialized view.
-   */
+  /** Refreshes the associated materialized view. */
   @Transactional
   @SuppressFBWarnings(
-          value = "SQL_INJECTION_SPRING_JDBC",
-          justification = "Refresh SQL is supplied by report service constants, not user input."
-  )
+      value = "SQL_INJECTION_SPRING_JDBC",
+      justification = "Refresh SQL is supplied by report service constants, not user input.")
   public void refreshDataSource() {
     String refreshCommand = getRefreshCommand();
     log.info("Refreshing data for {}", sanitise(getReportName()));
@@ -71,27 +68,26 @@ public abstract class AbstractReportService {
   }
 
   /**
-   * Gets the intended name of the report.
-   * This method is intended to be implemented by subclasses to define the name expected
+   * Gets the intended name of the report. This method is intended to be implemented by subclasses
+   * to define the name expected
    *
    * @return the report's expected name
    */
   public abstract String getReportName();
 
   /**
-   * Gets the intended file name of the report.
-   * This method is intended to be implemented by subclasses to define the file name expected
-   * It is used to build the full file name which includes date and extension.
+   * Gets the intended file name of the report. This method is intended to be implemented by
+   * subclasses to define the file name expected It is used to build the full file name which
+   * includes date and extension.
    *
    * @return the report's expected file name
    */
   protected abstract String getReportFileName();
 
   /**
-   * Gets the "folder" of the report.
-   * S3 doesn't really have folders, but it's easier to think of the path as containing folders and that is how
-   * it is often visualised in the Console.
-   * This will be appended onto the "reports/" folder.
+   * Gets the "folder" of the report. S3 doesn't really have folders, but it's easier to think of
+   * the path as containing folders and that is how it is often visualised in the Console. This will
+   * be appended onto the "reports/" folder.
    *
    * @return the report's expected path in S3
    */
@@ -106,8 +102,7 @@ public abstract class AbstractReportService {
   }
 
   /**
-   * Gets the intended file extension of the report.
-   * At present every report is a csv
+   * Gets the intended file extension of the report. At present every report is a csv
    *
    * @return the report's expected file extension
    */
@@ -133,9 +128,7 @@ public abstract class AbstractReportService {
     return "reports/" + getReportFolder() + "/" + getFullReportFileName();
   }
 
-  /**
-   * Generates a CSV report.
-   */
+  /** Generates a CSV report. */
   public void generateReport() {
     if (!runToday()) {
       log.atInfo()
@@ -169,15 +162,15 @@ public abstract class AbstractReportService {
           .addKeyValue("event.type", "batch")
           .addKeyValue("report.name", getReportName())
           .addKeyValue("event.outcome", "success")
-          .log("Created {} file with filename {} in {} ms", sanitise(getReportName()), sanitise(getFullReportFileName()), durationMilliseconds);
+          .log(
+              "Created {} file with filename {} in {} ms",
+              sanitise(getReportName()),
+              sanitise(getFullReportFileName()),
+              durationMilliseconds);
       metricsHandler.setCustomMetric(CustomMetricId.GENERATED_TIME_MS, durationMilliseconds);
       var expectedHeaders = getExpectedCsvHeaders();
       s3ClientWrapper.uploadFile(
-          tempFile,
-          generateS3FileKey(),
-          expectedHeaders,
-          getAdditionalCsvHeaderPattern()
-      );
+          tempFile, generateS3FileKey(), expectedHeaders, getAdditionalCsvHeaderPattern());
       metricsHandler.setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_SUCCESSFUL);
 
     } catch (IOException | RuntimeException e) {
@@ -195,10 +188,9 @@ public abstract class AbstractReportService {
   }
 
   @SuppressFBWarnings(
-          value = "PATH_TRAVERSAL_IN",
-          justification =
-                  "Prefix/suffix sanitised to alphanumeric/dot/dash/underscore only via sanitiseForFilename before use"
-  )
+      value = "PATH_TRAVERSAL_IN",
+      justification =
+          "Prefix/suffix sanitised to alphanumeric/dot/dash/underscore only via sanitiseForFilename before use")
   private File createTempReportFile() {
     try {
       String prefix = sanitiseForFilename(getReportFileName()) + "_" + LocalDate.now(clock) + "_";
@@ -220,11 +212,13 @@ public abstract class AbstractReportService {
         Files.delete(tempFile.toPath());
         log.info("Deleted temp file {}", sanitise(tempFile.getPath()));
       } catch (IOException e) {
-        log.warn("Failed to delete temp file {}: {}", sanitise(tempFile.getPath()), sanitise(e.getMessage()));
+        log.warn(
+            "Failed to delete temp file {}: {}",
+            sanitise(tempFile.getPath()),
+            sanitise(e.getMessage()));
       }
     }
   }
 
   protected abstract boolean runToday();
-
 }

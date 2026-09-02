@@ -36,14 +36,18 @@ public class TestConfig {
 
   @Bean
   @Primary
-  public S3ClientWrapper s3ClientWrapper(S3Client localstackS3Client, @Value("${S3_REPORT_STORE}") String bucketName,
-                                         MetricsHandler metricsHandler, CsvFileValidator csvFileValidator) {
+  public S3ClientWrapper s3ClientWrapper(
+      S3Client localstackS3Client,
+      @Value("${S3_REPORT_STORE}") String bucketName,
+      MetricsHandler metricsHandler,
+      CsvFileValidator csvFileValidator) {
     try {
       localstackS3Client.createBucket(CreateBucketRequest.builder().bucket(bucketName).build());
     } catch (BucketAlreadyOwnedByYouException e) {
       // ignore
     }
-    return new S3ClientWrapper(localstackS3Client, bucketName, metricsHandler, csvFileValidator, false);
+    return new S3ClientWrapper(
+        localstackS3Client, bucketName, metricsHandler, csvFileValidator, false);
   }
 
   @Bean
@@ -51,10 +55,9 @@ public class TestConfig {
   public Clock fixedClock() {
     return Clock.fixed(
         LocalDate.of(2025, 11, 21)
-            .atTime(5, 0)                     // 5:00 AM
-            .atZone(ZoneId.systemDefault())   // apply your timezone
+            .atTime(5, 0) // 5:00 AM
+            .atZone(ZoneId.systemDefault()) // apply your timezone
             .toInstant(),
-        ZoneId.systemDefault()
-    );
+        ZoneId.systemDefault());
   }
 }
