@@ -3,10 +3,25 @@ plugins {
     // plugin version set in settings.gradle
     id 'uk.gov.justice.service.laa.laa-spring-boot-gradle-plugin'
     id 'com.github.spotbugs' version '6.5.11'
+    id 'com.diffplug.spotless' version '7.2.1'
 }
 
-checkstyle {
-    toolVersion = '13.11.0' // Overriding until Common Plugin catches up
+tasks.withType(Checkstyle).configureEach {
+    setEnabled(false)
+}
+
+spotless {
+    java {
+        target 'src/**/*.java'
+        googleJavaFormat('1.36.1')
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('spotlessCheck')
 }
 
 test {
