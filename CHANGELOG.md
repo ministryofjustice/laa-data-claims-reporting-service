@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.7.1](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.7.0...v1.7.1) (2026-09-02)
+
+
+### Bug Fixes
+
+* **bot:** Bump software.amazon.awssdk:bom from 2.54.2 to 2.54.7 in the gradle-updates group ([#255](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/255)) ([a7e5a8d](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/a7e5a8d7d94d3e5af9eee71ae2d5ee89ed3958bb))
+
 ## [1.7.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.6.1...v1.7.0) (2026-08-27)
 
 
