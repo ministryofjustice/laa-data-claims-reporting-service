@@ -35,10 +35,9 @@ import uk.gov.justice.laa.dstew.claimsreports.service.AbstractReportService;
  * <p>This test verifies the following:
  *
  * <ul>
- *   <li>The health status of database replication, ensuring data consistency between
- *       replication tables.
- *   <li>The correctness of report generation and upload of CSV files to an S3-compatible
- *       storage.
+ *   <li>The health status of database replication, ensuring data consistency between replication
+ *       tables.
+ *   <li>The correctness of report generation and upload of CSV files to an S3-compatible storage.
  * </ul>
  *
  * <p>Key features:
