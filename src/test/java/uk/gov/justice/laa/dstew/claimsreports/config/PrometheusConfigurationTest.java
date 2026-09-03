@@ -1,5 +1,10 @@
 package uk.gov.justice.laa.dstew.claimsreports.config;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertNotNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.when;
+
 import io.micrometer.prometheusmetrics.PrometheusMeterRegistry;
 import io.prometheus.metrics.model.registry.PrometheusRegistry;
 import org.junit.jupiter.api.Test;
@@ -7,23 +12,18 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertNotNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class PrometheusConfigurationTest {
 
   private PrometheusConfiguration prometheusConfiguration;
 
-  @Mock
-  private PrometheusMeterRegistry prometheusMeterRegistry;
+  @Mock private PrometheusMeterRegistry prometheusMeterRegistry;
 
   @Test
   void shouldCreateCustomMetricsClass() {
     prometheusConfiguration = new PrometheusConfiguration();
-    when(prometheusMeterRegistry.getPrometheusRegistry()).thenReturn(mock(PrometheusRegistry.class));
+    when(prometheusMeterRegistry.getPrometheusRegistry())
+        .thenReturn(mock(PrometheusRegistry.class));
     var customMetrics = prometheusConfiguration.createReportGauges(prometheusMeterRegistry);
 
     assertNotNull(customMetrics.dataRefreshTimeMs());
@@ -39,7 +39,8 @@ class PrometheusConfigurationTest {
   @Test
   void shouldResetMetricsWhenResetCalled() {
     prometheusConfiguration = new PrometheusConfiguration();
-    when(prometheusMeterRegistry.getPrometheusRegistry()).thenReturn(mock(PrometheusRegistry.class));
+    when(prometheusMeterRegistry.getPrometheusRegistry())
+        .thenReturn(mock(PrometheusRegistry.class));
     var customMetrics = prometheusConfiguration.createReportGauges(prometheusMeterRegistry);
 
     // Set some test metrics
@@ -67,7 +68,8 @@ class PrometheusConfigurationTest {
   @Test
   void shouldCreateDbHealthMetrics() {
     prometheusConfiguration = new PrometheusConfiguration();
-    when(prometheusMeterRegistry.getPrometheusRegistry()).thenReturn(mock(PrometheusRegistry.class));
+    when(prometheusMeterRegistry.getPrometheusRegistry())
+        .thenReturn(mock(PrometheusRegistry.class));
     var customMetrics = prometheusConfiguration.createDatabaseHealthGauge(prometheusMeterRegistry);
 
     assertNotNull(customMetrics.idleConnections());

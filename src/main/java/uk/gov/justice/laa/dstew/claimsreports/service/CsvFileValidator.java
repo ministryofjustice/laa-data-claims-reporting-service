@@ -14,14 +14,18 @@ import java.nio.charset.CodingErrorAction;
 import java.nio.charset.MalformedInputException;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
+import java.util.List;
 import java.util.Locale;
+import java.util.Map;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import tools.jackson.core.JacksonException;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvSchema;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
 
-/**
- * Handles logic related to ensuring our generated CSV file is valid.
- */
+/** Handles logic related to ensuring our generated CSV file is valid. */
 @Service
 @Slf4j
 public class CsvFileValidator {
@@ -29,19 +33,20 @@ public class CsvFileValidator {
   static final int BUFFER_SIZE = 4096;
 
   /**
-   * Check the file is UTF-8 encoded.
-   * Important if changing this that you do not load the whole file into memory at once!
-   * We manually check as libraries like Tika just look at 10kb or so and predict based on that, which feels insufficient for our purpose and sizes
+   * Check the file is UTF-8 encoded. Important if changing this that you do not load the whole file
+   * into memory at once! We manually check as libraries like Tika just look at 10kb or so and
+   * predict based on that, which feels insufficient for our purpose and sizes
    *
    * @param fileToUpload file to check
    * @return true if UTF-8, false otherwise
    */
   public boolean checkUtf8Encoded(File fileToUpload) {
 
-    var decoder = StandardCharsets.UTF_8
-        .newDecoder()
-        .onMalformedInput(CodingErrorAction.REPORT)
-        .onUnmappableCharacter(CodingErrorAction.REPORT);
+    var decoder =
+        StandardCharsets.UTF_8
+            .newDecoder()
+            .onMalformedInput(CodingErrorAction.REPORT)
+            .onUnmappableCharacter(CodingErrorAction.REPORT);
 
     // inBuffer is what we read the csv file into
     var inBuffer = ByteBuffer.allocate(BUFFER_SIZE);
@@ -55,7 +60,8 @@ public class CsvFileValidator {
       var readableByteChannel = Channels.newChannel(inputStream);
 
       int bytesRead;
-      // We can't just read the whole file at once as it could be hundreds or thousands of MBs and will blow the memory
+      // We can't just read the whole file at once as it could be hundreds or thousands of MBs and
+      // will blow the memory
       // So we loop over a small section at a time
       // -1 is end of file (but still might have carry-over bytes in the inBuffer to handle after)
       while ((bytesRead = readableByteChannel.read(inBuffer)) != -1) {
@@ -90,7 +96,8 @@ public class CsvFileValidator {
       inBuffer.flip();
       var end = decoder.decode(inBuffer, outBuffer, true);
       if (end.isError()) {
-        // This error would e.g. be that the last thing read was part of a multibyte sequence and so we underflowed above,
+        // This error would e.g. be that the last thing read was part of a multibyte sequence and so
+        // we underflowed above,
         // but there is no more to read so we need to error.
         end.throwException();
       }
@@ -111,11 +118,10 @@ public class CsvFileValidator {
           .addKeyValue("event.type", "batch")
           .addKeyValue("event.outcome", "failure")
           .log(
-                  "Malformed UTF-8 at byte offset {} in file {}: {}",
-                  totalBytesRead + errorIndex,
-                  sanitise(fileToUpload.getPath()),
-                  sanitise(e.getMessage())
-          );
+              "Malformed UTF-8 at byte offset {} in file {}: {}",
+              totalBytesRead + errorIndex,
+              sanitise(fileToUpload.getPath()),
+              sanitise(e.getMessage()));
       return false;
     } catch (CharacterCodingException e) {
       log.atError()
@@ -144,10 +150,9 @@ public class CsvFileValidator {
    * @throws CsvUploadException thrown when not a valid CSV file
    */
   @SuppressFBWarnings(
-          value = "IMPROPER_UNICODE",
-          justification =
-                  "MIME type validated against fixed allow-list pattern, not used for case-sensitive security decisions"
-  )
+      value = "IMPROPER_UNICODE",
+      justification =
+          "MIME type validated against fixed allow-list pattern, not used for case-sensitive security decisions")
   public boolean checkMimeTypeIsCsv(File fileToUpload) throws CsvUploadException {
     String fileName = fileToUpload.getName();
     String mimeType;
@@ -163,7 +168,8 @@ public class CsvFileValidator {
     }
 
     if (!"text/csv".equalsIgnoreCase(mimeType)) {
-      throw new CsvUploadException("File '" + fileName + "' has invalid MIME type: " + mimeType + ". Expected 'text/csv'.");
+      throw new CsvUploadException(
+          "File '" + fileName + "' has invalid MIME type: " + mimeType + ". Expected 'text/csv'.");
     }
 
     return true;
@@ -172,12 +178,13 @@ public class CsvFileValidator {
   /**
    * Check the filename is sensible.
    *
-   * @param fileName       file created
+   * @param fileName file created
    * @param desiredFileKey file name to use in S3
    * @return true if correct
    * @throws CsvUploadException thrown when incorrect filename
    */
-  public boolean checkFileExtension(String fileName, String desiredFileKey) throws CsvUploadException {
+  public boolean checkFileExtension(String fileName, String desiredFileKey)
+      throws CsvUploadException {
     // File extension check
     if (!fileName.toLowerCase(Locale.ROOT).endsWith(".csv")) {
       throw new CsvUploadException("File '" + fileName + "' does not have a .csv extension.");
@@ -191,4 +198,83 @@ public class CsvFileValidator {
     return true;
   }
 
+  /**
+   * Check that the first row of the file contains the expected CSV headers.
+   *
+   * @param fileToUpload file to check
+   * @param expectedHeaders expected headers in their required order
+   * @return true if the headers match, false otherwise
+   */
+  private boolean checkHeaders(File fileToUpload, List<String> expectedHeaders) {
+    try {
+      List<String> actualHeaders = readHeaders(fileToUpload);
+      boolean headersMatch = actualHeaders.equals(expectedHeaders);
+
+      if (!headersMatch) {
+        log.atError()
+            .addKeyValue("event.action", "csv.validation.failure")
+            .addKeyValue("event.type", "batch")
+            .addKeyValue("expected.headers", expectedHeaders)
+            .addKeyValue("actual.headers", actualHeaders)
+            .log(
+                "CSV headers do not match expected headers for file {}",
+                sanitise(fileToUpload.getPath()));
+      }
+
+      return headersMatch;
+    } catch (JacksonException e) {
+      log.atError()
+          .addKeyValue("event.action", "csv.validation.failure")
+          .addKeyValue("event.type", "batch")
+          .setCause(e)
+          .log("Failed to read CSV headers from file {}", sanitise(fileToUpload.getPath()));
+      return false;
+    }
+  }
+
+  public boolean checkCsvHeaders(File fileToUpload, List<String> expectedHeaders) {
+    return checkHeaders(fileToUpload, expectedHeaders);
+  }
+
+  /**
+   * Check that the CSV file starts with expected fixed headers and any remaining headers match a
+   * pattern.
+   *
+   * @param fileToUpload file to check
+   * @param expectedFixedHeaders expected fixed headers in their required order
+   * @param additionalHeaderPattern pattern that any additional headers must match
+   * @return true if the fixed and patterned headers match, false otherwise
+   */
+  public boolean checkCsvHeaders(
+      File fileToUpload, List<String> expectedFixedHeaders, Pattern additionalHeaderPattern) {
+    try {
+      var actualHeaders = readHeaders(fileToUpload);
+      return actualHeaders.size() > expectedFixedHeaders.size()
+          && actualHeaders.subList(0, expectedFixedHeaders.size()).equals(expectedFixedHeaders)
+          && actualHeaders.subList(expectedFixedHeaders.size(), actualHeaders.size()).stream()
+              .allMatch(header -> additionalHeaderPattern.matcher(header).matches());
+    } catch (JacksonException e) {
+      log.atError()
+          .addKeyValue("event.action", "csv.validation.failure")
+          .addKeyValue("event.type", "batch")
+          .setCause(e)
+          .log("Failed to read CSV headers from file {}", sanitise(fileToUpload.getPath()));
+      return false;
+    }
+  }
+
+  private List<String> readHeaders(File fileToUpload) {
+    var csvMapper = new CsvMapper();
+    var csvReader = csvMapper.readerFor(Map.class).with(CsvSchema.emptySchema().withHeader());
+    try (var csvRows = csvReader.readValues(fileToUpload)) {
+      if (!csvRows.hasNextValue()) {
+        return List.of();
+      }
+      Object firstDataRow = csvRows.nextValue();
+      if (!(firstDataRow instanceof Map<?, ?> row)) {
+        return List.of();
+      }
+      return row.keySet().stream().map(String.class::cast).toList();
+    }
+  }
 }

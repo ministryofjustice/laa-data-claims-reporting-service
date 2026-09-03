@@ -1,15 +1,5 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
-import org.mockito.InjectMocks;
-import org.mockito.Mock;
-import org.mockito.junit.jupiter.MockitoExtension;
-import org.springframework.jdbc.core.JdbcTemplate;
-import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
-import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId;
-
 import static org.mockito.ArgumentMatchers.anyString;
 import static org.mockito.ArgumentMatchers.eq;
 import static org.mockito.Mockito.reset;
@@ -20,20 +10,32 @@ import static uk.gov.justice.laa.dstew.claimsreports.service.DatabaseStatisticSe
 import static uk.gov.justice.laa.dstew.claimsreports.service.DatabaseStatisticService.QUERY_MAX_CONNECTIONS;
 import static uk.gov.justice.laa.dstew.claimsreports.service.DatabaseStatisticService.QUERY_TOTAL_CONNECTIONS;
 
+import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.InjectMocks;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.jdbc.core.JdbcTemplate;
+import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
+import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId;
+
 @ExtendWith(MockitoExtension.class)
 class DatabaseStatisticServiceTest {
 
-  @Mock
-  private JdbcTemplate jdbcTemplate;
+  @Mock private JdbcTemplate jdbcTemplate;
 
-  @Mock
-  private MetricsHandler metricsHandler;
+  @Mock private MetricsHandler metricsHandler;
 
-  @InjectMocks
-  private DatabaseStatisticService databaseStatisticService;
+  @InjectMocks private DatabaseStatisticService databaseStatisticService;
 
   @BeforeEach
-  void beforeEach() {
+  @SuppressFBWarnings(
+      value = "SECSQLISPRJDBC",
+      justification =
+          "Mockito stubs match SQL constants passed by production code; no SQL is executed in this unit test.")
+  void setUpDatabaseStatisticService() {
     reset(jdbcTemplate, metricsHandler);
     when(jdbcTemplate.queryForObject(anyString(), eq(Double.class))).thenReturn(null);
   }
@@ -153,5 +155,4 @@ class DatabaseStatisticServiceTest {
     databaseStatisticService.setDatabaseMetrics();
     verify(metricsHandler).setCustomMetric(CustomMetricId.DB_CONNECTIONS_UTILISATION_TOTAL, 0);
   }
-
 }

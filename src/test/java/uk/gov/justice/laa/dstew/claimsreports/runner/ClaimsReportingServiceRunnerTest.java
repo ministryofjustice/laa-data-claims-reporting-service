@@ -7,19 +7,17 @@ import static org.mockito.Mockito.never;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_FAILED;
 import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId.REPLICATION_HEALTH_CHECK_STATUS;
+import static uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomReportGauges.REPORT_FAILED;
 
 import java.time.LocalDate;
 import java.util.List;
-
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
 import org.springframework.boot.ApplicationArguments;
 import org.springframework.test.util.ReflectionTestUtils;
-
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId;
 import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
@@ -29,37 +27,31 @@ import uk.gov.justice.laa.dstew.claimsreports.service.ReplicationHealthCheckServ
 
 class ClaimsReportingServiceRunnerTest {
 
-  @Mock
-  private AbstractReportService reportService1;
+  @Mock private AbstractReportService reportService1;
 
-  @Mock
-  private AbstractReportService reportService2;
+  @Mock private AbstractReportService reportService2;
 
-  @Mock
-  private ReplicationHealthCheckService replicationHealthCheckService;
+  @Mock private ReplicationHealthCheckService replicationHealthCheckService;
 
-  @Mock
-  private ApplicationArguments applicationArguments;
+  @Mock private ApplicationArguments applicationArguments;
 
-  @Mock
-  private MetricsHandler metricsHandler;
+  @Mock private MetricsHandler metricsHandler;
 
-  @Mock
-  private DatabaseStatisticService databaseStatisticService;
+  @Mock private DatabaseStatisticService databaseStatisticService;
 
   private ClaimsReportingServiceRunner runner;
 
   @BeforeEach
-  void setUp() {
+  void setUpRunner() {
     MockitoAnnotations.openMocks(this);
 
     // Inject a list of mocked report services
-    runner = new ClaimsReportingServiceRunner(
+    runner =
+        new ClaimsReportingServiceRunner(
             replicationHealthCheckService,
             List.of(reportService1, reportService2),
             metricsHandler,
-            databaseStatisticService
-    );
+            databaseStatisticService);
 
     // Default behaviour: replication is healthy
     ReplicationHealthReport healthyReport = new ReplicationHealthReport(LocalDate.now());
@@ -109,11 +101,11 @@ class ClaimsReportingServiceRunnerTest {
   void shouldHandleEmptyServiceList() {
     // Create runner with empty list of report services
     ClaimsReportingServiceRunner emptyRunner =
-            new ClaimsReportingServiceRunner(replicationHealthCheckService, List.of(), metricsHandler, databaseStatisticService);
+        new ClaimsReportingServiceRunner(
+            replicationHealthCheckService, List.of(), metricsHandler, databaseStatisticService);
 
     // Should not throw any exceptions
-    assertThatCode(() -> emptyRunner.run(applicationArguments))
-            .doesNotThrowAnyException();
+    assertThatCode(() -> emptyRunner.run(applicationArguments)).doesNotThrowAnyException();
   }
 
   @Test
@@ -179,7 +171,7 @@ class ClaimsReportingServiceRunnerTest {
     // Each report should be marked as failed
     verify(metricsHandler, times(2)).resetCustomMetrics();
     verify(metricsHandler, times(2))
-            .setCustomMetric(eq(CustomMetricId.REPORT_SUCCESSFUL), eq((double) REPORT_FAILED));
+        .setCustomMetric(eq(CustomMetricId.REPORT_SUCCESSFUL), eq((double) REPORT_FAILED));
 
     // Metrics pushed per report
     verify(metricsHandler).pushReportMetrics("report1");
@@ -209,12 +201,12 @@ class ClaimsReportingServiceRunnerTest {
 
     when(replicationHealthCheckService.checkReplicationHealth()).thenReturn(unhealthyButSafe);
 
-    runner = new ClaimsReportingServiceRunner(
+    runner =
+        new ClaimsReportingServiceRunner(
             replicationHealthCheckService,
             List.of(reportService1, reportService2),
             metricsHandler,
-            databaseStatisticService
-    );
+            databaseStatisticService);
 
     // enable ignoreRowCountMismatch feature flag
     ReflectionTestUtils.setField(runner, "ignoreRowCountMismatch", true);
@@ -244,12 +236,12 @@ class ClaimsReportingServiceRunnerTest {
     when(reportService1.getReportName()).thenReturn("report1");
     when(reportService2.getReportName()).thenReturn("report2");
 
-    runner = new ClaimsReportingServiceRunner(
+    runner =
+        new ClaimsReportingServiceRunner(
             replicationHealthCheckService,
             List.of(reportService1, reportService2),
             metricsHandler,
-            databaseStatisticService
-    );
+            databaseStatisticService);
 
     // enable ignoreRowCountMismatch
     ReflectionTestUtils.setField(runner, "ignoreRowCountMismatch", true);
@@ -262,7 +254,7 @@ class ClaimsReportingServiceRunnerTest {
 
     // all reports should be marked as failed
     verify(metricsHandler, times(2))
-            .setCustomMetric(eq(CustomMetricId.REPORT_SUCCESSFUL), eq((double) REPORT_FAILED));
+        .setCustomMetric(eq(CustomMetricId.REPORT_SUCCESSFUL), eq((double) REPORT_FAILED));
 
     verify(metricsHandler).pushReportMetrics("report1");
     verify(metricsHandler).pushReportMetrics("report2");

@@ -2,11 +2,26 @@ plugins {
     id 'io.freefair.lombok' version '9.5.0'
     // plugin version set in settings.gradle
     id 'uk.gov.justice.service.laa.laa-spring-boot-gradle-plugin'
-    id 'com.github.spotbugs' version '6.5.10'
+    id 'com.github.spotbugs' version '6.5.11'
+    id 'com.diffplug.spotless' version '7.2.1'
 }
 
-checkstyle {
-    toolVersion = '11.0.0' // Overriding until Common Plugin catches up
+tasks.withType(Checkstyle).configureEach {
+    setEnabled(false)
+}
+
+spotless {
+    java {
+        target 'src/**/*.java'
+        googleJavaFormat('1.36.1')
+        removeUnusedImports()
+        trimTrailingWhitespace()
+        endWithNewline()
+    }
+}
+
+tasks.named('check') {
+    dependsOn tasks.named('spotlessCheck')
 }
 
 test {
@@ -68,7 +83,7 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    implementation(platform 'software.amazon.awssdk:bom:2.53.1')
+    implementation(platform 'software.amazon.awssdk:bom:2.54.7')
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:sts'
 
@@ -79,29 +94,11 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-micrometer-tracing-brave'
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 
-    // Snyk vulns
-    implementation 'ch.qos.logback:logback-core:1.6.3'
-    implementation 'ch.qos.logback:logback-classic:1.6.3' // override until fix available
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.24'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.1'
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.22'
-    implementation 'io.micrometer:micrometer-core:1.17.1' // override until fix available
-    // The 3.x Jacksons MUST be kept in sync or they will break the build.
-    implementation 'tools.jackson.core:jackson-databind:3.2.2'
-    implementation 'tools.jackson.core:jackson-core:3.2.2'
-    implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.2.2' // Until Spring Boot gets to 3.1.5
-    // Need until AWS SDK reaches 4.2.16.Final or higher
-    implementation 'io.netty:netty-codec:4.2.17.Final'
-    implementation 'io.netty:netty-codec-compression:4.2.17.Final'
-    implementation 'io.netty:netty-codec-http:4.2.17.Final'
-    implementation 'io.netty:netty-codec-http2:4.2.17.Final'
-    implementation 'io.netty:netty-handler:4.2.17.Final'
-    // Need until AWS SDK reaches 5.4.3 or higher
-    implementation 'org.apache.httpcomponents.core5:httpcore5-h2:5.4.3'
+    implementation 'tools.jackson.dataformat:jackson-dataformat-csv'
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
-    runtimeOnly 'org.postgresql:postgresql:42.7.13' // override until LAA plugin updated
-    runtimeOnly "org.flywaydb:flyway-database-postgresql:13.3.0" // Override until Spring updates
+    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly "org.flywaydb:flyway-database-postgresql"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
     testImplementation 'org.springframework.boot:spring-boot-starter-actuator-test'

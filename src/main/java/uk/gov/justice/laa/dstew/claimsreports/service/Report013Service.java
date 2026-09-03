@@ -1,6 +1,8 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import java.time.Clock;
+import java.util.List;
+import java.util.regex.Pattern;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
@@ -8,19 +10,21 @@ import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
 /**
- * Report013Service is responsible for generating and managing report_013.
- * This service extends the AbstractReportService and provides
- * an implementation for the report generation process.
- * Responsibilities:
- * - Implements report generation logic for Report013 data.
- * - Utilizes the inherited functionality to refresh materialized views as needed.
+ * Report013Service is responsible for generating and managing report_013. This service extends the
+ * AbstractReportService and provides an implementation for the report generation process.
+ * Responsibilities: - Implements report generation logic for Report013 data. - Utilizes the
+ * inherited functionality to refresh materialized views as needed.
  */
 @Slf4j
 @Service
 public class Report013Service extends AbstractReportService {
 
-  public Report013Service(JdbcTemplate jdbcTemplate,
-                          S3ClientWrapper s3ClientWrapper, CsvCreationService csvCreationService, MetricsHandler metricsHandler, Clock clock) {
+  public Report013Service(
+      JdbcTemplate jdbcTemplate,
+      S3ClientWrapper s3ClientWrapper,
+      CsvCreationService csvCreationService,
+      MetricsHandler metricsHandler,
+      Clock clock) {
     super(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, clock);
   }
 
@@ -30,12 +34,14 @@ public class Report013Service extends AbstractReportService {
   }
 
   /**
-   * This is a complex report with variable columns and needs a stored function.
-   * The function refreshes the underlying report data in a table, rather than a materialised view.
+   * This is a complex report with variable columns and needs a stored function. The function
+   * refreshes the underlying report data in a table, rather than a materialised view.
+   *
+   * <p>The SQL uses {@code SELECT} because invoking the stored function runs the refresh.
    */
   @Override
   protected String getRefreshCommand() {
-    return "SELECT claims.refresh_report013()"; //The "SELECT" statement actually runs the stored function
+    return "SELECT claims.refresh_report013()";
   }
 
   @Override
@@ -56,6 +62,16 @@ public class Report013Service extends AbstractReportService {
   @Override
   protected String getOrderByClause() {
     return " \"Provider Office Account Number\", \"Area of Law\"";
+  }
+
+  @Override
+  protected List<String> getExpectedCsvHeaders() {
+    return List.of("Provider Office Account Number", "Area of Law");
+  }
+
+  @Override
+  protected Pattern getAdditionalCsvHeaderPattern() {
+    return Pattern.compile("(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-\\d{4}");
   }
 
   // Daily report

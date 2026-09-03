@@ -2,23 +2,12 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.junit.jupiter.api.Assertions.assertThrows;
-import org.junit.jupiter.api.BeforeEach;
-import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.extension.ExtendWith;
 import static org.mockito.ArgumentMatchers.any;
 import static org.mockito.ArgumentMatchers.anyInt;
-import org.mockito.Mock;
 import static org.mockito.Mockito.reset;
 import static org.mockito.Mockito.times;
 import static org.mockito.Mockito.verify;
 import static org.mockito.Mockito.when;
-import org.mockito.junit.jupiter.MockitoExtension;
-import tools.jackson.core.exc.JacksonIOException;
-import tools.jackson.databind.ObjectWriter;
-import tools.jackson.databind.SequenceWriter;
-import tools.jackson.dataformat.csv.CsvMapper;
-import tools.jackson.dataformat.csv.CsvSchema;
-import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 
 import java.io.BufferedWriter;
 import java.io.IOException;
@@ -28,6 +17,17 @@ import java.sql.ResultSetMetaData;
 import java.sql.SQLException;
 import java.util.LinkedHashMap;
 import java.util.Map;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
+import org.junit.jupiter.api.extension.ExtendWith;
+import org.mockito.Mock;
+import org.mockito.junit.jupiter.MockitoExtension;
+import tools.jackson.core.exc.JacksonIOException;
+import tools.jackson.databind.ObjectWriter;
+import tools.jackson.databind.SequenceWriter;
+import tools.jackson.dataformat.csv.CsvMapper;
+import tools.jackson.dataformat.csv.CsvSchema;
+import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 
 @ExtendWith(MockitoExtension.class)
 public class CsvRowCallbackHandlerTest {
@@ -36,25 +36,20 @@ public class CsvRowCallbackHandlerTest {
   private StringWriter stringWriter;
   private Map<String, String> row;
 
-  @Mock
-  private ResultSet resultSet;
+  @Mock private ResultSet resultSet;
 
-  @Mock
-  private ResultSetMetaData resultSetMetaData;
+  @Mock private ResultSetMetaData resultSetMetaData;
 
-  @Mock
-  private SequenceWriter sequenceWriter;
+  @Mock private SequenceWriter sequenceWriter;
 
-  @Mock
-  private ObjectWriter objectWriter;
+  @Mock private ObjectWriter objectWriter;
 
-  @Mock
-  private CsvMapper csvMapper;
+  @Mock private CsvMapper csvMapper;
 
   private final Map<String, String> expectedDataRow = new LinkedHashMap<>();
 
   @BeforeEach
-  void setup() {
+  void setUpCsvRowCallbackHandler() {
     row = new LinkedHashMap<>();
     stringWriter = new StringWriter();
     writer = new BufferedWriter(stringWriter);
@@ -87,7 +82,6 @@ public class CsvRowCallbackHandlerTest {
     csvRowCallbackHandler.processRow(resultSet);
     verify(sequenceWriter, times(1)).write(secondRowMap);
     verify(csvMapper, times(0)).writer();
-
   }
 
   @Test
@@ -103,7 +97,8 @@ public class CsvRowCallbackHandlerTest {
 
   @Test
   void willFlushWhenRowNumberEqualsFlushSize() throws SQLException, IOException {
-    CsvRowCallbackHandler csvRowCallbackHandler = new CsvRowCallbackHandler(writer, row, 1, csvMapper);
+    CsvRowCallbackHandler csvRowCallbackHandler =
+        new CsvRowCallbackHandler(writer, row, 1, csvMapper);
     setupResultSetData(1, "data");
 
     when(csvMapper.writer(any(CsvSchema.class))).thenReturn(objectWriter);
@@ -177,11 +172,13 @@ public class CsvRowCallbackHandlerTest {
 
     // Setup data with line feed and carriage return characters
     setupResultSetData(2, "random\ndata\r\nwith line breaks");
-    when(sequenceWriter.write(any(Map.class))).thenAnswer(invocation -> {
-      Map<String, String> writtenRow = invocation.getArgument(0);
-      assertEquals("randomdatawith line breaks", writtenRow.get("column_1"));
-      return null;
-    });
+    when(sequenceWriter.write(any(Map.class)))
+        .thenAnswer(
+            invocation -> {
+              Map<String, String> writtenRow = invocation.getArgument(0);
+              assertEquals("randomdatawith line breaks", writtenRow.get("column_1"));
+              return null;
+            });
 
     csvRowCallbackHandler.processRow(resultSet);
 
@@ -194,11 +191,13 @@ public class CsvRowCallbackHandlerTest {
 
     // Setup data with only carriage return characters (no line feeds)
     setupResultSetData(2, "data\rwith\rcarriage\rreturns");
-    when(sequenceWriter.write(any(Map.class))).thenAnswer(invocation -> {
-      Map<String, String> writtenRow = invocation.getArgument(0);
-      assertEquals("datawithcarriagereturns", writtenRow.get("column_1"));
-      return null;
-    });
+    when(sequenceWriter.write(any(Map.class)))
+        .thenAnswer(
+            invocation -> {
+              Map<String, String> writtenRow = invocation.getArgument(0);
+              assertEquals("datawithcarriagereturns", writtenRow.get("column_1"));
+              return null;
+            });
 
     csvRowCallbackHandler.processRow(resultSet);
 
@@ -211,11 +210,13 @@ public class CsvRowCallbackHandlerTest {
 
     // Setup data with multiple consecutive line breaks
     setupResultSetData(2, "data\n\n\nwith\r\n\r\nmultiple\n\r\n\rbreaks");
-    when(sequenceWriter.write(any(Map.class))).thenAnswer(invocation -> {
-      Map<String, String> writtenRow = invocation.getArgument(0);
-      assertEquals("datawithmultiplebreaks", writtenRow.get("column_1"));
-      return null;
-    });
+    when(sequenceWriter.write(any(Map.class)))
+        .thenAnswer(
+            invocation -> {
+              Map<String, String> writtenRow = invocation.getArgument(0);
+              assertEquals("datawithmultiplebreaks", writtenRow.get("column_1"));
+              return null;
+            });
 
     csvRowCallbackHandler.processRow(resultSet);
 
@@ -228,11 +229,13 @@ public class CsvRowCallbackHandlerTest {
 
     // Setup data with leading line breaks
     setupResultSetData(2, "\n\r\ndata with leading breaks");
-    when(sequenceWriter.write(any(Map.class))).thenAnswer(invocation -> {
-      Map<String, String> writtenRow = invocation.getArgument(0);
-      assertEquals("data with leading breaks", writtenRow.get("column_1"));
-      return null;
-    });
+    when(sequenceWriter.write(any(Map.class)))
+        .thenAnswer(
+            invocation -> {
+              Map<String, String> writtenRow = invocation.getArgument(0);
+              assertEquals("data with leading breaks", writtenRow.get("column_1"));
+              return null;
+            });
 
     csvRowCallbackHandler.processRow(resultSet);
 
@@ -245,11 +248,13 @@ public class CsvRowCallbackHandlerTest {
 
     // Setup data with trailing line breaks
     setupResultSetData(2, "data with trailing breaks\n\r\n");
-    when(sequenceWriter.write(any(Map.class))).thenAnswer(invocation -> {
-      Map<String, String> writtenRow = invocation.getArgument(0);
-      assertEquals("data with trailing breaks", writtenRow.get("column_1"));
-      return null;
-    });
+    when(sequenceWriter.write(any(Map.class)))
+        .thenAnswer(
+            invocation -> {
+              Map<String, String> writtenRow = invocation.getArgument(0);
+              assertEquals("data with trailing breaks", writtenRow.get("column_1"));
+              return null;
+            });
 
     csvRowCallbackHandler.processRow(resultSet);
 
@@ -262,11 +267,13 @@ public class CsvRowCallbackHandlerTest {
 
     // Setup data with both leading and trailing line breaks
     setupResultSetData(2, "\r\ndata surrounded by breaks\n\r");
-    when(sequenceWriter.write(any(Map.class))).thenAnswer(invocation -> {
-      Map<String, String> writtenRow = invocation.getArgument(0);
-      assertEquals("data surrounded by breaks", writtenRow.get("column_1"));
-      return null;
-    });
+    when(sequenceWriter.write(any(Map.class)))
+        .thenAnswer(
+            invocation -> {
+              Map<String, String> writtenRow = invocation.getArgument(0);
+              assertEquals("data surrounded by breaks", writtenRow.get("column_1"));
+              return null;
+            });
 
     csvRowCallbackHandler.processRow(resultSet);
 
