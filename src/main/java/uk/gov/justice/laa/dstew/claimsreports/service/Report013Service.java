@@ -39,8 +39,7 @@ public class Report013Service extends AbstractReportService {
    */
   @Override
   protected String getRefreshCommand() {
-    return "SELECT claims.refresh_report013()"; // The "SELECT" statement actually runs the stored
-    // function
+    return "SELECT claims.refresh_report013()"; // The "SELECT" statement actually runs the stored function
   }
 
   @Override
