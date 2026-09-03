@@ -87,7 +87,13 @@ jobs:
         uses: snyk/actions/gradle@9adf32b1121593767fc3c057af55b55db032dc04 # v1.0.0
         with:
           command: code test
-          args: --severity-threshold=high
+          args: --severity-threshold=high --sarif-file-output=snyk.sarif --policy-path=./.snyk
+
+      - name: Upload SARIF
+        if: always() && hashFiles('snyk.sarif') != ''
+        uses: github/codeql-action/upload-sarif@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4.37.0
+        with:
+          sarif_file: snyk.sarif
 
   vulnerability-scan-docker:
     runs-on: ubuntu-latest
@@ -120,8 +126,14 @@ jobs:
         uses: snyk/actions/docker@9adf32b1121593767fc3c057af55b55db032dc04 # v1.0.0
         with:
           image: spring-boot-microservice:scan
-          args: --file=Dockerfile --severity-threshold=high --policy-path=.snyk
-  
+          args: --file=Dockerfile --severity-threshold=high --sarif-file-output=snyk.sarif --policy-path=.snyk
+
+      - name: Upload SARIF
+        if: always() && hashFiles('snyk.sarif') != ''
+        uses: github/codeql-action/upload-sarif@99df26d4f13ea111d4ec1a7dddef6063f76b97e9 # v4.37.0
+        with:
+          sarif_file: snyk.sarif
+
   spotbugs-scan:
     runs-on: ubuntu-latest
     needs: build-and-run-tests
