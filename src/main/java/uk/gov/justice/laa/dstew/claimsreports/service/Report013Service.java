@@ -36,10 +36,12 @@ public class Report013Service extends AbstractReportService {
   /**
    * This is a complex report with variable columns and needs a stored function. The function
    * refreshes the underlying report data in a table, rather than a materialised view.
+   *
+   * <p>The SQL uses {@code SELECT} because invoking the stored function runs the refresh.
    */
   @Override
   protected String getRefreshCommand() {
-    return "SELECT claims.refresh_report013()"; // The "SELECT" statement actually runs the stored function
+    return "SELECT claims.refresh_report013()";
   }
 
   @Override

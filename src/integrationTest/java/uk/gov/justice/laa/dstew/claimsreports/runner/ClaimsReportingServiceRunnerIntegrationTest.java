@@ -33,16 +33,26 @@ import uk.gov.justice.laa.dstew.claimsreports.service.AbstractReportService;
  * Integration tests for the ClaimsReportingServiceRunner.
  *
  * <p>This test verifies the following:
- * - The health status of database replication, ensuring data consistency between replication tables.
- * - The correctness of report generation and upload of CSV files to an S3-compatible storage.
  *
- * <p>Key Features:
- * - Utilizes Testcontainers to set up PostgreSQL and LocalStack (with S3) containers for isolated testing.
- * - Dynamically registers environment properties required for testing, such as database connection
- *   details and S3 configurations.
- * - Tests replication health by inserting mock data into the database and
- *   validating the results using a service.
- * - Verifies that report files are generated, uploaded to the S3 bucket, and match expected content.
+ * <ul>
+ *   <li>The health status of database replication, ensuring data consistency between
+ *       replication tables.
+ *   <li>The correctness of report generation and upload of CSV files to an S3-compatible
+ *       storage.
+ * </ul>
+ *
+ * <p>Key features:
+ *
+ * <ul>
+ *   <li>Utilizes Testcontainers to set up PostgreSQL and LocalStack (with S3) containers for
+ *       isolated testing.
+ *   <li>Dynamically registers environment properties required for testing, such as database
+ *       connection details and S3 configurations.
+ *   <li>Tests replication health by inserting mock data into the database and validating the
+ *       results using a service.
+ *   <li>Verifies that report files are generated, uploaded to the S3 bucket, and match expected
+ *       content.
+ * </ul>
  */
 @Slf4j
 class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
