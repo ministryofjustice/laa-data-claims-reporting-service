@@ -34,11 +34,9 @@ class ClaimsReportingServiceRunnerRep012XlsxIntegrationTest extends IntegrationT
   @Value("${S3_REPORT_STORE}")
   private String bucketName;
 
-  @Autowired
-  private ClaimsReportingServiceRunner serviceRunner;
+  @Autowired private ClaimsReportingServiceRunner serviceRunner;
 
-  @Autowired
-  private S3Client s3Client;
+  @Autowired private S3Client s3Client;
 
   @BeforeEach
   void setup() {
@@ -49,26 +47,25 @@ class ClaimsReportingServiceRunnerRep012XlsxIntegrationTest extends IntegrationT
         Map.of(
             CLAIM_TABLE_NAME, Pair.of(5, 2),
             CLIENT_TABLE_NAME, Pair.of(4, 2),
-            CLAIM_SUMMARY_FEE_TABLE_NAME, Pair.of(5, 3)
-        )
-    );
+            CLAIM_SUMMARY_FEE_TABLE_NAME, Pair.of(5, 3)));
   }
 
   @AfterEach
   void emptyS3Bucket() {
-    ListObjectsV2Response listResponse = s3Client.listObjectsV2(ListObjectsV2Request.builder()
-        .bucket(bucketName)
-        .build());
+    ListObjectsV2Response listResponse =
+        s3Client.listObjectsV2(ListObjectsV2Request.builder().bucket(bucketName).build());
 
     if (listResponse.hasContents()) {
-      List<ObjectIdentifier> objects = listResponse.contents().stream()
-          .map(o -> ObjectIdentifier.builder().key(o.key()).build())
-          .toList();
+      List<ObjectIdentifier> objects =
+          listResponse.contents().stream()
+              .map(o -> ObjectIdentifier.builder().key(o.key()).build())
+              .toList();
 
-      s3Client.deleteObjects(DeleteObjectsRequest.builder()
-          .bucket(bucketName)
-          .delete(d -> d.objects(objects))
-          .build());
+      s3Client.deleteObjects(
+          DeleteObjectsRequest.builder()
+              .bucket(bucketName)
+              .delete(d -> d.objects(objects))
+              .build());
     }
   }
 
@@ -76,29 +73,29 @@ class ClaimsReportingServiceRunnerRep012XlsxIntegrationTest extends IntegrationT
   void shouldGenerateRep012AsXlsxWhenFeatureEnabled() throws IOException {
     serviceRunner.run(null);
 
-    ListObjectsV2Response listResponse = s3Client.listObjectsV2(ListObjectsV2Request.builder()
-        .bucket(bucketName)
-        .build());
+    ListObjectsV2Response listResponse =
+        s3Client.listObjectsV2(ListObjectsV2Request.builder().bucket(bucketName).build());
 
-    List<String> uploadedFiles = listResponse.contents().stream()
-        .map(S3Object::key)
-        .toList();
+    List<String> uploadedFiles = listResponse.contents().stream().map(S3Object::key).toList();
 
     assertThat(uploadedFiles).hasSize(5);
     assertThat(uploadedFiles).contains("reports/daily/report_012_2025-11-21.xlsx");
     assertThat(uploadedFiles).doesNotContain("reports/daily/report_012_2025-11-21.csv");
 
     Path tempFile = Files.createTempFile("rep012-", ".xlsx");
-    try (InputStream s3is = s3Client.getObject(GetObjectRequest.builder()
-        .bucket(bucketName)
-        .key("reports/daily/report_012_2025-11-21.xlsx")
-        .build())) {
+    try (InputStream s3is =
+        s3Client.getObject(
+            GetObjectRequest.builder()
+                .bucket(bucketName)
+                .key("reports/daily/report_012_2025-11-21.xlsx")
+                .build())) {
       Files.copy(s3is, tempFile, StandardCopyOption.REPLACE_EXISTING);
     }
 
     try (var workbook = new XSSFWorkbook(Files.newInputStream(tempFile))) {
       var sheet = workbook.getSheetAt(0);
-      assertThat(sheet.getRow(0).getCell(0).getStringCellValue()).isEqualTo("Provider office account number");
+      assertThat(sheet.getRow(0).getCell(0).getStringCellValue())
+          .isEqualTo("Provider office account number");
       assertThat(sheet.getLastRowNum()).isGreaterThan(0);
     } finally {
       Files.deleteIfExists(tempFile);

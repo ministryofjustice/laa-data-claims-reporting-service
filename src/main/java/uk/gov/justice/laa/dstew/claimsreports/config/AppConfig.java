@@ -16,9 +16,7 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 /**
  * Configuration class for application-level beans and settings.
  *
- * <p>
- * This class defines beans that are essential for database connectivity
- * </p>
+ * <p>This class defines beans that are essential for database connectivity
  */
 @Getter
 @Configuration
@@ -46,8 +44,9 @@ public class AppConfig {
   }
 
   /**
-   * Bean definition for a system clock that uses the default time zone of the system.
-   * This is done to allow us to override the system clock from tests, to keep them static (see TestConfig under integrationTest).
+   * Bean definition for a system clock that uses the default time zone of the system. This is done
+   * to allow us to override the system clock from tests, to keep them static (see TestConfig under
+   * integrationTest).
    *
    * @return an instance of {@link Clock} configured to use the system's default time zone.
    */
@@ -56,16 +55,14 @@ public class AppConfig {
     return Clock.systemDefaultZone();
   }
 
-  /**
-   * Defines how frequently the file buffer will be flushed for performant file creation.
-   */
+  /** Defines how frequently the file buffer will be flushed for performant file creation. */
   @Value("${csv-creation.buffer-flush-freq:1000}")
   private int bufferFlushFrequency;
 
   /**
-   * Defines how data chunks retrieved from DB will be for performant file creation.
-   * Default ensures this value is never 0, which would cause an arithmetic error when used in creation of
-   * CSV files.
+   * Defines how data chunks retrieved from DB will be for performant file creation. Default ensures
+   * this value is never 0, which would cause an arithmetic error when used in creation of CSV
+   * files.
    */
   @Value("${csv-creation.data-chunk-size:1000}")
   private int dataChunkSize;
@@ -74,9 +71,13 @@ public class AppConfig {
   private int excelRowAccessWindowSize;
 
   @Bean
-  public S3ClientWrapper createS3ClientWrapper(@Value("${AWS_REGION}") String awsRegion, @Value("${S3_REPORT_STORE}") String bucketName,
-                                               MetricsHandler metricsHandler, CsvFileValidator csvFileValidator) {
-    return new S3ClientWrapper(awsRegion, bucketName, metricsHandler, csvFileValidator, uploadUtf8FailuresToS3);
+  public S3ClientWrapper createS3ClientWrapper(
+      @Value("${AWS_REGION}") String awsRegion,
+      @Value("${S3_REPORT_STORE}") String bucketName,
+      MetricsHandler metricsHandler,
+      CsvFileValidator csvFileValidator) {
+    return new S3ClientWrapper(
+        awsRegion, bucketName, metricsHandler, csvFileValidator, uploadUtf8FailuresToS3);
   }
 
   /**
@@ -103,5 +104,4 @@ public class AppConfig {
   @Value("${feature.enable-rep012-xlsx:false}")
   @Getter
   private boolean enableRep012Xlsx;
-
 }

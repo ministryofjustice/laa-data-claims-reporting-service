@@ -19,8 +19,8 @@ import javax.sql.DataSource;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.junit.jupiter.api.io.TempDir;
 import org.junit.jupiter.api.extension.ExtendWith;
+import org.junit.jupiter.api.io.TempDir;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
@@ -31,31 +31,23 @@ import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 @ExtendWith(MockitoExtension.class)
 class ExcelCreationServiceTest {
 
-  @Mock
-  private DataSource dataSource;
+  @Mock private DataSource dataSource;
 
-  @Mock
-  private AppConfig appConfig;
+  @Mock private AppConfig appConfig;
 
-  @Mock
-  private MetricsHandler metricsHandler;
+  @Mock private MetricsHandler metricsHandler;
 
-  @Mock
-  private Connection connection;
+  @Mock private Connection connection;
 
-  @Mock
-  private PreparedStatement statement;
+  @Mock private PreparedStatement statement;
 
-  @Mock
-  private ResultSet resultSet;
+  @Mock private ResultSet resultSet;
 
-  @Mock
-  private ResultSetMetaData metaData;
+  @Mock private ResultSetMetaData metaData;
 
   private ExcelCreationService excelCreationService;
 
-  @TempDir
-  File tempDir;
+  @TempDir File tempDir;
 
   @BeforeEach
   void setUp() throws Exception {
@@ -65,7 +57,8 @@ class ExcelCreationServiceTest {
     when(appConfig.getExcelRowAccessWindowSize()).thenReturn(50);
 
     when(dataSource.getConnection()).thenReturn(connection);
-    when(connection.prepareStatement(any(), eq(ResultSet.TYPE_FORWARD_ONLY), eq(ResultSet.CONCUR_READ_ONLY)))
+    when(connection.prepareStatement(
+            any(), eq(ResultSet.TYPE_FORWARD_ONLY), eq(ResultSet.CONCUR_READ_ONLY)))
         .thenReturn(statement);
     when(statement.executeQuery()).thenReturn(resultSet);
     when(resultSet.getMetaData()).thenReturn(metaData);
@@ -123,10 +116,12 @@ class ExcelCreationServiceTest {
     final int rowCount = 5000;
     final int[] currentRow = {0};
     when(resultSet.next()).thenAnswer(invocation -> ++currentRow[0] <= rowCount);
-    when(resultSet.getString(anyInt())).thenAnswer(invocation -> {
-      int column = invocation.getArgument(0);
-      return "R" + currentRow[0] + "C" + column;
-    });
+    when(resultSet.getString(anyInt()))
+        .thenAnswer(
+            invocation -> {
+              int column = invocation.getArgument(0);
+              return "R" + currentRow[0] + "C" + column;
+            });
 
     File output = new File(tempDir, "large.xlsx");
     excelCreationService.buildExcelFromData("SELECT * FROM table", output, "REPORT012");
@@ -144,7 +139,8 @@ class ExcelCreationServiceTest {
     when(resultSet.getMetaData()).thenReturn(null);
 
     File output = new File(tempDir, "broken.xlsx");
-    assertThrows(CsvCreationException.class,
+    assertThrows(
+        CsvCreationException.class,
         () -> excelCreationService.buildExcelFromData("SELECT * FROM table", output, "REPORT012"));
   }
 }

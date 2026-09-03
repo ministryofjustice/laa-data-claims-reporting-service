@@ -1,5 +1,8 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.mockito.Mockito.*;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
@@ -18,12 +21,7 @@ import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.mockito.Mockito.*;
-
-/**
- * Unit tests for AbstractReportService
- */
+/** Unit tests for AbstractReportService */
 class AbstractReportServiceTest {
 
   private static final String TEMP_REPORT_PREFIX = "test_report_2025-12-21_";
@@ -46,7 +44,9 @@ class AbstractReportServiceTest {
     Instant fixedNow = Instant.parse("2025-12-21T10:00:00Z");
     fixedClock = Clock.fixed(fixedNow, ZoneOffset.UTC);
 
-    service = new TestReportService(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, true, fixedClock);
+    service =
+        new TestReportService(
+            jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, true, fixedClock);
   }
 
   @Test
@@ -55,8 +55,7 @@ class AbstractReportServiceTest {
     service.refreshDataSource();
 
     // then
-    verify(jdbcTemplate, times(1))
-        .execute("REFRESH MATERIALIZED VIEW claims.mvw_report_000");
+    verify(jdbcTemplate, times(1)).execute("REFRESH MATERIALIZED VIEW claims.mvw_report_000");
     verifyNoMoreInteractions(jdbcTemplate);
   }
 
@@ -64,8 +63,7 @@ class AbstractReportServiceTest {
   void refreshDataSource_ShouldHandleMultipleInvocations() {
     service.refreshDataSource();
     service.refreshDataSource();
-    verify(jdbcTemplate, times(2))
-        .execute("REFRESH MATERIALIZED VIEW claims.mvw_report_000");
+    verify(jdbcTemplate, times(2)).execute("REFRESH MATERIALIZED VIEW claims.mvw_report_000");
     verifyNoMoreInteractions(jdbcTemplate);
   }
 
@@ -82,17 +80,25 @@ class AbstractReportServiceTest {
   }
 
   @Test
-  void generateReport_shouldCallTheRightServices(){
+  void generateReport_shouldCallTheRightServices() {
     service.generateReport();
 
-    verify(csvCreationService).buildCsvFromData(eq("SELECT * FROM claims.mvw_report_000 ORDER BY  test_order_by_column"),
-        any(BufferedWriter.class), any());
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/daily/test_report_2025-12-21.csv"), eq(List.of()), isNull());
+    verify(csvCreationService)
+        .buildCsvFromData(
+            eq("SELECT * FROM claims.mvw_report_000 ORDER BY  test_order_by_column"),
+            any(BufferedWriter.class),
+            any());
+    verify(s3ClientWrapper)
+        .uploadFile(
+            any(File.class),
+            eq("reports/daily/test_report_2025-12-21.csv"),
+            eq(List.of()),
+            isNull());
   }
 
   @SneakyThrows
   @Test
-  void generateReport_shouldDeleteTheTempFileWhenFinished(){
+  void generateReport_shouldDeleteTheTempFileWhenFinished() {
     service.generateReport();
     assertNoTempReportFiles();
   }
@@ -101,10 +107,14 @@ class AbstractReportServiceTest {
   private void assertNoTempReportFiles() {
     Path tempDir = Path.of(System.getProperty("java.io.tmpdir"));
     try (var stream = Files.list(tempDir)) {
-      assertFalse(stream.anyMatch(file -> {
-        var fileName = file.getFileName();
-        return fileName != null && fileName.toString().startsWith(TEMP_REPORT_PREFIX) && fileName.toString().endsWith(".csv");
-      }));
+      assertFalse(
+          stream.anyMatch(
+              file -> {
+                var fileName = file.getFileName();
+                return fileName != null
+                    && fileName.toString().startsWith(TEMP_REPORT_PREFIX)
+                    && fileName.toString().endsWith(".csv");
+              }));
     }
   }
 
@@ -113,28 +123,31 @@ class AbstractReportServiceTest {
     Path tempDir = Path.of(System.getProperty("java.io.tmpdir"));
     try (var stream = Files.list(tempDir)) {
       stream
-          .filter(file -> {
-            var fileName = file.getFileName();
-            return fileName != null
-                && fileName.toString().startsWith(TEMP_REPORT_PREFIX)
-                && fileName.toString().endsWith(".csv");
-          })
-          .forEach(file -> {
-            try {
-              Files.deleteIfExists(file);
-            } catch (IOException e) {
-              throw new RuntimeException("Failed to delete temp report file: " + file, e);
-            }
-          });
+          .filter(
+              file -> {
+                var fileName = file.getFileName();
+                return fileName != null
+                    && fileName.toString().startsWith(TEMP_REPORT_PREFIX)
+                    && fileName.toString().endsWith(".csv");
+              })
+          .forEach(
+              file -> {
+                try {
+                  Files.deleteIfExists(file);
+                } catch (IOException e) {
+                  throw new RuntimeException("Failed to delete temp report file: " + file, e);
+                }
+              });
     }
   }
 
   @Test
   void willNotGenerateReportIfReportNotScheduledToRun() {
-    TestReportService service = new TestReportService(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, false, fixedClock);
+    TestReportService service =
+        new TestReportService(
+            jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, false, fixedClock);
 
     service.generateReport();
     verify(csvCreationService, times(0)).buildCsvFromData(any(), any(), any());
   }
-
 }

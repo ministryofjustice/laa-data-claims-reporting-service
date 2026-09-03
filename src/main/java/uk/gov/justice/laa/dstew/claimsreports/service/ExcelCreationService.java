@@ -24,9 +24,7 @@ import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 
-/**
- * Builds XLSX files directly from JDBC row streams using SXSSF to bound memory usage.
- */
+/** Builds XLSX files directly from JDBC row streams using SXSSF to bound memory usage. */
 @Service
 @Slf4j
 @AllArgsConstructor
@@ -45,8 +43,8 @@ public class ExcelCreationService {
    */
   @SuppressFBWarnings(
       value = "SQL_INJECTION_JDBC",
-      justification = "Report SQL is assembled from validated service-owned identifiers before reaching this method."
-  )
+      justification =
+          "Report SQL is assembled from validated service-owned identifiers before reaching this method.")
   public void buildExcelFromData(String sqlQuery, File outputFile, String reportName) {
     if (sqlQuery == null || sqlQuery.trim().isEmpty()) {
       throw new CsvCreationException("SQL query is not provided");
@@ -58,8 +56,9 @@ public class ExcelCreationService {
     SXSSFWorkbook workbook = null;
     try (Connection connection = dataSource.getConnection()) {
       connection.setAutoCommit(false);
-      try (PreparedStatement statement = connection.prepareStatement(
-          sqlQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
+      try (PreparedStatement statement =
+          connection.prepareStatement(
+              sqlQuery, ResultSet.TYPE_FORWARD_ONLY, ResultSet.CONCUR_READ_ONLY)) {
         statement.setFetchSize(appConfig.getDataChunkSize());
 
         workbook = new SXSSFWorkbook(appConfig.getExcelRowAccessWindowSize());
@@ -111,7 +110,8 @@ public class ExcelCreationService {
     return rowCount;
   }
 
-  private void writeHeaderRow(SXSSFSheet sheet, ResultSetMetaData metaData, int columnCount) throws SQLException {
+  private void writeHeaderRow(SXSSFSheet sheet, ResultSetMetaData metaData, int columnCount)
+      throws SQLException {
     Row header = sheet.createRow(0);
     for (int i = 1; i <= columnCount; i++) {
       header.createCell(i - 1).setCellValue(metaData.getColumnName(i));

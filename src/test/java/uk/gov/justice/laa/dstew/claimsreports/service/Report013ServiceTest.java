@@ -20,9 +20,7 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
-/**
- * Unit tests for {@link Report013Service}.
- */
+/** Unit tests for {@link Report013Service}. */
 class Report013ServiceTest {
 
   private Report013Service service;
@@ -42,7 +40,9 @@ class Report013ServiceTest {
     Instant fixedNow = Instant.parse("2025-12-22T10:00:00Z");
     fixedClock = Clock.fixed(fixedNow, ZoneOffset.UTC);
 
-    service = new Report013Service(jdbcTemplate, s3ClientWrapper, creationService, metricsHandler, fixedClock);
+    service =
+        new Report013Service(
+            jdbcTemplate, s3ClientWrapper, creationService, metricsHandler, fixedClock);
   }
 
   @Test
@@ -50,24 +50,27 @@ class Report013ServiceTest {
     // when
     service.refreshDataSource();
     // then
-    verify(jdbcTemplate, times(1))
-        .execute("SELECT claims.refresh_report013()");
+    verify(jdbcTemplate, times(1)).execute("SELECT claims.refresh_report013()");
     verifyNoMoreInteractions(jdbcTemplate);
   }
 
   @Test
-  void generateReport_shouldCallTheRightServicesWithTheRightValues(){
+  void generateReport_shouldCallTheRightServicesWithTheRightValues() {
 
     service.generateReport();
 
-    verify(creationService).buildCsvFromData(
-        eq("SELECT * FROM claims.report_013"
-            + " ORDER BY  \"Provider Office Account Number\", \"Area of Law\""),
-        any(BufferedWriter.class),
-        any()
-    );
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/daily/report_013_2025-12-22.csv"),
-      eq(List.of("Provider Office Account Number", "Area of Law")), any(Pattern.class));
+    verify(creationService)
+        .buildCsvFromData(
+            eq(
+                "SELECT * FROM claims.report_013"
+                    + " ORDER BY  \"Provider Office Account Number\", \"Area of Law\""),
+            any(BufferedWriter.class),
+            any());
+    verify(s3ClientWrapper)
+        .uploadFile(
+            any(File.class),
+            eq("reports/daily/report_013_2025-12-22.csv"),
+            eq(List.of("Provider Office Account Number", "Area of Law")),
+            any(Pattern.class));
   }
-
 }

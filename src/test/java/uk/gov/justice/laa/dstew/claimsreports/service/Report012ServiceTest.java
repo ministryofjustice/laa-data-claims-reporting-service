@@ -29,9 +29,7 @@ import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
-/**
- * Unit tests for {@link Report012Service}.
- */
+/** Unit tests for {@link Report012Service}. */
 class Report012ServiceTest {
 
   private static final String TEMP_REPORT_PREFIX = "report_012_2025-12-22_";
@@ -58,15 +56,24 @@ class Report012ServiceTest {
     Instant fixedNow = Instant.parse("2025-12-22T10:00:00Z");
     fixedClock = Clock.fixed(fixedNow, ZoneOffset.UTC);
 
-    service = new Report012Service(
-        jdbcTemplate,
-        s3ClientWrapper,
-        creationService,
-        metricsHandler,
-        fixedClock,
-        appConfig,
-        excelCreationService
-    );
+    service =
+        new Report012Service(
+            jdbcTemplate,
+            s3ClientWrapper,
+            creationService,
+            metricsHandler,
+            fixedClock,
+            appConfig,
+            excelCreationService);
+    service =
+        new Report012Service(
+            jdbcTemplate,
+            s3ClientWrapper,
+            creationService,
+            metricsHandler,
+            fixedClock,
+            appConfig,
+            excelCreationService);
   }
 
   @Test
@@ -82,17 +89,27 @@ class Report012ServiceTest {
 
     service.generateReport();
 
-    verify(creationService).buildCsvFromData(
-        eq("SELECT * FROM claims.mvw_report_012 "
-            + "ORDER BY  \"Provider office account number\","
-            + "    to_char(to_date(\"Submission month\", 'MON-YYYY'), 'YYYYMM'),"
-            + "    \"Area of law\""),
-        any(BufferedWriter.class),
-        any()
-    );
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/daily/report_012_2025-12-22.csv"), eq(List.of(
-        "Provider office account number", "Submission month", "Area of law",
-        "Original submission value", "Date submission was uploaded")), isNull());
+    verify(creationService)
+        .buildCsvFromData(
+            eq(
+                "SELECT * FROM claims.mvw_report_012 "
+                    + "ORDER BY  \"Provider office account number\","
+                    + "    to_char(to_date(\"Submission month\", 'MON-YYYY'), 'YYYYMM'),"
+                    + "    \"Area of law\""),
+            any(BufferedWriter.class),
+            any());
+    verify(s3ClientWrapper)
+        .uploadFile(
+            any(File.class),
+            eq("reports/daily/report_012_2025-12-22.csv"),
+            eq(
+                List.of(
+                    "Provider office account number",
+                    "Submission month",
+                    "Area of law",
+                    "Original submission value",
+                    "Date submission was uploaded")),
+            isNull());
   }
 
   @Test
@@ -101,16 +118,20 @@ class Report012ServiceTest {
 
     service.generateReport();
 
-    verify(excelCreationService).buildExcelFromData(
-        eq("SELECT * FROM claims.mvw_report_012 "
-            + "ORDER BY  \"Provider office account number\","
-            + "    to_char(to_date(\"Submission month\", 'MON-YYYY'), 'YYYYMM'),"
-            + "    \"Area of law\""),
-        any(File.class),
-        eq("REPORT012")
-    );
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/daily/report_012_2025-12-22.xlsx"),
-        eq("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+    verify(excelCreationService)
+        .buildExcelFromData(
+            eq(
+                "SELECT * FROM claims.mvw_report_012 "
+                    + "ORDER BY  \"Provider office account number\","
+                    + "    to_char(to_date(\"Submission month\", 'MON-YYYY'), 'YYYYMM'),"
+                    + "    \"Area of law\""),
+            any(File.class),
+            eq("REPORT012"));
+    verify(s3ClientWrapper)
+        .uploadFile(
+            any(File.class),
+            eq("reports/daily/report_012_2025-12-22.xlsx"),
+            eq("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
   }
 
   @Test
@@ -128,12 +149,14 @@ class Report012ServiceTest {
   private void assertNoTempXlsxFiles() {
     Path tempDir = Path.of(System.getProperty("java.io.tmpdir"));
     try (var stream = Files.list(tempDir)) {
-      assertFalse(stream.anyMatch(file -> {
-        var fileName = file.getFileName();
-        return fileName != null
-            && fileName.toString().startsWith(TEMP_REPORT_PREFIX)
-            && fileName.toString().endsWith(".xlsx");
-      }));
+      assertFalse(
+          stream.anyMatch(
+              file -> {
+                var fileName = file.getFileName();
+                return fileName != null
+                    && fileName.toString().startsWith(TEMP_REPORT_PREFIX)
+                    && fileName.toString().endsWith(".xlsx");
+              }));
     } catch (IOException e) {
       throw new RuntimeException("Unable to inspect temp files", e);
     }
@@ -143,19 +166,21 @@ class Report012ServiceTest {
     Path tempDir = Path.of(System.getProperty("java.io.tmpdir"));
     try (var stream = Files.list(tempDir)) {
       stream
-          .filter(file -> {
-            var fileName = file.getFileName();
-            return fileName != null
-                && fileName.toString().startsWith(TEMP_REPORT_PREFIX)
-                && fileName.toString().endsWith(".xlsx");
-          })
-          .forEach(file -> {
-            try {
-              Files.deleteIfExists(file);
-            } catch (IOException e) {
-              throw new RuntimeException("Failed to delete temp report file: " + file, e);
-            }
-          });
+          .filter(
+              file -> {
+                var fileName = file.getFileName();
+                return fileName != null
+                    && fileName.toString().startsWith(TEMP_REPORT_PREFIX)
+                    && fileName.toString().endsWith(".xlsx");
+              })
+          .forEach(
+              file -> {
+                try {
+                  Files.deleteIfExists(file);
+                } catch (IOException e) {
+                  throw new RuntimeException("Failed to delete temp report file: " + file, e);
+                }
+              });
     } catch (IOException e) {
       throw new RuntimeException("Unable to clean temp files", e);
     }
