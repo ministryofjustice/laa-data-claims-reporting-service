@@ -1,11 +1,21 @@
 package uk.gov.justice.laa.dstew.claimsreports.service.s3;
 
+import static org.junit.jupiter.api.Assertions.assertEquals;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.mockito.ArgumentMatchers.any;
+import static org.mockito.ArgumentMatchers.anyDouble;
+import static org.mockito.ArgumentMatchers.eq;
+import static org.mockito.Mockito.never;
+import static org.mockito.Mockito.reset;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.when;
+
 import java.io.ByteArrayOutputStream;
 import java.io.File;
-import java.util.List;
 import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import lombok.SneakyThrows;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -23,27 +33,14 @@ import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.Cus
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
 import uk.gov.justice.laa.dstew.claimsreports.service.CsvFileValidator;
 
-import static org.junit.jupiter.api.Assertions.assertEquals;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.mockito.ArgumentMatchers.any;
-import static org.mockito.ArgumentMatchers.anyDouble;
-import static org.mockito.ArgumentMatchers.eq;
-import static org.mockito.Mockito.never;
-import static org.mockito.Mockito.reset;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.when;
-
 @ExtendWith(MockitoExtension.class)
 class S3ClientWrapperTest {
 
-  @Mock
-  private S3Client s3Client;
+  @Mock private S3Client s3Client;
 
-  @Mock
-  private MetricsHandler metricsHandler;
+  @Mock private MetricsHandler metricsHandler;
 
-  @Mock
-  private CsvFileValidator csvFileValidator;
+  @Mock private CsvFileValidator csvFileValidator;
 
   private Path testFilePath;
   private File testReport;
@@ -55,7 +52,8 @@ class S3ClientWrapperTest {
     testFilePath = Path.of(getClass().getClassLoader().getResource("testReport.csv").toURI());
     testReport = testFilePath.toFile();
     reset(csvFileValidator, metricsHandler, s3Client);
-    s3ClientWrapper = new S3ClientWrapper(s3Client, "bucket", metricsHandler, csvFileValidator, false);
+    s3ClientWrapper =
+        new S3ClientWrapper(s3Client, "bucket", metricsHandler, csvFileValidator, false);
   }
 
   @SneakyThrows
@@ -64,11 +62,13 @@ class S3ClientWrapperTest {
 
     var mockResponse = PutObjectResponse.builder().build();
 
-    when(csvFileValidator.checkFileExtension("testReport.csv", "reports/filename.csv")).thenReturn(true);
+    when(csvFileValidator.checkFileExtension("testReport.csv", "reports/filename.csv"))
+        .thenReturn(true);
     when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(true);
     when(csvFileValidator.checkUtf8Encoded(testReport)).thenReturn(true);
 
-    when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class))).thenReturn(mockResponse);
+    when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
+        .thenReturn(mockResponse);
     s3ClientWrapper.uploadFile(testReport, "reports/filename.csv");
 
     // Check wrapper builds up the correct request to S3
@@ -87,7 +87,6 @@ class S3ClientWrapperTest {
     // Check metrics logged
     verify(metricsHandler).setCustomMetric(eq(CustomMetricId.ENCODING_CHECK_TIME_MS), anyDouble());
     verify(metricsHandler).setCustomMetric(eq(CustomMetricId.UPLOAD_TIME_MS), anyDouble());
-
   }
 
   @Test
@@ -96,36 +95,42 @@ class S3ClientWrapperTest {
     when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(true);
     when(csvFileValidator.checkUtf8Encoded(testReport)).thenReturn(true);
 
-    when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class))).thenThrow(NoSuchBucketException.builder().build());
+    when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
+        .thenThrow(NoSuchBucketException.builder().build());
 
-    assertThrows(NoSuchBucketException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
-
+    assertThrows(
+        NoSuchBucketException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
   }
 
   @Test
   void uploadFile_shouldErrorIfFileExtensionCheckReturnsFalse() {
     when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(true);
     when(csvFileValidator.checkFileExtension("testReport.csv", "filename.exe")).thenReturn(false);
-    assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.exe"));
+    assertThrows(
+        CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.exe"));
   }
 
   @Test
   void uploadFile_shouldErrorIfFileExtensionThrowsException() {
     when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(true);
-    when(csvFileValidator.checkFileExtension("testReport.csv", "filename.exe")).thenThrow(new CsvUploadException(":("));
-    assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.exe"));
+    when(csvFileValidator.checkFileExtension("testReport.csv", "filename.exe"))
+        .thenThrow(new CsvUploadException(":("));
+    assertThrows(
+        CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.exe"));
   }
 
   @Test
   void uploadFile_shouldErrorIfMimeTypeIsCsvReturnsFalse() {
     when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(false);
-    assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
+    assertThrows(
+        CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
   }
 
   @Test
   void uploadFile_shouldErrorIfMimeTypeIsCsvThrowsException() {
     when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenThrow(new CsvUploadException(":("));
-    assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.exe"));
+    assertThrows(
+        CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.exe"));
   }
 
   @Test
@@ -133,22 +138,26 @@ class S3ClientWrapperTest {
     when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(true);
     when(csvFileValidator.checkFileExtension("testReport.csv", "filename.csv")).thenReturn(true);
     when(csvFileValidator.checkUtf8Encoded(testReport)).thenReturn(false);
-    assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
+    assertThrows(
+        CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
   }
 
   @SneakyThrows
   @Test
   void uploadFile_shouldUploadErrorFileToS3IfUtf8CheckReturnsFalseAndFeatureFlagOn() {
-    s3ClientWrapper = new S3ClientWrapper(s3Client, "bucket", metricsHandler, csvFileValidator, true);
+    s3ClientWrapper =
+        new S3ClientWrapper(s3Client, "bucket", metricsHandler, csvFileValidator, true);
 
     when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(true);
     when(csvFileValidator.checkFileExtension("testReport.csv", "filename.csv")).thenReturn(true);
     when(csvFileValidator.checkUtf8Encoded(testReport)).thenReturn(false);
 
     var mockResponse = PutObjectResponse.builder().build();
-    when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class))).thenReturn(mockResponse);
+    when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
+        .thenReturn(mockResponse);
 
-    assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
+    assertThrows(
+        CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
 
     // Check wrapper builds up the correct request to S3
     var captorPutObjectRequest = ArgumentCaptor.forClass(PutObjectRequest.class);
@@ -162,7 +171,6 @@ class S3ClientWrapperTest {
     // Check the expected contents was sent up to S3
     var requestBody = captorRequestBody.getValue();
     assertEquals(Files.readString(testFilePath), getRequestBodyContents(requestBody));
-
   }
 
   @Test
@@ -170,7 +178,8 @@ class S3ClientWrapperTest {
     when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(true);
     when(csvFileValidator.checkFileExtension("testReport.csv", "filename.csv")).thenReturn(true);
     when(csvFileValidator.checkUtf8Encoded(testReport)).thenThrow(new CsvUploadException(":("));
-    assertThrows(CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
+    assertThrows(
+        CsvUploadException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
   }
 
   @Test
@@ -178,13 +187,18 @@ class S3ClientWrapperTest {
     when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(true);
     when(csvFileValidator.checkFileExtension("testReport.csv", "filename.csv")).thenReturn(true);
     when(csvFileValidator.checkUtf8Encoded(testReport)).thenReturn(true);
-    when(csvFileValidator.checkCsvHeaders(testReport, List.of("Expected header"))).thenReturn(false);
+    when(csvFileValidator.checkCsvHeaders(testReport, List.of("Expected header")))
+        .thenReturn(false);
 
-    assertThrows(CsvUploadException.class,
-      () -> s3ClientWrapper.uploadFile(testReport, "filename.csv", List.of("Expected header"), null));
+    assertThrows(
+        CsvUploadException.class,
+        () ->
+            s3ClientWrapper.uploadFile(
+                testReport, "filename.csv", List.of("Expected header"), null));
 
     verify(s3Client, never()).putObject(any(PutObjectRequest.class), any(RequestBody.class));
   }
+
   @SneakyThrows
   private String getRequestBodyContents(RequestBody requestBody) {
     var outputStream = new ByteArrayOutputStream();

@@ -16,9 +16,10 @@ import tools.jackson.dataformat.csv.CsvSchema;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
 
 /**
- * This class defines how each row of data will be appended to the new CSV file, as well as how frequently the output buffer
- * will be flushed to ensure CSV creation remains performant and does not hold too much data in memory during processing.
- * Final buffer flush will need to be done by method that utilises this handler, to ensure there are no remaining rows left in the buffer.
+ * This class defines how each row of data will be appended to the new CSV file, as well as how
+ * frequently the output buffer will be flushed to ensure CSV creation remains performant and does
+ * not hold too much data in memory during processing. Final buffer flush will need to be done by
+ * method that utilises this handler, to ensure there are no remaining rows left in the buffer.
  */
 @RequiredArgsConstructor
 class CsvRowCallbackHandler implements RowCallbackHandler {
@@ -27,8 +28,7 @@ class CsvRowCallbackHandler implements RowCallbackHandler {
   private final int bufferFlushFrequency;
   private final CsvMapper csvMapper;
   private SequenceWriter sequenceWriter;
-  @Getter
-  private int rowCount;
+  @Getter private int rowCount;
 
   @Override
   public void processRow(ResultSet resultSet) {

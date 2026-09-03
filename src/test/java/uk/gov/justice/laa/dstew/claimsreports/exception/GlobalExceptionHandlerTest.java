@@ -1,7 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.exception;
 
 import static org.assertj.core.api.Assertions.assertThat;
-import static org.assertj.core.api.AssertionsForClassTypes.assertThatCode;
 import static org.springframework.http.HttpStatus.INTERNAL_SERVER_ERROR;
 import static org.springframework.http.HttpStatus.NOT_FOUND;
 
@@ -23,7 +22,8 @@ class GlobalExceptionHandlerTest {
 
   @Test
   void handleItemNotFound_returnsNotFoundStatusAndErrorMessage() {
-    ResponseEntity<String> result = globalExceptionHandler.handleItemNotFound(new ItemNotFoundException("Item not found"));
+    ResponseEntity<String> result =
+        globalExceptionHandler.handleItemNotFound(new ItemNotFoundException("Item not found"));
 
     assertThat(result).isNotNull();
     assertThat(result.getStatusCode()).isEqualTo(NOT_FOUND);
@@ -33,7 +33,8 @@ class GlobalExceptionHandlerTest {
 
   @Test
   void handleGenericException_returnsInternalServerErrorStatusAndErrorMessage() {
-    ResponseEntity<String> result = globalExceptionHandler.handleGenericException(new RuntimeException("Something went wrong"));
+    ResponseEntity<String> result =
+        globalExceptionHandler.handleGenericException(new RuntimeException("Something went wrong"));
 
     assertThat(result).isNotNull();
     assertThat(result.getStatusCode()).isEqualTo(INTERNAL_SERVER_ERROR);
@@ -43,9 +44,12 @@ class GlobalExceptionHandlerTest {
 
   @Test
   void handleAwsServiceException_returnsInternalServerErrorStatusAndErrorMessage() {
-    var exception = NoSuchBucketException.builder().message("Bucket don't exist :(")
-        .awsErrorDetails(AwsErrorDetails.builder().errorCode("312").errorMessage("uh oh").build())
-        .build();
+    var exception =
+        NoSuchBucketException.builder()
+            .message("Bucket don't exist :(")
+            .awsErrorDetails(
+                AwsErrorDetails.builder().errorCode("312").errorMessage("uh oh").build())
+            .build();
 
     ResponseEntity<String> result = globalExceptionHandler.handleAwsErrors(exception);
 
@@ -57,12 +61,13 @@ class GlobalExceptionHandlerTest {
 
   @Test
   void handleCsvUploadException_returnsInternalServerErrorStatusAndErrorMessage() {
-    ResponseEntity<String> result = globalExceptionHandler.handleCsvUploadException(new CsvUploadException("File is wrong type"));
+    ResponseEntity<String> result =
+        globalExceptionHandler.handleCsvUploadException(
+            new CsvUploadException("File is wrong type"));
 
     assertThat(result).isNotNull();
     assertThat(result.getStatusCode()).isEqualTo(INTERNAL_SERVER_ERROR);
     assertThat(result.getBody()).isNotNull();
     assertThat(result.getBody()).isEqualTo("Failed to upload report.");
   }
-
 }

@@ -1,5 +1,13 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import static org.mockito.Mockito.any;
+import static org.mockito.Mockito.eq;
+import static org.mockito.Mockito.isNull;
+import static org.mockito.Mockito.mock;
+import static org.mockito.Mockito.times;
+import static org.mockito.Mockito.verify;
+import static org.mockito.Mockito.verifyNoMoreInteractions;
+
 import java.io.BufferedWriter;
 import java.io.File;
 import java.time.Clock;
@@ -8,24 +16,11 @@ import java.time.ZoneOffset;
 import java.util.List;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
-import org.springframework.core.env.Environment;
-import org.springframework.core.env.Profiles;
 import org.springframework.jdbc.core.JdbcTemplate;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
 
-import static org.mockito.Mockito.any;
-import static org.mockito.Mockito.eq;
-import static org.mockito.Mockito.isNull;
-import static org.mockito.Mockito.mock;
-import static org.mockito.Mockito.times;
-import static org.mockito.Mockito.verify;
-import static org.mockito.Mockito.verifyNoMoreInteractions;
-import static org.mockito.Mockito.when;
-
-/**
- * Unit tests for {@link Report014Service}.
- */
+/** Unit tests for {@link Report014Service}. */
 class Report014ServiceTest {
 
   private Report014Service service;
@@ -43,7 +38,9 @@ class Report014ServiceTest {
     Instant fixedNow = Instant.parse("2025-12-22T10:00:00Z");
     Clock fixedClock = Clock.fixed(fixedNow, ZoneOffset.UTC);
 
-    service = new Report014Service(jdbcTemplate, s3ClientWrapper, creationService, metricsHandler, fixedClock);
+    service =
+        new Report014Service(
+            jdbcTemplate, s3ClientWrapper, creationService, metricsHandler, fixedClock);
   }
 
   @Test
@@ -51,8 +48,7 @@ class Report014ServiceTest {
     // when
     service.refreshDataSource();
     // then
-    verify(jdbcTemplate, times(1))
-        .execute("REFRESH MATERIALIZED VIEW claims.mvw_report_014");
+    verify(jdbcTemplate, times(1)).execute("REFRESH MATERIALIZED VIEW claims.mvw_report_014");
     verifyNoMoreInteractions(jdbcTemplate);
   }
 
@@ -60,17 +56,36 @@ class Report014ServiceTest {
   void generateReport_shouldCallTheRightServicesWithTheRightValues() {
     service.generateReport();
 
-    verify(creationService).buildCsvFromData(
-            eq("SELECT * FROM claims.mvw_report_014"
+    verify(creationService)
+        .buildCsvFromData(
+            eq(
+                "SELECT * FROM claims.mvw_report_014"
                     + " ORDER BY \"Claim ID\", to_date(\"Amendment Date\", 'DD/MM/YYYY'), to_timestamp(\"Amendment Time\", 'HH24:MI:SS')::time, \"Assessment ID\""),
             any(BufferedWriter.class),
-            any()
-    );
-    verify(s3ClientWrapper).uploadFile(any(File.class), eq("reports/daily/report_014_2025-12-22.csv"), eq(List.of(
-      "Office Account Number", "Submission Period", "Area of Law", "Client Forename",
-      "Client Surname", "Unique Client Number", "Unique File Number", "Amendment Date",
-      "Amendment Time", "Value before Amendment", "Value after Amendment", "Difference",
-      "Assessment Type", "Assessment Reason", "Submission ID", "Claim ID", "Assessment ID")), isNull());
+            any());
+    verify(s3ClientWrapper)
+        .uploadFile(
+            any(File.class),
+            eq("reports/daily/report_014_2025-12-22.csv"),
+            eq(
+                List.of(
+                    "Office Account Number",
+                    "Submission Period",
+                    "Area of Law",
+                    "Client Forename",
+                    "Client Surname",
+                    "Unique Client Number",
+                    "Unique File Number",
+                    "Amendment Date",
+                    "Amendment Time",
+                    "Value before Amendment",
+                    "Value after Amendment",
+                    "Difference",
+                    "Assessment Type",
+                    "Assessment Reason",
+                    "Submission ID",
+                    "Claim ID",
+                    "Assessment ID")),
+            isNull());
   }
-
 }

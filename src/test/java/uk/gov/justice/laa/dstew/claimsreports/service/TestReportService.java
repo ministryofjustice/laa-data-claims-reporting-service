@@ -9,8 +9,13 @@ public class TestReportService extends AbstractReportService {
 
   private final boolean runToday;
 
-  public TestReportService(JdbcTemplate template, S3ClientWrapper s3ClientWrapper,
-                           CsvCreationService csvCreationService, MetricsHandler metricsHandler, boolean runToday, Clock clock) {
+  public TestReportService(
+      JdbcTemplate template,
+      S3ClientWrapper s3ClientWrapper,
+      CsvCreationService csvCreationService,
+      MetricsHandler metricsHandler,
+      boolean runToday,
+      Clock clock) {
     super(template, s3ClientWrapper, csvCreationService, metricsHandler, clock);
     this.runToday = runToday;
   }

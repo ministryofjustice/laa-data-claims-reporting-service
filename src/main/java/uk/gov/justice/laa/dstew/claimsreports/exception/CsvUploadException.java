@@ -1,8 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.exception;
 
-/**
- * The exception thrown when failure during upload of CSV file.
- */
+/** The exception thrown when failure during upload of CSV file. */
 public class CsvUploadException extends RuntimeException {
 
   /**
@@ -17,5 +15,4 @@ public class CsvUploadException extends RuntimeException {
   public CsvUploadException(String message, Throwable cause) {
     super(message, cause);
   }
-
 }

@@ -1,5 +1,10 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
+import static org.junit.jupiter.api.Assertions.assertFalse;
+import static org.junit.jupiter.api.Assertions.assertThrows;
+import static org.junit.jupiter.api.Assertions.assertTrue;
+import static uk.gov.justice.laa.dstew.claimsreports.service.CsvFileValidator.BUFFER_SIZE;
+
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
@@ -8,19 +13,13 @@ import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.util.Arrays;
 import java.util.regex.Pattern;
-
-import static org.junit.jupiter.api.Assertions.assertFalse;
-import static org.junit.jupiter.api.Assertions.assertThrows;
-import static org.junit.jupiter.api.Assertions.assertTrue;
+import lombok.SneakyThrows;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.MockedStatic;
 import org.mockito.Mockito;
 import org.mockito.junit.jupiter.MockitoExtension;
-
-import lombok.SneakyThrows;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
-import static uk.gov.justice.laa.dstew.claimsreports.service.CsvFileValidator.BUFFER_SIZE;
 
 @ExtendWith(MockitoExtension.class)
 class CsvFileValidatorTest {
@@ -45,7 +44,7 @@ class CsvFileValidatorTest {
     var path = Files.createTempFile("notUtf8", ".csv");
     try (OutputStream out = Files.newOutputStream(path)) {
       out.write("test, test".getBytes(StandardCharsets.UTF_8));
-      out.write(new byte[]{(byte) 0xF0}); //Not valid in utf-8
+      out.write(new byte[] {(byte) 0xF0}); // Not valid in utf-8
       out.write(", test, test".getBytes(StandardCharsets.UTF_8));
     }
 
@@ -84,7 +83,7 @@ class CsvFileValidatorTest {
       out.write(dash);
       out.write("Hello World".getBytes(StandardCharsets.UTF_8));
     }
-   assertTrue(csvFileValidator.checkUtf8Encoded(path));
+    assertTrue(csvFileValidator.checkUtf8Encoded(path));
   }
 
   @Test
@@ -102,14 +101,14 @@ class CsvFileValidatorTest {
       out.write(emoji);
       out.write("Hello World".getBytes(StandardCharsets.UTF_8));
     }
-  assertTrue(csvFileValidator.checkUtf8Encoded(path));
+    assertTrue(csvFileValidator.checkUtf8Encoded(path));
   }
 
   @Test
   public void testIncompleteUtf8AtEOF() throws IOException {
     // "–" = E2 80 93, write only E2 80 (incomplete)
     byte[] dash = "–".getBytes(StandardCharsets.UTF_8);
-    byte[] incomplete = new byte[]{dash[0], dash[1]}; // E2 80
+    byte[] incomplete = new byte[] {dash[0], dash[1]}; // E2 80
 
     var path = File.createTempFile("utf8-incomplete-eof", ".txt");
     try (FileOutputStream out = new FileOutputStream(path)) {
@@ -127,12 +126,16 @@ class CsvFileValidatorTest {
 
   @Test
   void checkFileExtension_shouldErrorIfTryingToSetFileNameThatIsNotCsv() {
-    assertThrows(CsvUploadException.class, () -> csvFileValidator.checkFileExtension("blah.exe", "bash.csv"));
+    assertThrows(
+        CsvUploadException.class,
+        () -> csvFileValidator.checkFileExtension("blah.exe", "bash.csv"));
   }
 
   @Test
   void checkFileExtension_shouldErrorIfTryingToUploadFileThatIsNotCsv() {
-    assertThrows(CsvUploadException.class, () -> csvFileValidator.checkFileExtension("blah.csv", "bash.exe"));
+    assertThrows(
+        CsvUploadException.class,
+        () -> csvFileValidator.checkFileExtension("blah.csv", "bash.exe"));
   }
 
   @SneakyThrows
@@ -151,7 +154,8 @@ class CsvFileValidatorTest {
     var path = Files.createTempFile("headers-mismatch", ".csv");
     Files.writeString(path, "\"First name\",Age\nAlice,42\n");
 
-    assertFalse(csvFileValidator.checkCsvHeaders(path.toFile(), Arrays.asList("First name", "Name")));
+    assertFalse(
+        csvFileValidator.checkCsvHeaders(path.toFile(), Arrays.asList("First name", "Name")));
     Files.deleteIfExists(path);
   }
 
@@ -159,11 +163,14 @@ class CsvFileValidatorTest {
   @Test
   void checkCsvHeaders_shouldValidateDynamicHeadersAfterExpectedPrefix() {
     var path = Files.createTempFile("dynamic-headers", ".csv");
-    Files.writeString(path, "\"Provider Office Account Number\",\"Area of Law\",APR-2025\n001,CIVIL,1\n");
+    Files.writeString(
+        path, "\"Provider Office Account Number\",\"Area of Law\",APR-2025\n001,CIVIL,1\n");
 
-    assertTrue(csvFileValidator.checkCsvHeaders(path.toFile(),
-        Arrays.asList("Provider Office Account Number", "Area of Law"),
-        Pattern.compile("(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-\\d{4}")));
+    assertTrue(
+        csvFileValidator.checkCsvHeaders(
+            path.toFile(),
+            Arrays.asList("Provider Office Account Number", "Area of Law"),
+            Pattern.compile("(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-\\d{4}")));
     Files.deleteIfExists(path);
   }
 
@@ -173,9 +180,11 @@ class CsvFileValidatorTest {
     var path = Files.createTempFile("missing-dynamic-headers", ".csv");
     Files.writeString(path, "\"Provider Office Account Number\",\"Area of Law\"\n");
 
-    assertFalse(csvFileValidator.checkCsvHeaders(path.toFile(),
-        Arrays.asList("Provider Office Account Number", "Area of Law"),
-        Pattern.compile("(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-\\d{4}")));
+    assertFalse(
+        csvFileValidator.checkCsvHeaders(
+            path.toFile(),
+            Arrays.asList("Provider Office Account Number", "Area of Law"),
+            Pattern.compile("(?:JAN|FEB|MAR|APR|MAY|JUN|JUL|AUG|SEP|OCT|NOV|DEC)-\\d{4}")));
     Files.deleteIfExists(path);
   }
 
@@ -185,7 +194,9 @@ class CsvFileValidatorTest {
     var path = Files.createTempFile("unparsable-headers", ".csv");
     Files.writeString(path, "\"Unterminated header,Age\nAlice,42\n");
 
-    assertFalse(csvFileValidator.checkCsvHeaders(path.toFile(), Arrays.asList("Unterminated header", "Age")));
+    assertFalse(
+        csvFileValidator.checkCsvHeaders(
+            path.toFile(), Arrays.asList("Unterminated header", "Age")));
     Files.deleteIfExists(path);
   }
 
@@ -195,12 +206,11 @@ class CsvFileValidatorTest {
     var path = Files.createTempFile("unparsable-dynamic-headers", ".csv");
     Files.writeString(path, "\"Unterminated header,Age\nAlice,42\n");
 
-    assertFalse(csvFileValidator.checkCsvHeaders(path.toFile(),
-        Arrays.asList("Unterminated header"),
-        Pattern.compile("Age")));
+    assertFalse(
+        csvFileValidator.checkCsvHeaders(
+            path.toFile(), Arrays.asList("Unterminated header"), Pattern.compile("Age")));
     Files.deleteIfExists(path);
   }
-
 
   @Test
   void checkMimeTypeIsCsv_shouldReturnTrueForCsvMimeType() {
@@ -215,7 +225,9 @@ class CsvFileValidatorTest {
   void checkMimeTypeIsCsv_shouldThrowExceptionForNonCsvMimeType() {
     File fakeFile = new File("test.exe");
     try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
-      filesMock.when(() -> Files.probeContentType(fakeFile.toPath())).thenReturn("application/octet-stream");
+      filesMock
+          .when(() -> Files.probeContentType(fakeFile.toPath()))
+          .thenReturn("application/octet-stream");
       assertThrows(CsvUploadException.class, () -> csvFileValidator.checkMimeTypeIsCsv(fakeFile));
     }
   }
@@ -225,12 +237,9 @@ class CsvFileValidatorTest {
     File fakeFile = new File("test.unknown");
 
     try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
-      filesMock.when(() -> Files.probeContentType(fakeFile.toPath()))
-          .thenReturn(null);
+      filesMock.when(() -> Files.probeContentType(fakeFile.toPath())).thenReturn(null);
 
-      assertThrows(CsvUploadException.class,
-          () -> csvFileValidator.checkMimeTypeIsCsv(fakeFile)
-      );
+      assertThrows(CsvUploadException.class, () -> csvFileValidator.checkMimeTypeIsCsv(fakeFile));
     }
   }
 
@@ -239,13 +248,11 @@ class CsvFileValidatorTest {
     File fakeFile = new File("test.csv");
 
     try (MockedStatic<Files> filesMock = Mockito.mockStatic(Files.class)) {
-      filesMock.when(() -> Files.probeContentType(fakeFile.toPath()))
+      filesMock
+          .when(() -> Files.probeContentType(fakeFile.toPath()))
           .thenThrow(new IOException("IO"));
 
-      assertThrows(CsvUploadException.class,
-          () -> csvFileValidator.checkMimeTypeIsCsv(fakeFile)
-      );
+      assertThrows(CsvUploadException.class, () -> csvFileValidator.checkMimeTypeIsCsv(fakeFile));
     }
   }
-
 }
