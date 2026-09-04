@@ -130,11 +130,8 @@ See [README.md](../README.md#releases) for release-please configuration and comm
 - Jacoco code coverage verification; main application class is excluded
 - Pre-commit hooks enabled to prevent accidental secret commits (from DevSecOps) — see [README.md](../README.md#pre-commit-hooks)
 
-### British English
-- Use British English spelling in code comments, documentation, and commit messages
-- Examples: organisation (not organization), colour (not color), centre (not center), licence (not license)
-- Variable and method names follow Java conventions; function names may use UK English terminology where appropriate (e.g., `validateMetadata` not `validateMetaData`)
-- Test descriptions and log messages should use British English spelling
+### Language
+- **Use British English spelling and terminology** in all code comments, documentation, commit messages, and variable names (e.g., `colour` not `color`, `localise` not `localize`, `organise` not `organize`)
 
 ### GitHub Token Setup
 See [README.md](../README.md#add-github-token) for GitHub PAT setup required by the LAA Gradle plugin.
