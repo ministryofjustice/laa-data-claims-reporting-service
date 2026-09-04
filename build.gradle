@@ -3,7 +3,7 @@ plugins {
     // plugin version set in settings.gradle
     id 'uk.gov.justice.service.laa.laa-spring-boot-gradle-plugin'
     id 'com.github.spotbugs' version '6.5.11'
-    id 'com.diffplug.spotless' version '7.2.1'
+    id 'com.diffplug.spotless' version '8.10.1'
 }
 
 tasks.withType(Checkstyle).configureEach {
@@ -83,7 +83,7 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    implementation(platform 'software.amazon.awssdk:bom:2.54.7')
+    implementation(platform 'software.amazon.awssdk:bom:2.54.9')
     implementation 'software.amazon.awssdk:s3'
     implementation 'software.amazon.awssdk:sts'
 
