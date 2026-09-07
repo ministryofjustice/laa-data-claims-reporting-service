@@ -146,7 +146,7 @@ jobs:
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       - name: Run SpotBugs with FindSecBugs
-        uses: ./.github/spotbugs-scan
+        uses: ./.github/actions/spotbugs_scan
         with:
           github_token: ${{ secrets.GITHUB_TOKEN }}
 
@@ -194,7 +194,7 @@ jobs:
 
       - name: Deploy UAT branch
         id: deploy_uat_branch
-        uses: ./.github/deploy_branch
+        uses: ./.github/actions/deploy_branch
         with:
           ecr-region: ${{ vars.ECR_REGION }}
           ecr-role-to-assume: ${{ secrets.ECR_ROLE_TO_ASSUME }}
@@ -250,7 +250,7 @@ jobs:
 
       - name: Deploy staging
         id: deploy_staging
-        uses: ./.github/deploy
+        uses: ./.github/actions/deploy
         with:
           ecr-region: ${{ vars.ECR_REGION }}
           ecr-role-to-assume: ${{ secrets.ECR_ROLE_TO_ASSUME }}
@@ -303,7 +303,7 @@ jobs:
 
       - name: Deploy production
         id: deploy_production
-        uses: ./.github/deploy
+        uses: ./.github/actions/deploy
         with:
           ecr-region: ${{ vars.ECR_REGION }}
           ecr-role-to-assume: ${{ secrets.ECR_ROLE_TO_ASSUME }}
