@@ -75,6 +75,7 @@ jobs:
       - build-and-run-tests
     permissions:
       contents: read
+      security-events: write
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       SNYK_TEST_EXCLUDE: build,generated
@@ -101,6 +102,7 @@ jobs:
       - build-and-run-tests
     permissions:
       contents: read
+      security-events: write
     env:
       SNYK_TOKEN: ${{ secrets.SNYK_TOKEN }}
       GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
