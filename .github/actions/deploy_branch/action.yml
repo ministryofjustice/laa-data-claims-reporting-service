@@ -43,7 +43,7 @@ runs:
 
     - name: Extract release name
       id: extract_release_name
-      uses: ./.github/get_release_name
+      uses: ./.github/actions/get_release_name
 
     - name: Authenticate to the cluster
       uses: ministryofjustice/laa-reusable-github-actions/.github/actions/authenticate_to_cluster@a0bd8225ca8cc96e57a19223ce21f2ce7230833c # latest commit for repo
