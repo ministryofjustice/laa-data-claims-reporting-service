@@ -302,3 +302,7 @@ Install the hook with the following command:
 ```text
 pre-commit install
 ```
+
+---
+
+random text to generate a commit.
