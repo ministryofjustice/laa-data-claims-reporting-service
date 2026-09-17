@@ -9,6 +9,7 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.jdbc.datasource.DriverManagerDataSource;
+import org.springframework.web.client.RestTemplate;
 import tools.jackson.dataformat.csv.CsvMapper;
 import uk.gov.justice.laa.dstew.claimsreports.service.CsvFileValidator;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
@@ -55,6 +56,11 @@ public class AppConfig {
     return Clock.systemDefaultZone();
   }
 
+  @Bean
+  public RestTemplate restTemplate() {
+    return new RestTemplate();
+  }
+
   /** Defines how frequently the file buffer will be flushed for performant file creation. */
   @Value("${csv-creation.buffer-flush-freq:1000}")
   private int bufferFlushFrequency;
@@ -69,6 +75,30 @@ public class AppConfig {
 
   @Value("${excel-creation.row-access-window-size:100}")
   private int excelRowAccessWindowSize;
+
+  @Value("${sharepoint.tenant-id:}")
+  private String sharePointTenantId;
+
+  @Value("${sharepoint.client-id:}")
+  private String sharePointClientId;
+
+  @Value("${sharepoint.client-secret:}")
+  private String sharePointClientSecret;
+
+  @Value("${sharepoint.site-host:}")
+  private String sharePointSiteHost;
+
+  @Value("${sharepoint.site-path:}")
+  private String sharePointSitePath;
+
+  @Value("${sharepoint.drive-name:Documents}")
+  private String sharePointDriveName;
+
+  @Value("${sharepoint.folder-path:}")
+  private String sharePointFolderPath;
+
+  @Value("${sharepoint.upload.retry-count:3}")
+  private int sharePointUploadRetryCount;
 
   @Bean
   public S3ClientWrapper createS3ClientWrapper(
@@ -104,4 +134,8 @@ public class AppConfig {
   @Value("${feature.enable-rep012-xlsx:false}")
   @Getter
   private boolean enableRep012Xlsx;
+
+  @Value("${feature.enable-rep012-sharepoint-upload:false}")
+  @Getter
+  private boolean enableRep012SharePointUpload;
 }
