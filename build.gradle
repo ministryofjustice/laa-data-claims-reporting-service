@@ -95,6 +95,11 @@ dependencies {
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 
     implementation 'tools.jackson.dataformat:jackson-dataformat-csv'
+
+    // Hardcoding due to snyk issues raised in CI scan
+    implementation 'tools.jackson.core:jackson-databind:3.1.6'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.21.6'
+
     implementation 'org.apache.poi:poi-ooxml:5.4.1'
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
