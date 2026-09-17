@@ -27,7 +27,11 @@ import org.springframework.jdbc.core.JdbcTemplate;
 import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvCreationException;
+import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
+import uk.gov.justice.laa.dstew.claimsreports.exception.SharePointUploadException;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
+import uk.gov.justice.laa.dstew.claimsreports.service.sharepoint.SharePointUploadResult;
+import uk.gov.justice.laa.dstew.claimsreports.service.sharepoint.SharePointUploadService;
 
 /** Unit tests for {@link Report012Service}. */
 class Report012ServiceTest {
@@ -42,6 +46,7 @@ class Report012ServiceTest {
   private MetricsHandler metricsHandler;
   private Clock fixedClock;
   private AppConfig appConfig;
+  private SharePointUploadService sharePointUploadService;
 
   @BeforeEach
   void setUpReport012Service() {
@@ -52,6 +57,7 @@ class Report012ServiceTest {
     s3ClientWrapper = mock(S3ClientWrapper.class);
     metricsHandler = mock(MetricsHandler.class);
     appConfig = mock(AppConfig.class);
+    sharePointUploadService = mock(SharePointUploadService.class);
 
     Instant fixedNow = Instant.parse("2025-12-22T10:00:00Z");
     fixedClock = Clock.fixed(fixedNow, ZoneOffset.UTC);
@@ -64,16 +70,8 @@ class Report012ServiceTest {
             metricsHandler,
             fixedClock,
             appConfig,
-            excelCreationService);
-    service =
-        new Report012Service(
-            jdbcTemplate,
-            s3ClientWrapper,
-            creationService,
-            metricsHandler,
-            fixedClock,
-            appConfig,
-            excelCreationService);
+            excelCreationService,
+            sharePointUploadService);
   }
 
   @Test
@@ -115,6 +113,7 @@ class Report012ServiceTest {
   @Test
   void generateReport_shouldUseXlsxPathWhenFeatureFlagEnabled() {
     when(appConfig.isEnableRep012Xlsx()).thenReturn(true);
+    when(appConfig.isEnableRep012SharePointUpload()).thenReturn(false);
 
     service.generateReport();
 
@@ -135,8 +134,67 @@ class Report012ServiceTest {
   }
 
   @Test
+  void generateReport_shouldUploadToSharePointWhenEnabled() {
+    when(appConfig.isEnableRep012Xlsx()).thenReturn(true);
+    when(appConfig.isEnableRep012SharePointUpload()).thenReturn(true);
+    when(sharePointUploadService.uploadFile(any(File.class), eq("report_012_2025-12-22.xlsx")))
+        .thenReturn(new SharePointUploadResult("https://justiceuk.sharepoint.com/example"));
+
+    service.generateReport();
+
+    verify(sharePointUploadService).uploadFile(any(File.class), eq("report_012_2025-12-22.xlsx"));
+  }
+
+  @Test
+  void generateReport_shouldContinueWhenS3FailsButSharePointSucceeds() {
+    when(appConfig.isEnableRep012Xlsx()).thenReturn(true);
+    when(appConfig.isEnableRep012SharePointUpload()).thenReturn(true);
+    doThrow(new CsvUploadException("s3 failed"))
+        .when(s3ClientWrapper)
+        .uploadFile(any(File.class), any(), any());
+    when(sharePointUploadService.uploadFile(any(File.class), eq("report_012_2025-12-22.xlsx")))
+        .thenReturn(new SharePointUploadResult("https://justiceuk.sharepoint.com/example"));
+
+    service.generateReport();
+
+    verify(sharePointUploadService).uploadFile(any(File.class), eq("report_012_2025-12-22.xlsx"));
+  }
+
+  @Test
+  void generateReport_shouldContinueWhenSharePointFailsButS3Succeeds() {
+    when(appConfig.isEnableRep012Xlsx()).thenReturn(true);
+    when(appConfig.isEnableRep012SharePointUpload()).thenReturn(true);
+    doThrow(new SharePointUploadException("sharepoint failed"))
+        .when(sharePointUploadService)
+        .uploadFile(any(File.class), eq("report_012_2025-12-22.xlsx"));
+
+    service.generateReport();
+
+    verify(s3ClientWrapper)
+        .uploadFile(
+            any(File.class),
+            eq("reports/daily/report_012_2025-12-22.xlsx"),
+            eq("application/vnd.openxmlformats-officedocument.spreadsheetml.sheet"));
+  }
+
+  @Test
+  void generateReport_shouldFailWhenBothS3AndSharePointFail() {
+    when(appConfig.isEnableRep012Xlsx()).thenReturn(true);
+    when(appConfig.isEnableRep012SharePointUpload()).thenReturn(true);
+    doThrow(new CsvUploadException("s3 failed"))
+        .when(s3ClientWrapper)
+        .uploadFile(any(File.class), any(), any());
+    doThrow(new SharePointUploadException("sharepoint failed"))
+        .when(sharePointUploadService)
+        .uploadFile(any(File.class), eq("report_012_2025-12-22.xlsx"));
+
+    assertThrows(CsvCreationException.class, () -> service.generateReport());
+  }
+
+  @Test
   void generateReport_shouldDeleteTempXlsxWhenExcelCreationFails() {
     when(appConfig.isEnableRep012Xlsx()).thenReturn(true);
+    when(appConfig.isEnableRep012SharePointUpload()).thenReturn(false);
     doThrow(new CsvCreationException("Simulated excel failure"))
         .when(excelCreationService)
         .buildExcelFromData(any(), any(), any());

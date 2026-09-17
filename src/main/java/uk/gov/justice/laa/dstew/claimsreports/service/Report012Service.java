@@ -3,13 +3,17 @@ package uk.gov.justice.laa.dstew.claimsreports.service;
 import java.io.File;
 import java.io.IOException;
 import java.time.Clock;
+import java.time.LocalDate;
 import java.util.List;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
 import uk.gov.justice.laa.dstew.claimsreports.config.AppConfig;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
+import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
+import uk.gov.justice.laa.dstew.claimsreports.exception.SharePointUploadException;
 import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
+import uk.gov.justice.laa.dstew.claimsreports.service.sharepoint.SharePointUploadService;
 
 /**
  * Report012Service is responsible for generating and managing report_012. This service extends the
@@ -23,6 +27,7 @@ public class Report012Service extends AbstractReportService {
 
   private final AppConfig appConfig;
   private final ExcelCreationService excelCreationService;
+  private final SharePointUploadService sharePointUploadService;
 
   /** Creates Report012Service. */
   public Report012Service(
@@ -32,10 +37,12 @@ public class Report012Service extends AbstractReportService {
       MetricsHandler metricsHandler,
       Clock clock,
       AppConfig appConfig,
-      ExcelCreationService excelCreationService) {
+      ExcelCreationService excelCreationService,
+      SharePointUploadService sharePointUploadService) {
     super(jdbcTemplate, s3ClientWrapper, csvCreationService, metricsHandler, clock);
     this.appConfig = appConfig;
     this.excelCreationService = excelCreationService;
+    this.sharePointUploadService = sharePointUploadService;
   }
 
   @Override
@@ -103,10 +110,47 @@ public class Report012Service extends AbstractReportService {
   @Override
   protected void uploadReportFile(File tempFile, String s3FileKey) {
     if (appConfig.isEnableRep012Xlsx()) {
-      s3ClientWrapper.uploadFile(
-          tempFile, s3FileKey, "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet");
+      uploadXlsxReport(tempFile, s3FileKey);
       return;
     }
     super.uploadReportFile(tempFile, s3FileKey);
+  }
+
+  private void uploadXlsxReport(File tempFile, String s3FileKey) {
+    String xlsxContentType =
+        uk.gov.justice.laa.dstew.claimsreports.service.sharepoint.SharePointProperties
+            .XLSX_MIME_TYPE;
+    boolean s3Succeeded = false;
+    boolean sharePointSucceeded = false;
+    RuntimeException s3Failure = null;
+    RuntimeException sharePointFailure = null;
+    try {
+      s3ClientWrapper.uploadFile(tempFile, s3FileKey, xlsxContentType);
+      s3Succeeded = true;
+    } catch (RuntimeException ex) {
+      s3Failure = ex;
+      log.warn("S3 upload failed for {}: {}", getReportName(), ex.getMessage());
+    }
+
+    if (appConfig.isEnableRep012SharePointUpload()) {
+      try {
+        var result = sharePointUploadService.uploadFile(tempFile, getCurrentReportFileName());
+        sharePointSucceeded = true;
+        log.info("SharePoint upload complete for {} at {}", getReportName(), result.webUrl());
+      } catch (SharePointUploadException ex) {
+        sharePointFailure = ex;
+        log.warn("SharePoint upload failed for {}: {}", getReportName(), ex.getMessage());
+      }
+    }
+
+    if (!s3Succeeded && !sharePointSucceeded) {
+      throw new CsvUploadException(
+          "S3 and SharePoint uploads both failed for " + getReportName(),
+          s3Failure != null ? s3Failure : sharePointFailure);
+    }
+  }
+
+  private String getCurrentReportFileName() {
+    return getReportFileName() + "_" + LocalDate.now(clock) + getReportFileExtension();
   }
 }
