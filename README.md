@@ -164,6 +164,19 @@ kubectl -n "$NS" create job "$JOB" --from=cronjob/"$CRONJOB" --dry-run=client -o
   | kubectl apply -f -
 ```
 
+### SharePoint REP012 XLSX upload
+- REP012 can additionally upload streamed XLSX output to SharePoint when `FEATURE_ENABLE_REP012_SHAREPOINT_UPLOAD=true`.
+- Required env vars:
+  - `SHAREPOINT_TENANT_ID`
+  - `SHAREPOINT_CLIENT_ID`
+  - `SHAREPOINT_CLIENT_SECRET`
+  - `SHAREPOINT_SITE_HOST`
+  - `SHAREPOINT_SITE_PATH`
+  - `SHAREPOINT_DRIVE_NAME`
+  - `SHAREPOINT_FOLDER_PATH`
+- DCRS resolves the SharePoint site ID at runtime using Microsoft Graph from the configured host and site path.
+- SharePoint upload is retried three times and logs the resulting SharePoint `webUrl` when successful.
+
 ### Downloading reports from S3
 Follow instructions on [confluence page](https://dsdmoj.atlassian.net/wiki/spaces/LPF/pages/6021087732/How+to+get+report+from+S3+directly)
 
