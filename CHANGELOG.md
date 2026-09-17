@@ -1,5 +1,13 @@
 # Changelog
 
+## [1.7.2](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.7.1...v1.7.2) (2026-09-04)
+
+
+### Bug Fixes
+
+* **bot:** Bump amazoncorretto from 25.0.3-alpine3.23 to 26.0.2-alpine3.23 ([#262](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/262)) ([cc6f4c5](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/cc6f4c50b639346dbae06c516e2be4f82d366259))
+* **bot:** Bump the gradle-updates group with 2 updates ([#261](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/261)) ([253b91e](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/253b91e6a4323ae5cea76bb58a83c2cf5603961d))
+
 ## [1.7.1](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.7.0...v1.7.1) (2026-09-02)
 
 
