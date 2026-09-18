@@ -138,6 +138,22 @@ class Report014IntegrationTest extends IntegrationTestBase {
         .isEqualTo("Escape Fee Case Assessment");
   }
 
+  @Test
+  void testAssessedByUserIdIsAvailableInReport() {
+    insertDataForFirstAssessmentTest();
+
+    List<Map<String, Object>> firstAssessmentRow =
+        jdbcTemplate.queryForList(
+            """
+        SELECT "Assessed by User ID"
+        FROM claims.mvw_report_014
+        WHERE "Assessment ID" = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab'
+        """);
+
+    assertThat(firstAssessmentRow).isNotNull();
+    assertThat(firstAssessmentRow.getFirst().get("Assessed by User ID")).isEqualTo("updated_integration_test_user");
+  }
+
   private void insertDataForFirstAssessmentTest() {
     insertFullSubmissionWithClaimsAndAssessments("VALIDATION_SUCCEEDED", "VALID");
   }
@@ -255,9 +271,9 @@ class Report014IntegrationTest extends IntegrationTestBase {
           """
               INSERT INTO claims.assessment
               (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
-               allowed_total_vat, allowed_total_incl_vat, assessment_type, assessment_reason, created_by_user_id, created_on)
+               allowed_total_vat, allowed_total_incl_vat, assessment_type, assessment_reason, created_by_user_id, created_on, updated_by_user_id)
               VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'REDUCED_STILL_ESCAPED', 200.00,
-                      1400.00, 210.00, 2080.00, 'ESCAPE_CASE_ASSESSMENT', 'Escape Fee Case Assessment', 'integration_test_user', now() )
+                      1400.00, 210.00, 2080.00, 'ESCAPE_CASE_ASSESSMENT', 'Escape Fee Case Assessment', 'integration_test_user', now(), 'updated_integration_test_user' )
               """);
     }
 
