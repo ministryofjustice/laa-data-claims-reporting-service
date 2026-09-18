@@ -5,12 +5,15 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import uk.gov.justice.laa.dstew.claimsreports.IntegrationTestBase;
 
 @Slf4j
 class Report014IntegrationTest extends IntegrationTestBase {
+  UUID firstAssessmentId = UUID.randomUUID();
+  UUID secondAssessmentId = UUID.randomUUID();
 
   @Test
   void testUsesCalculatedFeeForBeforeWhenFirstAssessment() {
@@ -22,8 +25,9 @@ class Report014IntegrationTest extends IntegrationTestBase {
             """
         SELECT "Value before Amendment", "Difference"
         FROM claims.mvw_report_014
-        WHERE "Assessment ID" = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab'
-        """);
+        WHERE "Assessment ID" = ?
+        """,
+            String.valueOf(firstAssessmentId));
 
     assertThat(firstAssessmentRow).isNotNull();
     assertThat(firstAssessmentRow).isNotEmpty();
@@ -49,8 +53,9 @@ class Report014IntegrationTest extends IntegrationTestBase {
             """
         SELECT "Value before Amendment", "Difference"
         FROM claims.mvw_report_014
-        WHERE "Assessment ID" = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaac'
-        """);
+        WHERE "Assessment ID" = ?
+        """,
+            String.valueOf(secondAssessmentId));
 
     assertThat(secondAssessmentRow).isNotNull();
     assertThat(secondAssessmentRow).isNotEmpty();
@@ -129,8 +134,9 @@ class Report014IntegrationTest extends IntegrationTestBase {
             """
         SELECT "Assessment Type", "Assessment Reason"
         FROM claims.mvw_report_014
-        WHERE "Assessment ID" = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab'
-        """);
+        WHERE "Assessment ID" = ?
+        """,
+            String.valueOf(firstAssessmentId));
 
     assertThat(returnedRows).isNotNull();
     assertThat(returnedRows.getFirst().get("Assessment Type")).isEqualTo("Escape Case Assessment");
@@ -147,8 +153,9 @@ class Report014IntegrationTest extends IntegrationTestBase {
             """
         SELECT "Assessed by User ID"
         FROM claims.mvw_report_014
-        WHERE "Assessment ID" = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab'
-        """);
+        WHERE "Assessment ID" = ?
+        """,
+            String.valueOf(firstAssessmentId));
 
     assertThat(firstAssessmentRow).isNotNull();
     assertThat(firstAssessmentRow.getFirst().get("Assessed by User ID"))
@@ -250,8 +257,8 @@ class Report014IntegrationTest extends IntegrationTestBase {
   }
 
   private void insertClaimAssessment(
-      String id,
-      String allowedTotalIncludingVat,
+      UUID id,
+      double allowedTotalIncludingVat,
       String assessmentType,
       String assessmentReason,
       String updatedByUserId) {
@@ -280,8 +287,8 @@ class Report014IntegrationTest extends IntegrationTestBase {
   private void insertDataForSecondAssessmentTest() {
 
     insertClaimAssessment(
-        "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab",
-        "2070.00",
+        secondAssessmentId,
+        2070.00,
         "ESCAPE_CASE_ASSESSMENT",
         "Escape Fee Case Assessment",
         "updated_integration_test_user");
@@ -299,15 +306,11 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
     if (Objects.equals(claimStatus, "VOID")) {
       insertClaimAssessment(
-          "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab",
-          "2080.00",
-          "VOID",
-          "Voided",
-          "updated_integration_test_user");
+          firstAssessmentId, 2080.00, "VOID", "Voided", "updated_integration_test_user");
     } else {
       insertClaimAssessment(
-          "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab",
-          "2080.00",
+          firstAssessmentId,
+          2080.00,
           "ESCAPE_CASE_ASSESSMENT",
           "Escape Fee Case Assessment",
           "updated_integration_test_user");
