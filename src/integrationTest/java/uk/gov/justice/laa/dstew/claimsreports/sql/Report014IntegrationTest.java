@@ -14,6 +14,13 @@ import uk.gov.justice.laa.dstew.claimsreports.IntegrationTestBase;
 class Report014IntegrationTest extends IntegrationTestBase {
   UUID firstAssessmentId = UUID.randomUUID();
   UUID secondAssessmentId = UUID.randomUUID();
+  int totalAmountOfCalculatedFee = 1501;
+  int allowedTotalIncludVatOf1stAssessment = 2080;
+  int allowedTotalIncludVatOf2ndAssessment = 2070;
+
+  private String to2DecimalPlaces(int value) {
+    return String.format("%.2f", (double) value);
+  }
 
   @Test
   void testUsesCalculatedFeeForBeforeWhenFirstAssessment() {
@@ -35,11 +42,13 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
     // Should have grabbed value from Calculated Fee Detail for before value
     var beforeValue = firstAssessmentRow.getFirst().get("Value before Amendment");
-    assertThat(beforeValue).isEqualTo("1501.00");
+    assertThat(beforeValue).isEqualTo(to2DecimalPlaces(totalAmountOfCalculatedFee));
 
     // Should have used that for the difference
     var difference = firstAssessmentRow.getFirst().get("Difference");
-    assertThat(difference).isEqualTo("579.00");
+    assertThat(difference)
+        .isEqualTo(
+            to2DecimalPlaces(allowedTotalIncludVatOf1stAssessment - totalAmountOfCalculatedFee));
   }
 
   @Test
@@ -63,11 +72,14 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
     // Should have grabbed value from the first Assessment Row for before value
     var beforeValue = secondAssessmentRow.getFirst().get("Value before Amendment");
-    assertThat(beforeValue).isEqualTo("2080.00");
+    assertThat(beforeValue).isEqualTo(to2DecimalPlaces(allowedTotalIncludVatOf1stAssessment));
 
     // Should have used that for the difference
     var difference = secondAssessmentRow.getFirst().get("Difference");
-    assertThat(difference).isEqualTo("-10.00");
+    assertThat(difference)
+        .isEqualTo(
+            to2DecimalPlaces(
+                allowedTotalIncludVatOf2ndAssessment - allowedTotalIncludVatOf1stAssessment));
   }
 
   @Test
@@ -245,53 +257,45 @@ class Report014IntegrationTest extends IntegrationTestBase {
         """);
   }
 
-  private void insertCalculatedFeeDetails() {
+  private void insertCalculatedFeeDetails(int totalAmount) {
     jdbcTemplate.update(
         """
       INSERT INTO claims.calculated_fee_detail (
           id, claim_summary_fee_id, claim_id, fee_code, fee_type, created_by_user_id, created_on, updated_by_user_id, updated_on,
           fee_code_description, category_of_law, total_amount
           ) VALUES ('77777777-7777-7777-7777-777777777779', '66666666-6666-6666-6666-666666666669', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5',
-              'FEE001', 'TypeA', 'integration_test_user', '2025-10-20 09:00:00+00', 'test_user', '2025-04-20 09:30:00+00', 'Description 1', 'INVEST', 1501)
-      """);
+              'FEE001', 'TypeA', 'integration_test_user', '2025-10-20 09:00:00+00', 'test_user', '2025-04-20 09:30:00+00', 'Description 1', 'INVEST', ?)
+      """,
+        totalAmount);
   }
 
   private void insertClaimAssessment(
-      UUID id,
-      double allowedTotalIncludingVat,
-      String assessmentType,
-      String assessmentReason,
-      String updatedByUserId) {
+      UUID id, int allowedTotalIncludingVat, String assessmentType, String assessmentReason) {
     jdbcTemplate.update(
         """
               INSERT INTO claims.assessment
               (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
                allowed_total_vat, allowed_total_incl_vat, assessment_type, assessment_reason, created_by_user_id, created_on, updated_by_user_id)
               VALUES (?, 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'REDUCED_STILL_ESCAPED', 200.00,
-                      1400.00, 210.00, ?, ?, ?, 'integration_test_user', now(), ?)
+                      1400.00, 210.00, ?, ?, ?, 'integration_test_user', now(), 'updated_integration_test_user')
               """,
         id,
         allowedTotalIncludingVat,
         assessmentType,
-        assessmentReason,
-        updatedByUserId);
+        assessmentReason);
   }
 
   void refreshReport014MaterializedView() {
-    jdbcTemplate.update(
-        """
-            REFRESH MATERIALIZED VIEW claims.mvw_report_014
-            """);
+    jdbcTemplate.update("REFRESH MATERIALIZED VIEW claims.mvw_report_014");
   }
 
   private void insertDataForSecondAssessmentTest() {
 
     insertClaimAssessment(
         secondAssessmentId,
-        2070.00,
+        allowedTotalIncludVatOf2ndAssessment,
         "ESCAPE_CASE_ASSESSMENT",
-        "Escape Fee Case Assessment",
-        "updated_integration_test_user");
+        "Escape Fee Case Assessment");
     refreshReport014MaterializedView();
   }
 
@@ -302,18 +306,17 @@ class Report014IntegrationTest extends IntegrationTestBase {
     insertClaim(claimStatus);
     insertClaimCase();
     insertClaimSummaryFee();
-    insertCalculatedFeeDetails();
+    insertCalculatedFeeDetails(totalAmountOfCalculatedFee);
 
     if (Objects.equals(claimStatus, "VOID")) {
       insertClaimAssessment(
-          firstAssessmentId, 2080.00, "VOID", "Voided", "updated_integration_test_user");
+          firstAssessmentId, allowedTotalIncludVatOf1stAssessment, "VOID", "Voided");
     } else {
       insertClaimAssessment(
           firstAssessmentId,
-          2080.00,
+          allowedTotalIncludVatOf1stAssessment,
           "ESCAPE_CASE_ASSESSMENT",
-          "Escape Fee Case Assessment",
-          "updated_integration_test_user");
+          "Escape Fee Case Assessment");
     }
 
     refreshReport014MaterializedView();
