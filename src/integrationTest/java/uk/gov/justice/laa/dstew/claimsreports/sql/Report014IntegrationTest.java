@@ -18,23 +18,12 @@ class Report014IntegrationTest extends IntegrationTestBase {
   int allowedTotalIncludVatOf1stAssessment = 2080;
   int allowedTotalIncludVatOf2ndAssessment = 2070;
 
-  private String to2DecimalPlaces(int value) {
-    return String.format("%.2f", (double) value);
-  }
-
   @Test
   void testUsesCalculatedFeeForBeforeWhenFirstAssessment() {
 
     insertDataForFirstAssessmentTest();
 
-    List<Map<String, Object>> firstAssessmentRow =
-        jdbcTemplate.queryForList(
-            """
-        SELECT "Value before Amendment", "Difference"
-        FROM claims.mvw_report_014
-        WHERE "Assessment ID" = ?
-        """,
-            String.valueOf(firstAssessmentId));
+    List<Map<String, Object>> firstAssessmentRow = queryByAssessmentId(firstAssessmentId);
 
     assertThat(firstAssessmentRow).isNotNull();
     assertThat(firstAssessmentRow).isNotEmpty();
@@ -57,14 +46,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
     insertDataForFirstAssessmentTest();
     insertDataForSecondAssessmentTest();
 
-    List<Map<String, Object>> secondAssessmentRow =
-        jdbcTemplate.queryForList(
-            """
-        SELECT "Value before Amendment", "Difference"
-        FROM claims.mvw_report_014
-        WHERE "Assessment ID" = ?
-        """,
-            String.valueOf(secondAssessmentId));
+    List<Map<String, Object>> secondAssessmentRow = queryByAssessmentId(secondAssessmentId);
 
     assertThat(secondAssessmentRow).isNotNull();
     assertThat(secondAssessmentRow).isNotEmpty();
@@ -141,14 +123,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
     // populated properly.
     insertDataForFirstAssessmentTest();
 
-    List<Map<String, Object>> returnedRows =
-        jdbcTemplate.queryForList(
-            """
-        SELECT "Assessment Type", "Assessment Reason"
-        FROM claims.mvw_report_014
-        WHERE "Assessment ID" = ?
-        """,
-            String.valueOf(firstAssessmentId));
+    List<Map<String, Object>> returnedRows = queryByAssessmentId(firstAssessmentId);
 
     assertThat(returnedRows).isNotNull();
     assertThat(returnedRows.getFirst().get("Assessment Type")).isEqualTo("Escape Case Assessment");
@@ -160,18 +135,25 @@ class Report014IntegrationTest extends IntegrationTestBase {
   void testAssessedByUserIdIsAvailableInReport() {
     insertDataForFirstAssessmentTest();
 
-    List<Map<String, Object>> firstAssessmentRow =
-        jdbcTemplate.queryForList(
-            """
-        SELECT "Assessed by User ID"
-        FROM claims.mvw_report_014
-        WHERE "Assessment ID" = ?
-        """,
-            String.valueOf(firstAssessmentId));
+    List<Map<String, Object>> firstAssessmentRow = queryByAssessmentId(firstAssessmentId);
 
     assertThat(firstAssessmentRow).isNotNull();
     assertThat(firstAssessmentRow.getFirst().get("Assessed by User ID"))
         .isEqualTo("updated_integration_test_user");
+  }
+
+  private String to2DecimalPlaces(int value) {
+    return String.format("%.2f", (double) value);
+  }
+
+  private List<Map<String, Object>> queryByAssessmentId(UUID assessmentId) {
+    return jdbcTemplate.queryForList(
+        """
+        SELECT *
+        FROM claims.mvw_report_014
+        WHERE "Assessment ID" = ?
+        """,
+        String.valueOf(assessmentId));
   }
 
   private void insertDataForFirstAssessmentTest() {
