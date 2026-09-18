@@ -35,7 +35,7 @@ WITH submission_periods AS (
 		c.status AS claim_status,
 		a.assessment_type,
 		a.assessment_reason,
-		a.updated_by_user_id
+		a.created_by_user_id
     FROM claims.assessment AS a
     JOIN claims.claim AS c
 		ON c.id = a.claim_id
@@ -66,7 +66,7 @@ SELECT
     COALESCE(sp.submission_id::text, '') 										                AS "Submission ID",
     COALESCE(al.claim_id::text, '') 											                AS "Claim ID",
     COALESCE(al.assessment_id::text, '') 										                AS "Assessment ID",
-    COALESCE(al.updated_by_user_id::text, '') 										            AS "Assessed by User ID"
+    COALESCE(al.created_by_user_id::text, '')									            	AS "Assessed by User ID"
 FROM assessment_lines AS al
          JOIN submission_periods AS sp
               ON sp.submission_id = al.submission_id

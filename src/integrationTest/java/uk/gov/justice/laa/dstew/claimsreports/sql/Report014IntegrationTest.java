@@ -121,7 +121,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
     assertThat(firstAssessmentRow).isNotNull();
     assertThat(firstAssessmentRow.getFirst().get("Assessed by User ID"))
-        .isEqualTo("updated_integration_test_user");
+        .isEqualTo("integration_test_user");
   }
 
   private String to2DecimalPlaces(int value) {
