@@ -69,13 +69,8 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
     insertFullSubmissionWithClaimsAndAssessments("VALIDATION_FAILED", "VALID");
 
-    List<Map<String, Object>> returnedRows =
-        jdbcTemplate.queryForList(
-            """
-        SELECT *
-        FROM claims.mvw_report_014
-        WHERE 'Submission ID' = 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB1'
-        """);
+    List<Map<String, Object>> returnedRows = queryBySubmissionId();
+        
 
     assertThat(returnedRows).isNotNull();
     assertThat(returnedRows).isEmpty();
@@ -86,13 +81,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
     insertFullSubmissionWithClaimsAndAssessments("VALIDATION_SUCCEEDED", "INVALID");
 
-    List<Map<String, Object>> returnedRows =
-        jdbcTemplate.queryForList(
-            """
-        SELECT *
-        FROM claims.mvw_report_014
-        WHERE "Claim ID" = 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5'
-        """);
+    List<Map<String, Object>> returnedRows = queryBySubmissionId();
 
     assertThat(returnedRows).isNotNull();
     assertThat(returnedRows).isEmpty();
@@ -154,6 +143,15 @@ class Report014IntegrationTest extends IntegrationTestBase {
         WHERE "Assessment ID" = ?
         """,
         String.valueOf(assessmentId));
+  }
+
+  private List<Map<String, Object>> queryBySubmissionId() {
+    return jdbcTemplate.queryForList(
+            """
+        SELECT *
+        FROM claims.mvw_report_014
+        WHERE 'Submission ID' = 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB1'
+        """);
   }
 
   private void insertDataForFirstAssessmentTest() {
