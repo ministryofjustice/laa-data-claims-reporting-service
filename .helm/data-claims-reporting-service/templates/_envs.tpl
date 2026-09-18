@@ -61,4 +61,64 @@ Extract other environment variables from laa-data-claims-reporting-service-secre
       name: laa-data-claims-reporting-service-secrets
       key: feature-force-run-rep000
       optional: true
+- name: FEATURE_ENABLE_REP012_XLSX
+  valueFrom:
+    secretKeyRef:
+      name: laa-data-claims-reporting-service-secrets
+      key: feature-enable-rep012-xlsx
+      optional: true
+- name: FEATURE_ENABLE_REP012_SHAREPOINT_UPLOAD
+  valueFrom:
+    secretKeyRef:
+      name: laa-data-claims-reporting-service-secrets
+      key: feature-enable-rep012-sharepoint-upload
+      optional: true
+- name: SHAREPOINT_TENANT_ID
+  valueFrom:
+    secretKeyRef:
+      name: laa-data-claims-reporting-service-secrets
+      key: sharepoint-tenant-id
+      optional: true
+- name: SHAREPOINT_CLIENT_ID
+  valueFrom:
+    secretKeyRef:
+      name: laa-data-claims-reporting-service-secrets
+      key: sharepoint-client-id
+      optional: true
+- name: SHAREPOINT_SITE_HOST
+  valueFrom:
+    secretKeyRef:
+      name: laa-data-claims-reporting-service-secrets
+      key: sharepoint-site-host
+      optional: true
+- name: SHAREPOINT_SITE_PATH
+  valueFrom:
+    secretKeyRef:
+      name: laa-data-claims-reporting-service-secrets
+      key: sharepoint-site-path
+      optional: true
+- name: SHAREPOINT_DRIVE_NAME
+  valueFrom:
+    secretKeyRef:
+      name: laa-data-claims-reporting-service-secrets
+      key: sharepoint-drive-name
+      optional: true
+- name: SHAREPOINT_FOLDER_PATH
+  valueFrom:
+    secretKeyRef:
+      name: laa-data-claims-reporting-service-secrets
+      key: sharepoint-folder-path
+      optional: true
+- name: SHAREPOINT_UPLOAD_RETRY_COUNT
+  valueFrom:
+    secretKeyRef:
+      name: laa-data-claims-reporting-service-secrets
+      key: sharepoint-upload-retry-count
+      optional: true
+- name: SHAREPOINT_CLIENT_SECRET
+  valueFrom:
+    secretKeyRef:
+      name: laa-data-claims-reporting-service-secrets
+      key: sharepoint-client-secret
+      optional: true
 {{- end }}

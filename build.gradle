@@ -106,6 +106,8 @@ dependencies {
     implementation 'tools.jackson.core:jackson-databind:3.1.6'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.21.6'
 
+    implementation 'org.apache.poi:poi-ooxml:5.4.1'
+
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly "org.flywaydb:flyway-database-postgresql"

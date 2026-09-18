@@ -77,6 +77,10 @@ public class S3ClientWrapper {
     uploadFile(fileToUpload, desiredFileKey, List.of(), null);
   }
 
+  public void uploadFile(File fileToUpload, String desiredFileKey, String contentType) {
+    uploadFileToS3(fileToUpload, desiredFileKey, contentType);
+  }
+
   /**
    * Upload a generated CSV file after validating fixed headers and any additional patterned
    * headers.
@@ -136,11 +140,42 @@ public class S3ClientWrapper {
         .log("File {} is valid UTF-8. Check took {} ms", fileName, encodingDuration);
     metricsHandler.setCustomMetric(CustomMetricId.ENCODING_CHECK_TIME_MS, encodingDuration);
 
+    uploadFileToS3(fileToUpload, desiredFileKey, "text/csv");
+  }
+
+  private void uploadErroredFile(File fileToUpload, String fileName) {
+    log.atInfo()
+        .addKeyValue("event.action", "s3.upload.error_file")
+        .addKeyValue("event.type", "storage")
+        .log(
+            "UTF-8 check failed and uploadUtf8Errors is enabled, attempting to upload to errors folder");
+    var errorFileName = "reports/errors/" + fileName;
+
+    var errorUpload =
+        PutObjectRequest.builder()
+            .bucket(s3Bucket)
+            .key(errorFileName)
+            .contentType("text/csv")
+            .build();
+    s3Client.putObject(errorUpload, RequestBody.fromFile(fileToUpload));
+    log.atInfo()
+        .addKeyValue("event.action", "s3.upload.error_file")
+        .addKeyValue("event.type", "storage")
+        .addKeyValue("s3.bucket", s3Bucket)
+        .addKeyValue("s3.key", errorFileName)
+        .log(
+            "Uploaded non-UTF-8 file {} to S3 bucket {} with filename {}",
+            sanitise(fileToUpload.getPath()),
+            sanitise(s3Bucket),
+            sanitise(errorFileName));
+  }
+
+  private void uploadFileToS3(File fileToUpload, String desiredFileKey, String contentType) {
     var putRequest =
         PutObjectRequest.builder()
             .bucket(s3Bucket)
             .key(desiredFileKey)
-            .contentType("text/csv")
+            .contentType(contentType)
             .build();
 
     log.atInfo()
@@ -179,32 +214,5 @@ public class S3ClientWrapper {
             sanitise(desiredFileKey),
             fileSizeMib,
             durationMilliseconds);
-  }
-
-  private void uploadErroredFile(File fileToUpload, String fileName) {
-    log.atInfo()
-        .addKeyValue("event.action", "s3.upload.error_file")
-        .addKeyValue("event.type", "storage")
-        .log(
-            "UTF-8 check failed and uploadUtf8Errors is enabled, attempting to upload to errors folder");
-    var errorFileName = "reports/errors/" + fileName;
-
-    var errorUpload =
-        PutObjectRequest.builder()
-            .bucket(s3Bucket)
-            .key(errorFileName)
-            .contentType("text/csv")
-            .build();
-    s3Client.putObject(errorUpload, RequestBody.fromFile(fileToUpload));
-    log.atInfo()
-        .addKeyValue("event.action", "s3.upload.error_file")
-        .addKeyValue("event.type", "storage")
-        .addKeyValue("s3.bucket", s3Bucket)
-        .addKeyValue("s3.key", errorFileName)
-        .log(
-            "Uploaded non-UTF-8 file {} to S3 bucket {} with filename {}",
-            sanitise(fileToUpload.getPath()),
-            sanitise(s3Bucket),
-            sanitise(errorFileName));
   }
 }
