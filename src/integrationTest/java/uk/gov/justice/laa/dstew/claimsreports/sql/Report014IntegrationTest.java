@@ -35,9 +35,9 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
     // Should have used that for the difference
     var difference = firstAssessmentRow.getFirst().get("Difference");
-    assertThat(difference)
-        .isEqualTo(
-            to2DecimalPlaces(allowedTotalIncludVatOf1stAssessment - totalAmountOfCalculatedFee));
+    String expectedDifference =
+        to2DecimalPlaces(allowedTotalIncludVatOf1stAssessment - totalAmountOfCalculatedFee);
+    assertThat(difference).isEqualTo(expectedDifference);
   }
 
   @Test
@@ -58,10 +58,10 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
     // Should have used that for the difference
     var difference = secondAssessmentRow.getFirst().get("Difference");
-    assertThat(difference)
-        .isEqualTo(
-            to2DecimalPlaces(
-                allowedTotalIncludVatOf2ndAssessment - allowedTotalIncludVatOf1stAssessment));
+    String expectedDifference =
+        to2DecimalPlaces(
+            allowedTotalIncludVatOf2ndAssessment - allowedTotalIncludVatOf1stAssessment);
+    assertThat(difference).isEqualTo(expectedDifference);
   }
 
   @Test
@@ -69,8 +69,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
     insertFullSubmissionWithClaimsAndAssessments("VALIDATION_FAILED", "VALID");
 
-    List<Map<String, Object>> returnedRows = queryBySubmissionId();
-        
+    List<Map<String, Object>> returnedRows = queryByClaimId();
 
     assertThat(returnedRows).isNotNull();
     assertThat(returnedRows).isEmpty();
@@ -81,7 +80,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
     insertFullSubmissionWithClaimsAndAssessments("VALIDATION_SUCCEEDED", "INVALID");
 
-    List<Map<String, Object>> returnedRows = queryBySubmissionId();
+    List<Map<String, Object>> returnedRows = queryByClaimId();
 
     assertThat(returnedRows).isNotNull();
     assertThat(returnedRows).isEmpty();
@@ -92,13 +91,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
     insertFullSubmissionWithClaimsAndAssessments("VALIDATION_SUCCEEDED", "VOID");
 
-    List<Map<String, Object>> returnedRows =
-        jdbcTemplate.queryForList(
-            """
-        SELECT "Assessment Type", "Assessment Reason"
-        FROM claims.mvw_report_014
-        WHERE "Claim ID" = 'cccccccc-cccc-cccc-cccc-ccccccccccc5'
-        """);
+    List<Map<String, Object>> returnedRows = queryByClaimId();
 
     assertThat(returnedRows).isNotNull();
     assertThat(returnedRows.getFirst().get("Assessment Type")).isEqualTo("Void");
@@ -145,12 +138,12 @@ class Report014IntegrationTest extends IntegrationTestBase {
         String.valueOf(assessmentId));
   }
 
-  private List<Map<String, Object>> queryBySubmissionId() {
+  private List<Map<String, Object>> queryByClaimId() {
     return jdbcTemplate.queryForList(
-            """
-        SELECT *
+        """
+        SELECT "Assessment Type", "Assessment Reason"
         FROM claims.mvw_report_014
-        WHERE 'Submission ID' = 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB1'
+        WHERE "Claim ID" = 'cccccccc-cccc-cccc-cccc-ccccccccccc5'
         """);
   }
 
