@@ -82,12 +82,12 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1'
 
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    implementation(platform 'software.amazon.awssdk:bom:2.54.13')
+    implementation(platform 'software.amazon.awssdk:bom:2.54.18')
     implementation 'software.amazon.awssdk:s3'
     //AWSSDK:s3 introduces high vuln in netty-codec-http, overriding until fixed in AWS SDK:
     implementation 'io.netty:netty-codec-http:4.2.18.Final'
@@ -103,8 +103,8 @@ dependencies {
     implementation 'tools.jackson.dataformat:jackson-dataformat-csv'
 
     // Hardcoding due to snyk issues raised in CI scan
-    implementation 'tools.jackson.core:jackson-databind:3.1.6'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.21.6'
+    implementation 'tools.jackson.core:jackson-databind:3.2.2'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.2'
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
     runtimeOnly 'org.postgresql:postgresql'
