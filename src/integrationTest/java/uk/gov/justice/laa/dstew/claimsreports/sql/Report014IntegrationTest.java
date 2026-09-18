@@ -151,7 +151,8 @@ class Report014IntegrationTest extends IntegrationTestBase {
         """);
 
     assertThat(firstAssessmentRow).isNotNull();
-    assertThat(firstAssessmentRow.getFirst().get("Assessed by User ID")).isEqualTo("updated_integration_test_user");
+    assertThat(firstAssessmentRow.getFirst().get("Assessed by User ID"))
+        .isEqualTo("updated_integration_test_user");
   }
 
   private void insertDataForFirstAssessmentTest() {
@@ -175,31 +176,32 @@ class Report014IntegrationTest extends IntegrationTestBase {
       """);
   }
 
-  private void insertFullSubmissionWithClaimsAndAssessments(
-      String submissionStatus, String claimStatus) {
+  private void insertClaimsSubmission(String submissionStatus) {
     jdbcTemplate.update(
         """
-    INSERT INTO claims.submission (
-        id, bulk_submission_id, office_account_number, submission_period, area_of_law, status, crime_lower_schedule_number,
-        previous_submission_id, is_nil_submission, number_of_claims, error_messages, created_by_user_id, created_on, provider_user_id
-    ) VALUES (
-        'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB1',
-        '11111111-1111-1111-1111-111111111111',
-        'OA001',
-        'MAR-2025',
-        'LEGAL HELP',
-        ?,
-        'CSN001',
-        NULL,
-        FALSE,
-        1,
-        NULL,
-        'integration_test_user',
-        '2025-11-21 05:00:00',
-        'test provider user')
-      """,
+        INSERT INTO claims.submission (
+            id, bulk_submission_id, office_account_number, submission_period, area_of_law, status, crime_lower_schedule_number,
+            previous_submission_id, is_nil_submission, number_of_claims, error_messages, created_by_user_id, created_on, provider_user_id
+        ) VALUES (
+            'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB1',
+            '11111111-1111-1111-1111-111111111111',
+            'OA001',
+            'MAR-2025',
+            'LEGAL HELP',
+            ?,
+            'CSN001',
+            NULL,
+            FALSE,
+            1,
+            NULL,
+            'integration_test_user',
+            '2025-11-21 05:00:00',
+            'test provider user')
+        """,
         submissionStatus);
+  }
 
+  private void insertClaim(String claimStatus) {
     jdbcTemplate.update(
         """
       INSERT INTO claims.claim (
@@ -214,7 +216,9 @@ class Report014IntegrationTest extends IntegrationTestBase {
           TIMESTAMP '2025-11-21 05:00:00' - interval '1 day')
           """,
         claimStatus);
+  }
 
+  private void insertClaimCase() {
     jdbcTemplate.update(
         """
     INSERT INTO claims.claim_case (
@@ -231,23 +235,27 @@ class Report014IntegrationTest extends IntegrationTestBase {
         TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          )
     """);
+  }
 
+  private void insertClaimSummaryFee() {
     jdbcTemplate.update(
         """
-      INSERT INTO claims.claim_summary_fee (
-          id, claim_id, advice_time, travel_time, waiting_time, net_profit_costs_amount, net_disbursement_amount,
-          net_counsel_costs_amount, disbursements_vat_amount, travel_waiting_costs_amount, net_waiting_costs_amount,
-          is_vat_applicable, is_tolerance_applicable, created_by_user_id, created_on, updated_on
-      ) VALUES (
-          '56666666-6666-6666-6666-666666666669',
-          'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5',
-          60, 30, 15, 1000, 200,
-          500, 100, 50, 20,
-          TRUE, FALSE, 'integration_test_user',
-          TIMESTAMP '2025-11-21 05:00:00' - interval '2 day', TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
-           )
-      """);
+        INSERT INTO claims.claim_summary_fee (
+            id, claim_id, advice_time, travel_time, waiting_time, net_profit_costs_amount, net_disbursement_amount,
+            net_counsel_costs_amount, disbursements_vat_amount, travel_waiting_costs_amount, net_waiting_costs_amount,
+            is_vat_applicable, is_tolerance_applicable, created_by_user_id, created_on, updated_on
+        ) VALUES (
+            '56666666-6666-6666-6666-666666666669',
+            'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5',
+            60, 30, 15, 1000, 200,
+            500, 100, 50, 20,
+            TRUE, FALSE, 'integration_test_user',
+            TIMESTAMP '2025-11-21 05:00:00' - interval '2 day', TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
+            )
+        """);
+  }
 
+  private void insertCalculatedFeeDetails() {
     jdbcTemplate.update(
         """
       INSERT INTO claims.calculated_fee_detail (
@@ -256,30 +264,46 @@ class Report014IntegrationTest extends IntegrationTestBase {
           ) VALUES ('77777777-7777-7777-7777-777777777779', '66666666-6666-6666-6666-666666666669', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5',
               'FEE001', 'TypeA', 'integration_test_user', '2025-10-20 09:00:00+00', 'test_user', '2025-04-20 09:30:00+00', 'Description 1', 'INVEST', 1501)
       """);
+  }
 
-    if (Objects.equals(claimStatus, "VOID")) {
-      jdbcTemplate.update(
-          """
-              INSERT INTO claims.assessment
-              (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
-               allowed_total_vat, allowed_total_incl_vat, assessment_type, assessment_reason, created_by_user_id, created_on)
-              VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'NILLED', 00.00,
-                      00.00, 00.00, 00.0, 'VOID', 'Voided', 'integration_test_user', now() )
-              """);
-    } else {
-      jdbcTemplate.update(
-          """
+  private void insertClaimAssessment(
+      String assessmentType, String assessmentReason, String updatedByUserId) {
+    jdbcTemplate.update(
+        """
               INSERT INTO claims.assessment
               (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
                allowed_total_vat, allowed_total_incl_vat, assessment_type, assessment_reason, created_by_user_id, created_on, updated_by_user_id)
               VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'REDUCED_STILL_ESCAPED', 200.00,
-                      1400.00, 210.00, 2080.00, 'ESCAPE_CASE_ASSESSMENT', 'Escape Fee Case Assessment', 'integration_test_user', now(), 'updated_integration_test_user' )
-              """);
-    }
+                      1400.00, 210.00, 2080.00, ?, ?, 'integration_test_user', now(), ?)
+              """,
+        assessmentType,
+        assessmentReason,
+        updatedByUserId);
+  }
 
+  void refreshReport014MaterializedView() {
     jdbcTemplate.update(
         """
-      REFRESH MATERIALIZED VIEW claims.mvw_report_014
-      """);
+            REFRESH MATERIALIZED VIEW claims.mvw_report_014
+            """);
+  }
+
+  private void insertFullSubmissionWithClaimsAndAssessments(
+      String submissionStatus, String claimStatus) {
+
+    insertClaimsSubmission(submissionStatus);
+    insertClaim(claimStatus);
+    insertClaimCase();
+    insertClaimSummaryFee();
+    insertCalculatedFeeDetails();
+
+    if (Objects.equals(claimStatus, "VOID")) {
+      insertClaimAssessment("VOID", "Voided", "updated_integration_test_user");
+    } else {
+      insertClaimAssessment(
+          "ESCAPE_CASE_ASSESSMENT", "Escape Fee Case Assessment", "updated_integration_test_user");
+    }
+
+    refreshReport014MaterializedView();
   }
 }
