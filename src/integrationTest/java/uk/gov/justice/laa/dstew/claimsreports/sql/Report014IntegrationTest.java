@@ -5,25 +5,25 @@ import static org.assertj.core.api.Assertions.assertThat;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.UUID;
 import lombok.extern.slf4j.Slf4j;
 import org.junit.jupiter.api.Test;
 import uk.gov.justice.laa.dstew.claimsreports.IntegrationTestBase;
 
 @Slf4j
 class Report014IntegrationTest extends IntegrationTestBase {
+  UUID firstAssessmentId = UUID.randomUUID();
+  UUID secondAssessmentId = UUID.randomUUID();
+  int totalAmountOfCalculatedFee = 1501;
+  int allowedTotalIncludVatOf1stAssessment = 2080;
+  int allowedTotalIncludVatOf2ndAssessment = 2070;
 
   @Test
   void testUsesCalculatedFeeForBeforeWhenFirstAssessment() {
 
     insertDataForFirstAssessmentTest();
 
-    List<Map<String, Object>> firstAssessmentRow =
-        jdbcTemplate.queryForList(
-            """
-        SELECT "Value before Amendment", "Difference"
-        FROM claims.mvw_report_014
-        WHERE "Assessment ID" = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab'
-        """);
+    List<Map<String, Object>> firstAssessmentRow = queryByAssessmentId(firstAssessmentId);
 
     assertThat(firstAssessmentRow).isNotNull();
     assertThat(firstAssessmentRow).isNotEmpty();
@@ -31,11 +31,13 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
     // Should have grabbed value from Calculated Fee Detail for before value
     var beforeValue = firstAssessmentRow.getFirst().get("Value before Amendment");
-    assertThat(beforeValue).isEqualTo("1501.00");
+    assertThat(beforeValue).isEqualTo(to2DecimalPlaces(totalAmountOfCalculatedFee));
 
     // Should have used that for the difference
     var difference = firstAssessmentRow.getFirst().get("Difference");
-    assertThat(difference).isEqualTo("579.00");
+    String expectedDifference =
+        to2DecimalPlaces(allowedTotalIncludVatOf1stAssessment - totalAmountOfCalculatedFee);
+    assertThat(difference).isEqualTo(expectedDifference);
   }
 
   @Test
@@ -44,13 +46,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
     insertDataForFirstAssessmentTest();
     insertDataForSecondAssessmentTest();
 
-    List<Map<String, Object>> secondAssessmentRow =
-        jdbcTemplate.queryForList(
-            """
-        SELECT "Value before Amendment", "Difference"
-        FROM claims.mvw_report_014
-        WHERE "Assessment ID" = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaac'
-        """);
+    List<Map<String, Object>> secondAssessmentRow = queryByAssessmentId(secondAssessmentId);
 
     assertThat(secondAssessmentRow).isNotNull();
     assertThat(secondAssessmentRow).isNotEmpty();
@@ -58,11 +54,14 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
     // Should have grabbed value from the first Assessment Row for before value
     var beforeValue = secondAssessmentRow.getFirst().get("Value before Amendment");
-    assertThat(beforeValue).isEqualTo("2080.00");
+    assertThat(beforeValue).isEqualTo(to2DecimalPlaces(allowedTotalIncludVatOf1stAssessment));
 
     // Should have used that for the difference
     var difference = secondAssessmentRow.getFirst().get("Difference");
-    assertThat(difference).isEqualTo("-10.00");
+    String expectedDifference =
+        to2DecimalPlaces(
+            allowedTotalIncludVatOf2ndAssessment - allowedTotalIncludVatOf1stAssessment);
+    assertThat(difference).isEqualTo(expectedDifference);
   }
 
   @Test
@@ -70,13 +69,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
     insertFullSubmissionWithClaimsAndAssessments("VALIDATION_FAILED", "VALID");
 
-    List<Map<String, Object>> returnedRows =
-        jdbcTemplate.queryForList(
-            """
-        SELECT *
-        FROM claims.mvw_report_014
-        WHERE 'Submission ID' = 'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB1'
-        """);
+    List<Map<String, Object>> returnedRows = queryByClaimId();
 
     assertThat(returnedRows).isNotNull();
     assertThat(returnedRows).isEmpty();
@@ -87,13 +80,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
     insertFullSubmissionWithClaimsAndAssessments("VALIDATION_SUCCEEDED", "INVALID");
 
-    List<Map<String, Object>> returnedRows =
-        jdbcTemplate.queryForList(
-            """
-        SELECT *
-        FROM claims.mvw_report_014
-        WHERE "Claim ID" = 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5'
-        """);
+    List<Map<String, Object>> returnedRows = queryByClaimId();
 
     assertThat(returnedRows).isNotNull();
     assertThat(returnedRows).isEmpty();
@@ -104,13 +91,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
 
     insertFullSubmissionWithClaimsAndAssessments("VALIDATION_SUCCEEDED", "VOID");
 
-    List<Map<String, Object>> returnedRows =
-        jdbcTemplate.queryForList(
-            """
-        SELECT "Assessment Type", "Assessment Reason"
-        FROM claims.mvw_report_014
-        WHERE "Claim ID" = 'cccccccc-cccc-cccc-cccc-ccccccccccc5'
-        """);
+    List<Map<String, Object>> returnedRows = queryByClaimId();
 
     assertThat(returnedRows).isNotNull();
     assertThat(returnedRows.getFirst().get("Assessment Type")).isEqualTo("Void");
@@ -124,13 +105,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
     // populated properly.
     insertDataForFirstAssessmentTest();
 
-    List<Map<String, Object>> returnedRows =
-        jdbcTemplate.queryForList(
-            """
-        SELECT "Assessment Type", "Assessment Reason"
-        FROM claims.mvw_report_014
-        WHERE "Assessment ID" = 'aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab'
-        """);
+    List<Map<String, Object>> returnedRows = queryByAssessmentId(firstAssessmentId);
 
     assertThat(returnedRows).isNotNull();
     assertThat(returnedRows.getFirst().get("Assessment Type")).isEqualTo("Escape Case Assessment");
@@ -138,52 +113,70 @@ class Report014IntegrationTest extends IntegrationTestBase {
         .isEqualTo("Escape Fee Case Assessment");
   }
 
+  @Test
+  void testAssessedByUserIdIsAvailableInReport() {
+    insertDataForFirstAssessmentTest();
+
+    List<Map<String, Object>> firstAssessmentRow = queryByAssessmentId(firstAssessmentId);
+
+    assertThat(firstAssessmentRow).isNotNull();
+    assertThat(firstAssessmentRow.getFirst().get("Assessed by User ID"))
+        .isEqualTo("integration_test_user");
+  }
+
+  private String to2DecimalPlaces(int value) {
+    return String.format("%.2f", (double) value);
+  }
+
+  private List<Map<String, Object>> queryByAssessmentId(UUID assessmentId) {
+    return jdbcTemplate.queryForList(
+        """
+        SELECT *
+        FROM claims.mvw_report_014
+        WHERE "Assessment ID" = ?
+        """,
+        String.valueOf(assessmentId));
+  }
+
+  private List<Map<String, Object>> queryByClaimId() {
+    return jdbcTemplate.queryForList(
+        """
+        SELECT "Assessment Type", "Assessment Reason"
+        FROM claims.mvw_report_014
+        WHERE "Claim ID" = 'cccccccc-cccc-cccc-cccc-ccccccccccc5'
+        """);
+  }
+
   private void insertDataForFirstAssessmentTest() {
     insertFullSubmissionWithClaimsAndAssessments("VALIDATION_SUCCEEDED", "VALID");
   }
 
-  private void insertDataForSecondAssessmentTest() {
-
+  private void insertClaimsSubmission(String submissionStatus) {
     jdbcTemplate.update(
         """
-            INSERT INTO claims.assessment
-            (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
-             allowed_total_vat, allowed_total_incl_vat, created_by_user_id, created_on)
-            VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaac', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'REDUCED_STILL_ESCAPED', 200.00,
-                    1400.00, 210.00, 2070.00, 'integration_test_user', now() )
-            """);
-
-    jdbcTemplate.update(
-        """
-      REFRESH MATERIALIZED VIEW claims.mvw_report_014
-      """);
+        INSERT INTO claims.submission (
+            id, bulk_submission_id, office_account_number, submission_period, area_of_law, status, crime_lower_schedule_number,
+            previous_submission_id, is_nil_submission, number_of_claims, error_messages, created_by_user_id, created_on, provider_user_id
+        ) VALUES (
+            'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB1',
+            '11111111-1111-1111-1111-111111111111',
+            'OA001',
+            'MAR-2025',
+            'LEGAL HELP',
+            ?,
+            'CSN001',
+            NULL,
+            FALSE,
+            1,
+            NULL,
+            'integration_test_user',
+            '2025-11-21 05:00:00',
+            'test provider user')
+        """,
+        submissionStatus);
   }
 
-  private void insertFullSubmissionWithClaimsAndAssessments(
-      String submissionStatus, String claimStatus) {
-    jdbcTemplate.update(
-        """
-    INSERT INTO claims.submission (
-        id, bulk_submission_id, office_account_number, submission_period, area_of_law, status, crime_lower_schedule_number,
-        previous_submission_id, is_nil_submission, number_of_claims, error_messages, created_by_user_id, created_on, provider_user_id
-    ) VALUES (
-        'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB1',
-        '11111111-1111-1111-1111-111111111111',
-        'OA001',
-        'MAR-2025',
-        'LEGAL HELP',
-        ?,
-        'CSN001',
-        NULL,
-        FALSE,
-        1,
-        NULL,
-        'integration_test_user',
-        '2025-11-21 05:00:00',
-        'test provider user')
-      """,
-        submissionStatus);
-
+  private void insertClaim(String claimStatus) {
     jdbcTemplate.update(
         """
       INSERT INTO claims.claim (
@@ -198,7 +191,9 @@ class Report014IntegrationTest extends IntegrationTestBase {
           TIMESTAMP '2025-11-21 05:00:00' - interval '1 day')
           """,
         claimStatus);
+  }
 
+  private void insertClaimCase() {
     jdbcTemplate.update(
         """
     INSERT INTO claims.claim_case (
@@ -215,55 +210,88 @@ class Report014IntegrationTest extends IntegrationTestBase {
         TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
          )
     """);
+  }
 
+  private void insertClaimSummaryFee() {
     jdbcTemplate.update(
         """
-      INSERT INTO claims.claim_summary_fee (
-          id, claim_id, advice_time, travel_time, waiting_time, net_profit_costs_amount, net_disbursement_amount,
-          net_counsel_costs_amount, disbursements_vat_amount, travel_waiting_costs_amount, net_waiting_costs_amount,
-          is_vat_applicable, is_tolerance_applicable, created_by_user_id, created_on, updated_on
-      ) VALUES (
-          '56666666-6666-6666-6666-666666666669',
-          'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5',
-          60, 30, 15, 1000, 200,
-          500, 100, 50, 20,
-          TRUE, FALSE, 'integration_test_user',
-          TIMESTAMP '2025-11-21 05:00:00' - interval '2 day', TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
-           )
-      """);
+        INSERT INTO claims.claim_summary_fee (
+            id, claim_id, advice_time, travel_time, waiting_time, net_profit_costs_amount, net_disbursement_amount,
+            net_counsel_costs_amount, disbursements_vat_amount, travel_waiting_costs_amount, net_waiting_costs_amount,
+            is_vat_applicable, is_tolerance_applicable, created_by_user_id, created_on, updated_on
+        ) VALUES (
+            '56666666-6666-6666-6666-666666666669',
+            'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5',
+            60, 30, 15, 1000, 200,
+            500, 100, 50, 20,
+            TRUE, FALSE, 'integration_test_user',
+            TIMESTAMP '2025-11-21 05:00:00' - interval '2 day', TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
+            )
+        """);
+  }
 
+  private void insertCalculatedFeeDetails(int totalAmount) {
     jdbcTemplate.update(
         """
       INSERT INTO claims.calculated_fee_detail (
           id, claim_summary_fee_id, claim_id, fee_code, fee_type, created_by_user_id, created_on, updated_by_user_id, updated_on,
           fee_code_description, category_of_law, total_amount
           ) VALUES ('77777777-7777-7777-7777-777777777779', '66666666-6666-6666-6666-666666666669', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5',
-              'FEE001', 'TypeA', 'integration_test_user', '2025-10-20 09:00:00+00', 'test_user', '2025-04-20 09:30:00+00', 'Description 1', 'INVEST', 1501)
-      """);
+              'FEE001', 'TypeA', 'integration_test_user', '2025-10-20 09:00:00+00', 'test_user', '2025-04-20 09:30:00+00', 'Description 1', 'INVEST', ?)
+      """,
+        totalAmount);
+  }
 
-    if (Objects.equals(claimStatus, "VOID")) {
-      jdbcTemplate.update(
-          """
-              INSERT INTO claims.assessment
-              (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
-               allowed_total_vat, allowed_total_incl_vat, assessment_type, assessment_reason, created_by_user_id, created_on)
-              VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'NILLED', 00.00,
-                      00.00, 00.00, 00.0, 'VOID', 'Voided', 'integration_test_user', now() )
-              """);
-    } else {
-      jdbcTemplate.update(
-          """
-              INSERT INTO claims.assessment
-              (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
-               allowed_total_vat, allowed_total_incl_vat, assessment_type, assessment_reason, created_by_user_id, created_on)
-              VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'REDUCED_STILL_ESCAPED', 200.00,
-                      1400.00, 210.00, 2080.00, 'ESCAPE_CASE_ASSESSMENT', 'Escape Fee Case Assessment', 'integration_test_user', now() )
-              """);
-    }
-
+  private void insertClaimAssessment(
+      UUID id, int allowedTotalIncludingVat, String assessmentType, String assessmentReason) {
     jdbcTemplate.update(
         """
-      REFRESH MATERIALIZED VIEW claims.mvw_report_014
-      """);
+              INSERT INTO claims.assessment
+              (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
+               allowed_total_vat, allowed_total_incl_vat, assessment_type, assessment_reason, created_by_user_id, created_on, updated_by_user_id)
+              VALUES (?, 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'REDUCED_STILL_ESCAPED', 200.00,
+                      1400.00, 210.00, ?, ?, ?, 'integration_test_user', now(), 'updated_integration_test_user')
+              """,
+        id,
+        allowedTotalIncludingVat,
+        assessmentType,
+        assessmentReason);
+  }
+
+  void refreshReport014MaterializedView() {
+    jdbcTemplate.update("REFRESH MATERIALIZED VIEW claims.mvw_report_014");
+  }
+
+  private void insertDataForSecondAssessmentTest() {
+
+    insertClaimAssessment(
+        secondAssessmentId,
+        allowedTotalIncludVatOf2ndAssessment,
+        "ESCAPE_CASE_ASSESSMENT",
+        "Escape Fee Case Assessment");
+    refreshReport014MaterializedView();
+  }
+
+  private void insertFullSubmissionWithClaimsAndAssessments(
+      String submissionStatus, String claimStatus) {
+
+    insertClaimsSubmission(submissionStatus);
+    insertClaim(claimStatus);
+    insertClaimCase();
+    insertClaimSummaryFee();
+    insertCalculatedFeeDetails(totalAmountOfCalculatedFee);
+
+    if (Objects.equals(claimStatus, "VOID")) {
+      insertClaimAssessment(
+          firstAssessmentId, allowedTotalIncludVatOf1stAssessment, "VOID", "Voided");
+    } else {
+      insertClaimAssessment(
+          firstAssessmentId,
+          allowedTotalIncludVatOf1stAssessment,
+          "ESCAPE_CASE_ASSESSMENT",
+          "Escape Fee Case Assessment");
+    }
+
+    refreshReport014MaterializedView();
   }
 }
