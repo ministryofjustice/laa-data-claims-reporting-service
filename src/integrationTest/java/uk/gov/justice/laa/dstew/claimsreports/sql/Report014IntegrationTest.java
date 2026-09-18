@@ -159,23 +159,6 @@ class Report014IntegrationTest extends IntegrationTestBase {
     insertFullSubmissionWithClaimsAndAssessments("VALIDATION_SUCCEEDED", "VALID");
   }
 
-  private void insertDataForSecondAssessmentTest() {
-
-    jdbcTemplate.update(
-        """
-            INSERT INTO claims.assessment
-            (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
-             allowed_total_vat, allowed_total_incl_vat, created_by_user_id, created_on)
-            VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaac', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'REDUCED_STILL_ESCAPED', 200.00,
-                    1400.00, 210.00, 2070.00, 'integration_test_user', now() )
-            """);
-
-    jdbcTemplate.update(
-        """
-      REFRESH MATERIALIZED VIEW claims.mvw_report_014
-      """);
-  }
-
   private void insertClaimsSubmission(String submissionStatus) {
     jdbcTemplate.update(
         """
@@ -267,15 +250,21 @@ class Report014IntegrationTest extends IntegrationTestBase {
   }
 
   private void insertClaimAssessment(
-      String assessmentType, String assessmentReason, String updatedByUserId) {
+      String id,
+      String allowedTotalIncludingVat,
+      String assessmentType,
+      String assessmentReason,
+      String updatedByUserId) {
     jdbcTemplate.update(
         """
               INSERT INTO claims.assessment
               (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
                allowed_total_vat, allowed_total_incl_vat, assessment_type, assessment_reason, created_by_user_id, created_on, updated_by_user_id)
-              VALUES ('aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'REDUCED_STILL_ESCAPED', 200.00,
-                      1400.00, 210.00, 2080.00, ?, ?, 'integration_test_user', now(), ?)
+              VALUES (?, 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'REDUCED_STILL_ESCAPED', 200.00,
+                      1400.00, 210.00, ?, ?, ?, 'integration_test_user', now(), ?)
               """,
+        id,
+        allowedTotalIncludingVat,
         assessmentType,
         assessmentReason,
         updatedByUserId);
@@ -288,6 +277,17 @@ class Report014IntegrationTest extends IntegrationTestBase {
             """);
   }
 
+  private void insertDataForSecondAssessmentTest() {
+
+    insertClaimAssessment(
+        "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab",
+        "2070.00",
+        "ESCAPE_CASE_ASSESSMENT",
+        "Escape Fee Case Assessment",
+        "updated_integration_test_user");
+    refreshReport014MaterializedView();
+  }
+
   private void insertFullSubmissionWithClaimsAndAssessments(
       String submissionStatus, String claimStatus) {
 
@@ -298,10 +298,19 @@ class Report014IntegrationTest extends IntegrationTestBase {
     insertCalculatedFeeDetails();
 
     if (Objects.equals(claimStatus, "VOID")) {
-      insertClaimAssessment("VOID", "Voided", "updated_integration_test_user");
+      insertClaimAssessment(
+          "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab",
+          "2080.00",
+          "VOID",
+          "Voided",
+          "updated_integration_test_user");
     } else {
       insertClaimAssessment(
-          "ESCAPE_CASE_ASSESSMENT", "Escape Fee Case Assessment", "updated_integration_test_user");
+          "aaaaaaaa-aaaa-aaaa-aaaa-aaaaaaaaaaab",
+          "2080.00",
+          "ESCAPE_CASE_ASSESSMENT",
+          "Escape Fee Case Assessment",
+          "updated_integration_test_user");
     }
 
     refreshReport014MaterializedView();
