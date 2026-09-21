@@ -134,7 +134,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
         SELECT *
         FROM claims.mvw_report_014
         WHERE "Assessment ID" = ?
-        """,
+      """,
         String.valueOf(assessmentId));
   }
 
@@ -144,7 +144,7 @@ class Report014IntegrationTest extends IntegrationTestBase {
         SELECT "Assessment Type", "Assessment Reason"
         FROM claims.mvw_report_014
         WHERE "Claim ID" = 'cccccccc-cccc-cccc-cccc-ccccccccccc5'
-        """);
+      """);
   }
 
   private void insertDataForFirstAssessmentTest() {
@@ -172,44 +172,43 @@ class Report014IntegrationTest extends IntegrationTestBase {
             'integration_test_user',
             '2025-11-21 05:00:00',
             'test provider user')
-        """,
+      """,
         submissionStatus);
   }
 
   private void insertClaim(String claimStatus) {
     jdbcTemplate.update(
         """
-      INSERT INTO claims.claim (
-          id, submission_id, status, line_number, matter_type_code, created_by_user_id, created_on
-      ) VALUES (
-          'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5',
-          'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB1',
-            ?,
-          1,
-          'MT001',
-          'integration_test_user',
-          TIMESTAMP '2025-11-21 05:00:00' - interval '1 day')
-          """,
+          INSERT INTO claims.claim (
+              id, submission_id, status, line_number, matter_type_code, created_by_user_id, created_on
+          ) VALUES (
+              'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5',
+              'BBBBBBBB-BBBB-BBBB-BBBB-BBBBBBBBBBB1',
+              ?,
+              1,
+              'MT001',
+              'integration_test_user',
+              TIMESTAMP '2025-11-21 05:00:00' - interval '1 day')
+        """,
         claimStatus);
   }
 
   private void insertClaimCase() {
     jdbcTemplate.update(
         """
-    INSERT INTO claims.claim_case (
-        id, claim_id, case_id, unique_case_id, case_stage_code, stage_reached_code, outcome_code, created_by_user_id, created_on
-    ) VALUES (
-        'CC555555-5555-5555-5555-555555555555',
-        'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5',
-        'CASE002',
-        'UCASE001',
-        'STAGE1',
-        'REACHED1',
-        'SUCCESS',
-        'integration_test_user',
-        TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
-         )
-    """);
+        INSERT INTO claims.claim_case (
+            id, claim_id, case_id, unique_case_id, case_stage_code, stage_reached_code, outcome_code, created_by_user_id, created_on
+        ) VALUES (
+            'CC555555-5555-5555-5555-555555555555',
+            'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5',
+            'CASE002',
+            'UCASE001',
+            'STAGE1',
+            'REACHED1',
+            'SUCCESS',
+            'integration_test_user',
+            TIMESTAMP '2025-11-21 05:00:00' - interval '1 day')
+      """);
   }
 
   private void insertClaimSummaryFee() {
@@ -225,18 +224,17 @@ class Report014IntegrationTest extends IntegrationTestBase {
             60, 30, 15, 1000, 200,
             500, 100, 50, 20,
             TRUE, FALSE, 'integration_test_user',
-            TIMESTAMP '2025-11-21 05:00:00' - interval '2 day', TIMESTAMP '2025-11-21 05:00:00' - interval '1 day'
-            )
-        """);
+            TIMESTAMP '2025-11-21 05:00:00' - interval '2 day', TIMESTAMP '2025-11-21 05:00:00' - interval '1 day')
+      """);
   }
 
   private void insertCalculatedFeeDetails(int totalAmount) {
     jdbcTemplate.update(
         """
-      INSERT INTO claims.calculated_fee_detail (
-          id, claim_summary_fee_id, claim_id, fee_code, fee_type, created_by_user_id, created_on, updated_by_user_id, updated_on,
-          fee_code_description, category_of_law, total_amount
-          ) VALUES ('77777777-7777-7777-7777-777777777779', '66666666-6666-6666-6666-666666666669', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5',
+          INSERT INTO claims.calculated_fee_detail (
+              id, claim_summary_fee_id, claim_id, fee_code, fee_type, created_by_user_id, created_on, updated_by_user_id, updated_on,
+              fee_code_description, category_of_law, total_amount)
+            VALUES ('77777777-7777-7777-7777-777777777779', '66666666-6666-6666-6666-666666666669', 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5',
               'FEE001', 'TypeA', 'integration_test_user', '2025-10-20 09:00:00+00', 'test_user', '2025-04-20 09:30:00+00', 'Description 1', 'INVEST', ?)
       """,
         totalAmount);
@@ -246,12 +244,12 @@ class Report014IntegrationTest extends IntegrationTestBase {
       UUID id, int allowedTotalIncludingVat, String assessmentType, String assessmentReason) {
     jdbcTemplate.update(
         """
-              INSERT INTO claims.assessment
-              (id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
-               allowed_total_vat, allowed_total_incl_vat, assessment_type, assessment_reason, created_by_user_id, created_on, updated_by_user_id)
-              VALUES (?, 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'REDUCED_STILL_ESCAPED', 200.00,
-                      1400.00, 210.00, ?, ?, ?, 'integration_test_user', now(), 'updated_integration_test_user')
-              """,
+          INSERT INTO claims.assessment (
+              id, claim_id, claim_summary_fee_id, assessment_outcome, assessed_total_vat, assessed_total_incl_vat,
+              allowed_total_vat, allowed_total_incl_vat, assessment_type, assessment_reason, created_by_user_id, created_on, updated_by_user_id)
+          VALUES (?, 'CCCCCCCC-CCCC-CCCC-CCCC-CCCCCCCCCCC5', '66666666-6666-6666-6666-666666666666', 'REDUCED_STILL_ESCAPED', 200.00,
+              1400.00, 210.00, ?, ?, ?, 'integration_test_user', now(), 'updated_integration_test_user')
+        """,
         id,
         allowedTotalIncludingVat,
         assessmentType,
