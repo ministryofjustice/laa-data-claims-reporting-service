@@ -206,6 +206,7 @@ class ReplicationHealthCheckServiceIntegrationTest extends IntegrationTestBase {
 
     assertThat(report.isTableSummaryOk()).isTrue();
     assertThat(report.isTableCountsOk()).isTrue();
+
     assertThat(report.summary()).contains("WAL latest end time is null");
   }
 
