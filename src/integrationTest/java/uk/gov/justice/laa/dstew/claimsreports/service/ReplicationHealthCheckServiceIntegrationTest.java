@@ -175,6 +175,41 @@ class ReplicationHealthCheckServiceIntegrationTest extends IntegrationTestBase {
   }
 
   @Test
+  void healthCheckFailsWhenLatestEndTimeIsNull() {
+    // Given
+    LocalDate yesterday = LocalDate.now(staticClock).minusDays(1);
+    OffsetDateTime now = OffsetDateTime.now(staticClock);
+
+    Map<String, Pair<Integer, Integer>> tableCounts =
+        Map.of(
+            CLAIM_TABLE_NAME,
+            Pair.of(5, 2),
+            CLIENT_TABLE_NAME,
+            Pair.of(4, 2),
+            CLAIM_SUMMARY_FEE_TABLE_NAME,
+            Pair.of(5, 3));
+
+    createReplicationSummaryTestData(yesterday, now, tableCounts);
+
+    jdbcTemplate.update(
+        """
+          UPDATE mock_pg_catalog.pg_stat_subscription
+          SET latest_end_time = NULL
+          WHERE subname = 'claims_reporting_service_sub'
+          """);
+
+    // When
+    ReplicationHealthReport report = replicationHealthCheckService.checkReplicationHealth();
+
+    // Then
+    assertThat(report.isWalLsnOk()).isFalse();
+
+    assertThat(report.isTableSummaryOk()).isTrue();
+    assertThat(report.isTableCountsOk()).isTrue();
+    assertThat(report.summary()).contains("WAL latest end time is null");
+  }
+
+  @Test
   void healthCheckFailsWhenOnlyOlderSummaryExists() {
     // Given
     jdbcTemplate.update(DELETE_FROM_REPLICATION_SUMMARY);
