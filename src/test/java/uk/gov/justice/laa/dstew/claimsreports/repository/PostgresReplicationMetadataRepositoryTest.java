@@ -148,4 +148,39 @@ class PostgresReplicationMetadataRepositoryTest {
     assertThat(result.receivedLsn()).isEqualTo("0/16B6C50");
     assertThat(result.latestEndLsn()).isEqualTo("0/16B6C40");
   }
+
+  @Test
+  void getSubscriptionWalStatus_returnStatus_whenLatestEndTimeIsNull() {
+    // Given
+    String subscriptionName = "claims_reporting_service_sub";
+
+    when(jdbcTemplate.queryForObject(
+            eq(
+                """
+            SELECT received_lsn, latest_end_lsn, latest_end_time
+            FROM pg_stat_subscription
+            WHERE subname = ?
+            """),
+            any(RowMapper.class),
+            eq(subscriptionName)))
+        .thenAnswer(
+            invocation -> {
+              RowMapper<SubscriptionWalStatus> mapper = invocation.getArgument(1);
+              ResultSet rs = mock(ResultSet.class);
+
+              when(rs.getString("received_lsn")).thenReturn("0/16B6C50");
+              when(rs.getString("latest_end_lsn")).thenReturn("0/16B6C40");
+
+              return mapper.mapRow(rs, 1);
+            });
+
+    // When
+    SubscriptionWalStatus result = repository.getSubscriptionWalStatus(subscriptionName);
+
+    // Then
+    assertThat(result).isNotNull();
+    assertThat(result.receivedLsn()).isEqualTo("0/16B6C50");
+    assertThat(result.latestEndLsn()).isEqualTo("0/16B6C40");
+    assertThat(result.latestEndTime()).isNull();
+  }
 }

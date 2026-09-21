@@ -1,5 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.repository;
 
+import java.sql.Timestamp;
 import java.time.LocalDate;
 import java.util.HashMap;
 import java.util.List;
@@ -55,11 +56,13 @@ public class PostgresReplicationMetadataRepository implements ReplicationMetadat
         FROM pg_stat_subscription
         WHERE subname = ?
         """,
-          (rs, rowNum) ->
-              new SubscriptionWalStatus(
-                  rs.getString("received_lsn"),
-                  rs.getString("latest_end_lsn"),
-                  rs.getTimestamp("latest_end_time").toInstant()),
+          (rs, rowNum) -> {
+            Timestamp latestEndTime = rs.getTimestamp("latest_end_time");
+            return new SubscriptionWalStatus(
+                rs.getString("received_lsn"),
+                rs.getString("latest_end_lsn"),
+                latestEndTime == null ? null : latestEndTime.toInstant());
+          },
           subscriptionName);
     } catch (EmptyResultDataAccessException ex) {
       return null;
