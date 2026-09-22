@@ -74,6 +74,10 @@ spotbugsMain {
 
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
+    // Vulnerability introduced in spring-boot-starter-logging 4.1.1, overriding until fixed in spring:
+    implementation 'ch.qos.logback:logback-classic:1.6.3'
+
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
@@ -85,6 +89,8 @@ dependencies {
 
     implementation(platform 'software.amazon.awssdk:bom:2.54.13')
     implementation 'software.amazon.awssdk:s3'
+    //AWSSDK:s3 introduces high vuln in netty-codec-http, overriding until fixed in AWS SDK:
+    implementation 'io.netty:netty-codec-http:4.2.18.Final'
     implementation 'software.amazon.awssdk:sts'
 
     implementation 'io.micrometer:micrometer-registry-prometheus'
@@ -95,6 +101,10 @@ dependencies {
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 
     implementation 'tools.jackson.dataformat:jackson-dataformat-csv'
+
+    // Hardcoding due to snyk issues raised in CI scan
+    implementation 'tools.jackson.core:jackson-databind:3.1.6'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.21.6'
 
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
     runtimeOnly 'org.postgresql:postgresql'
