@@ -106,7 +106,7 @@ public abstract class AbstractReportService {
    *
    * @return the report's expected file extension
    */
-  private String getReportFileExtension() {
+  protected String getReportFileExtension() {
     return ".csv";
   }
 
@@ -151,10 +151,7 @@ public abstract class AbstractReportService {
 
     try {
       final String sql = buildReportSql(getDataSourceName(), getOrderByClause());
-
-      try (BufferedWriter writer = Files.newBufferedWriter(tempFile.toPath())) {
-        csvCreationService.buildCsvFromData(sql, writer, getReportName());
-      }
+      writeReportToTempFile(sql, tempFile);
       long endTime = System.currentTimeMillis();
       long durationMilliseconds = endTime - startTime;
       log.atInfo()
@@ -168,9 +165,7 @@ public abstract class AbstractReportService {
               sanitise(getFullReportFileName()),
               durationMilliseconds);
       metricsHandler.setCustomMetric(CustomMetricId.GENERATED_TIME_MS, durationMilliseconds);
-      var expectedHeaders = getExpectedCsvHeaders();
-      s3ClientWrapper.uploadFile(
-          tempFile, generateS3FileKey(), expectedHeaders, getAdditionalCsvHeaderPattern());
+      uploadReportFile(tempFile, generateS3FileKey());
       metricsHandler.setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_SUCCESSFUL);
 
     } catch (IOException | RuntimeException e) {
@@ -204,6 +199,18 @@ public abstract class AbstractReportService {
 
   private String buildReportSql(String dataSourceName, String orderByClause) {
     return String.format("SELECT * FROM %s ORDER BY %s", dataSourceName, orderByClause);
+  }
+
+  protected void writeReportToTempFile(String sql, File tempFile) throws IOException {
+    try (BufferedWriter writer = Files.newBufferedWriter(tempFile.toPath())) {
+      csvCreationService.buildCsvFromData(sql, writer, getReportName());
+    }
+  }
+
+  protected void uploadReportFile(File tempFile, String s3FileKey) {
+    var expectedHeaders = getExpectedCsvHeaders();
+    s3ClientWrapper.uploadFile(
+        tempFile, s3FileKey, expectedHeaders, getAdditionalCsvHeaderPattern());
   }
 
   private void deleteTempFile(File tempFile) {
