@@ -79,7 +79,8 @@ public class Report014Service extends AbstractReportService {
         "Assessment Reason",
         "Submission ID",
         "Claim ID",
-        "Assessment ID");
+        "Assessment ID",
+        "Assessed by User ID");
   }
 
   // Daily report

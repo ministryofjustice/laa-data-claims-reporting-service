@@ -174,6 +174,25 @@ class ReplicationHealthCheckServiceTest {
   }
 
   @Test
+  void testWalLatestEndTimeNullTriggersFailure() {
+    // Given
+    when(metadataRepository.getPublishedTables()).thenReturn(List.of("claims.table1"));
+
+    SubscriptionWalStatus walStatus = new SubscriptionWalStatus(MID_WAL_LSN, MID_WAL_LSN, null);
+
+    when(metadataRepository.getSubscriptionWalStatus("claims_reporting_service_sub"))
+        .thenReturn(walStatus);
+
+    // When
+    ReplicationHealthReport report = service.checkReplicationHealth();
+
+    // Then
+    assertFalse(report.isHealthy());
+
+    assertTrue(report.summary().contains("WAL latest end time is null"));
+  }
+
+  @Test
   void testCountMismatchDetected() {
     mockReplicationHealth(List.of("claims.table1"), MID_WAL_LSN, MID_WAL_LSN, 30);
     // Stub for replication summary query
