@@ -1,5 +1,17 @@
 # Changelog
 
+## [1.9.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.8.0...v1.9.0) (2026-09-30)
+
+
+### Features
+
+* **LPF-1831:** new cols added for inquests ([#286](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/286)) ([fd7720d](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/fd7720d0d219f40589e16cf86c11986d191506d5))
+
+
+### Bug Fixes
+
+* **bot:** Bump the gradle-updates group with 8 updates ([#287](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/287)) ([27bb068](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/27bb068da60b5a2a3ef5db5eba4e4be180dd32b9))
+
 ## [1.8.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.7.2...v1.8.0) (2026-09-25)
 
 
