@@ -110,7 +110,7 @@ dependencies {
     implementation 'tools.jackson.core:jackson-databind:3.2.3'
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.3'
     implementation 'com.fasterxml.jackson.core:jackson-core:2.22.3'
-    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.22.3'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.22'
     implementation 'tools.jackson.core:jackson-core:3.2.3'
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
     runtimeOnly 'org.postgresql:postgresql'
