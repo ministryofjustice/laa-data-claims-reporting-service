@@ -17,6 +17,9 @@ import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.MockitoAnnotations;
@@ -26,9 +29,6 @@ import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
 import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationSummary;
 import uk.gov.justice.laa.dstew.claimsreports.dto.SubscriptionWalStatus;
 import uk.gov.justice.laa.dstew.claimsreports.repository.ReplicationMetadataRepository;
-import org.junit.jupiter.params.ParameterizedTest;
-import org.junit.jupiter.params.provider.Arguments;
-import org.junit.jupiter.params.provider.MethodSource;
 
 @SuppressFBWarnings("SECSQLISPRJDBC")
 class ReplicationHealthCheckServiceTest {
@@ -275,9 +275,7 @@ class ReplicationHealthCheckServiceTest {
   private static Stream<Arguments> walComparisonCases() {
     return Stream.of(
         Arguments.of(
-            "slash-separated LSNs with the low half wider than 8 digits",
-            "1/0",
-            "0/FFFFFFFF"),
+            "slash-separated LSNs with the low half wider than 8 digits", "1/0", "0/FFFFFFFF"),
         Arguments.of(
             "unsigned ordering when the high half crosses the signed int boundary",
             "80000000/00000000",
