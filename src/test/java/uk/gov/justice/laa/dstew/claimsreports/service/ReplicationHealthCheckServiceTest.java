@@ -13,6 +13,7 @@ import java.time.LocalDate;
 import java.time.ZoneId;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Stream;
 import org.jetbrains.annotations.NotNull;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -25,6 +26,9 @@ import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
 import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationSummary;
 import uk.gov.justice.laa.dstew.claimsreports.dto.SubscriptionWalStatus;
 import uk.gov.justice.laa.dstew.claimsreports.repository.ReplicationMetadataRepository;
+import org.junit.jupiter.params.ParameterizedTest;
+import org.junit.jupiter.params.provider.Arguments;
+import org.junit.jupiter.params.provider.MethodSource;
 
 @SuppressFBWarnings("SECSQLISPRJDBC")
 class ReplicationHealthCheckServiceTest {
@@ -222,6 +226,82 @@ class ReplicationHealthCheckServiceTest {
 
     assertFalse(report.isHealthy());
     assertTrue(report.summary().contains("Count mismatch"));
+  }
+
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("walComparisonCases")
+  void testWalOrderingDetectsReplicationLag(
+      String description, String receivedLsn, String latestEndLsn) {
+    mockReplicationHealth(
+        List.of("claims.table1", "claims.table2"), receivedLsn, latestEndLsn, 3000);
+
+    when(metadataRepository.getReplicationSummaries(any()))
+        .thenReturn(
+            Map.of(
+                "claims.table1",
+                new ReplicationSummary(
+                    "claims.table1", TABLE1_RECORD_COUNT, TABLE1_UPDATE_COUNT, MID_WAL_LSN),
+                "claims.table2",
+                new ReplicationSummary(
+                    "claims.table2", TABLE2_RECORD_COUNT, TABLE2_UPDATE_COUNT, OLD_WAL_LSN)));
+
+    when(jdbcTemplate.query(
+            eq("SELECT count(*) FROM claims.table1 WHERE created_on < ?"),
+            any(ResultSetExtractor.class),
+            any(Object[].class)))
+        .thenReturn(TABLE1_RECORD_COUNT);
+    when(jdbcTemplate.query(
+            eq("SELECT count(*) FROM claims.table2 WHERE created_on < ?"),
+            any(ResultSetExtractor.class),
+            any(Object[].class)))
+        .thenReturn(TABLE2_RECORD_COUNT);
+    when(jdbcTemplate.query(
+            eq("SELECT count(*) FROM claims.table1 WHERE updated_on BETWEEN ? AND ?"),
+            any(ResultSetExtractor.class),
+            any(Object[].class)))
+        .thenReturn(TABLE1_UPDATE_COUNT);
+    when(jdbcTemplate.query(
+            eq("SELECT count(*) FROM claims.table2 WHERE updated_on BETWEEN ? AND ?"),
+            any(ResultSetExtractor.class),
+            any(Object[].class)))
+        .thenReturn(TABLE2_UPDATE_COUNT);
+
+    ReplicationHealthReport report = service.checkReplicationHealth();
+
+    assertFalse(report.isHealthy(), description);
+    assertTrue(report.summary().contains("Replication lag detected"), description);
+  }
+
+  private static Stream<Arguments> walComparisonCases() {
+    return Stream.of(
+        Arguments.of(
+            "slash-separated LSNs with the low half wider than 8 digits",
+            "1/0",
+            "0/FFFFFFFF"),
+        Arguments.of(
+            "unsigned ordering when the high half crosses the signed int boundary",
+            "80000000/00000000",
+            "7FFFFFFF/FFFFFFFF"));
+  }
+
+  @Test
+  void testPublicationTableNull() {
+    when(metadataRepository.getPublishedTables()).thenReturn(null);
+
+    ReplicationHealthReport report = service.checkReplicationHealth();
+
+    assertFalse(report.isHealthy());
+    assertTrue(report.summary().contains("No tables found for publication"));
+  }
+
+  @Test
+  void testPublicationTableEmpty() {
+    when(metadataRepository.getPublishedTables()).thenReturn(List.of());
+
+    ReplicationHealthReport report = service.checkReplicationHealth();
+
+    assertFalse(report.isHealthy());
+    assertTrue(report.summary().contains("No tables found for publication"));
   }
 
   private void mockReplicationHealth(

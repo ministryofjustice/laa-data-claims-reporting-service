@@ -1,7 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
@@ -148,8 +147,19 @@ public class ReplicationHealthCheckService {
   }
 
   private int compareWal(String wal1, String wal2) {
-    return new BigInteger(wal1.replace("/", ""), 16)
-        .compareTo(new BigInteger(wal2.replace("/", ""), 16));
+   // Postgres WAL LSNs are in the format of "X/Y" where X and Y are hexadecimal numbers.
+   String[] wal1Parts = wal1.split("/", 2);
+   String[] wal2Parts = wal2.split("/", 2);
+
+   int wal1High = Integer.parseUnsignedInt(wal1Parts[0], 16);
+   int wal2High = Integer.parseUnsignedInt(wal2Parts[0], 16);
+   int wal1Low = Integer.parseUnsignedInt(wal1Parts[1], 16);
+   int wal2Low = Integer.parseUnsignedInt(wal2Parts[1], 16);
+
+   long wal1Combined = ((long) wal1High << 32) | (wal1Low & 0xFFFFFFFFL);
+   long wal2Combined = ((long) wal2High << 32) | (wal2Low & 0xFFFFFFFFL);
+
+   return Long.compareUnsigned(wal1Combined, wal2Combined);
   }
 
   @SuppressFBWarnings(
