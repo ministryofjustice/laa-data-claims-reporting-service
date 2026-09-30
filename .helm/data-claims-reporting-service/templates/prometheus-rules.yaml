@@ -78,6 +78,7 @@ spec:
           for: 1m
           labels:
             severity: {{ .Values.alerting.severity }}
+# (time() - kube_cronjob_status_last_schedule_time{namespace="laa-data-claims-reporting-service-uat"}) > 24 * 60 * 60
         - alert: KubeJobNotCreated
           annotations:
             message: Job has failed to be created
