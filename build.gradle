@@ -100,7 +100,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-micrometer-tracing-brave'
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 
-    implementation 'tools.jackson.dataformat:jackson-dataformat-csv'
+    implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.2.3'
 
     // Hardcoding due to snyk issues raised in CI scan
     implementation 'tools.jackson.core:jackson-databind:3.2.3'
