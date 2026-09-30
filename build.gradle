@@ -6,6 +6,10 @@ plugins {
     id 'com.diffplug.spotless' version '8.10.3'
 }
 
+// Temporarily overriding the managed Tomcat version for all modules,
+// not just tomcat-embed-core, until the vulnerability is fixed.
+ext['tomcat.version'] = '11.0.25'
+
 tasks.withType(Checkstyle).configureEach {
     setEnabled(false)
 }
@@ -107,8 +111,6 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.3'
     implementation 'com.fasterxml.jackson.core:jackson-core:2.22.3'
     implementation 'tools.jackson.core:jackson-core:3.2.3'
-    implementation 'org.apache.tomcat.embed:tomcat-embed-core:11.0.25'
-
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
     runtimeOnly 'org.postgresql:postgresql'
     runtimeOnly "org.flywaydb:flyway-database-postgresql"
