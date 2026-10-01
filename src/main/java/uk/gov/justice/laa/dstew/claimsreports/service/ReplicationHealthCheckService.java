@@ -196,7 +196,8 @@ public class ReplicationHealthCheckService {
       return Optional.empty();
     }
 
-    if (highValue > 0xFFFFFFFFL || lowValue > 0xFFFFFFFFL) {
+    if (Long.compareUnsigned(highValue, 0xFFFFFFFFL) > 0
+        || Long.compareUnsigned(lowValue, 0xFFFFFFFFL) > 0) {
       return Optional.empty();
     }
 

@@ -349,6 +349,8 @@ class ReplicationHealthCheckServiceTest {
         Arguments.of("Non-hex low half", "00000000/G"),
         Arguments.of("Overlong high half", "100000000/00000000"),
         Arguments.of("Overlong low half", "00000000/100000000"),
+        Arguments.of("16-digit unsigned high half", "FFFFFFFFFFFFFFFF/00000000"),
+        Arguments.of("16-digit unsigned low half", "00000000/FFFFFFFFFFFFFFFF"),
         Arguments.of("null", null),
         Arguments.of("empty string", ""));
   }
