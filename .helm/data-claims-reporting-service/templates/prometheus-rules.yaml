@@ -1,4 +1,4 @@
-{{- if or (and (contains "uat" .Release.Namespace) (eq .Release.Name "main")) (contains "staging" .Release.Namespace) (contains "prod" .Release.Namespace)}}
+# {{- if or (and (contains "uat" .Release.Namespace) (eq .Release.Name "main")) (contains "staging" .Release.Namespace) (contains "prod" .Release.Namespace)}}
 
 apiVersion: monitoring.coreos.com/v1
 kind: PrometheusRule
@@ -147,4 +147,4 @@ spec:
           for: 1m
           labels:
             severity: {{ .Values.alerting.severity }}
-{{- end }}
+# {{- end }}
