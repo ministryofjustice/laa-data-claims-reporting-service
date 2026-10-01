@@ -82,7 +82,7 @@ spec:
           annotations:
             message: Job has not been scheduled over 24 hour period
             dashboard_url: {{ .Values.alerting.grafanaDashboard }}
-          expr: (time() - kube_cronjob_status_last_schedule_time{namespace="{{ .Release.Namespace }}"}) > 60 # changed
+          expr: (time() - kube_cronjob_status_last_schedule_time{namespace="laa-data-claims-api-uat"}) > bool (60) # changed
           for: 5m
           labels:
             severity: {{ .Values.alerting.severity }}
