@@ -274,8 +274,7 @@ class ReplicationHealthCheckServiceTest {
 
   private static Stream<Arguments> walComparisonCases() {
     return Stream.of(
-        Arguments.of(
-            "ordering across the 32-bit low-half boundary", "1/0", "0/FFFFFFFF"),
+        Arguments.of("ordering across the 32-bit low-half boundary", "1/0", "0/FFFFFFFF"),
         Arguments.of(
             "unsigned ordering when the high half crosses the signed int boundary",
             "80000000/00000000",
