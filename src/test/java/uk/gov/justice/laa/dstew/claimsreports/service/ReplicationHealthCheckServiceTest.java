@@ -282,6 +282,78 @@ class ReplicationHealthCheckServiceTest {
             "7FFFFFFF/FFFFFFFF"));
   }
 
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("walInvalidCases")
+  void errorWhenInvalidLSNForReceivedLSN(String description, String receivedLsn) {
+    mockReplicationHealth(List.of("claims.table1"), receivedLsn, MID_WAL_LSN, 30);
+
+    when(metadataRepository.getReplicationSummaries(any()))
+        .thenReturn(
+            Map.of(
+                "claims.table1",
+                new ReplicationSummary(
+                    "claims.table1", TABLE1_RECORD_COUNT, TABLE1_UPDATE_COUNT, MID_WAL_LSN)));
+
+    when(jdbcTemplate.query(
+            eq("SELECT count(*) FROM claims.table1 WHERE created_on < ?"),
+            any(ResultSetExtractor.class),
+            any(Object[].class)))
+        .thenReturn(TABLE1_RECORD_COUNT);
+    when(jdbcTemplate.query(
+            eq("SELECT count(*) FROM claims.table1 WHERE updated_on BETWEEN ? AND ?"),
+            any(ResultSetExtractor.class),
+            any(Object[].class)))
+        .thenReturn(TABLE1_UPDATE_COUNT);
+
+    ReplicationHealthReport report = service.checkReplicationHealth();
+
+    assertFalse(report.isHealthy());
+    assertTrue(report.summary().contains("Malformed WAL LSN — received WAL " + receivedLsn));
+  }
+
+  @ParameterizedTest(name = "{0}")
+  @MethodSource("walInvalidCases")
+  void errorWhenInvalidLSNForLatestLSN(String description, String latestLsn) {
+    mockReplicationHealth(List.of("claims.table1"), MID_WAL_LSN, latestLsn, 30);
+
+    when(metadataRepository.getReplicationSummaries(any()))
+        .thenReturn(
+            Map.of(
+                "claims.table1",
+                new ReplicationSummary(
+                    "claims.table1", TABLE1_RECORD_COUNT, TABLE1_UPDATE_COUNT, MID_WAL_LSN)));
+
+    when(jdbcTemplate.query(
+            eq("SELECT count(*) FROM claims.table1 WHERE created_on < ?"),
+            any(ResultSetExtractor.class),
+            any(Object[].class)))
+        .thenReturn(TABLE1_RECORD_COUNT);
+    when(jdbcTemplate.query(
+            eq("SELECT count(*) FROM claims.table1 WHERE updated_on BETWEEN ? AND ?"),
+            any(ResultSetExtractor.class),
+            any(Object[].class)))
+        .thenReturn(TABLE1_UPDATE_COUNT);
+
+    ReplicationHealthReport report = service.checkReplicationHealth();
+
+    assertFalse(report.isHealthy());
+    assertTrue(report.summary().contains("Malformed WAL LSN — last applied WAL " + latestLsn));
+  }
+
+  private static Stream<Arguments> walInvalidCases() {
+    return Stream.of(
+        Arguments.of("No slash", "1"),
+        Arguments.of("Too many slashes", "1/2/3"),
+        Arguments.of("Empty high half", "/00000000"),
+        Arguments.of("Empty low half", "00000000/"),
+        Arguments.of("Non-hex high half", "G/00000000"),
+        Arguments.of("Non-hex low half", "00000000/G"),
+        Arguments.of("Overlong high half", "100000000/00000000"),
+        Arguments.of("Overlong low half", "00000000/100000000"),
+        Arguments.of("null", null),
+        Arguments.of("empty string", ""));
+  }
+
   @Test
   void testPublicationTableNull() {
     when(metadataRepository.getPublishedTables()).thenReturn(null);
@@ -339,21 +411,6 @@ class ReplicationHealthCheckServiceTest {
 
     when(metadataRepository.getSubscriptionWalStatus("claims_reporting_service_sub"))
         .thenReturn(null);
-
-    ReplicationHealthReport report = service.checkReplicationHealth();
-
-    assertFalse(report.isHealthy());
-    assertTrue(report.summary().contains("No WAL progress information available"));
-  }
-
-  @Test
-  void testWalLatestEndLsnNullTriggersFailure() {
-    when(metadataRepository.getPublishedTables()).thenReturn(List.of("claims.table1"));
-
-    SubscriptionWalStatus walStatus = new SubscriptionWalStatus(MID_WAL_LSN, null, clock.instant());
-
-    when(metadataRepository.getSubscriptionWalStatus("claims_reporting_service_sub"))
-        .thenReturn(walStatus);
 
     ReplicationHealthReport report = service.checkReplicationHealth();
 

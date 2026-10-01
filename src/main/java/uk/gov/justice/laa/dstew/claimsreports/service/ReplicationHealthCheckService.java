@@ -9,11 +9,13 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.jdbc.core.JdbcTemplate;
 import org.springframework.stereotype.Service;
+import org.springframework.util.StringUtils;
 import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationHealthReport;
 import uk.gov.justice.laa.dstew.claimsreports.dto.ReplicationSummary;
 import uk.gov.justice.laa.dstew.claimsreports.dto.SubscriptionWalStatus;
@@ -115,7 +117,7 @@ public class ReplicationHealthCheckService {
     Instant now = clock.instant();
     SubscriptionWalStatus wal = metadataRepository.getSubscriptionWalStatus(SUBSCRIPTION_NAME);
 
-    if (wal == null || wal.latestEndLsn() == null) {
+    if (wal == null) {
       report.setWalLsnOk(false);
       report.addFailure(
           REPLICATION,
@@ -126,6 +128,15 @@ public class ReplicationHealthCheckService {
       if (lastApplied == null) {
         report.setWalLsnOk(false);
         report.addFailure(REPLICATION, "WAL latest end time is null");
+      } else if (!isValidWalLsn(wal.receivedLsn())) {
+        report.setWalLsnOk(false);
+        report.addFailure(
+            REPLICATION, String.format("Malformed WAL LSN — received WAL %s", wal.receivedLsn()));
+      } else if (!isValidWalLsn(wal.latestEndLsn())) {
+        report.setWalLsnOk(false);
+        report.addFailure(
+            REPLICATION,
+            String.format("Malformed WAL LSN — last applied WAL %s", wal.latestEndLsn()));
       } else if (lastApplied.isBefore(now.minusSeconds(TOLERABLE_REPLICATION_DELAY_SECONDS))) {
         long lagMinutes = Duration.between(lastApplied, now).toMinutes();
         report.setWalLsnOk(false);
@@ -147,19 +158,51 @@ public class ReplicationHealthCheckService {
   }
 
   private int compareWal(String wal1, String wal2) {
-    // Postgres WAL LSNs are in the format of "X/Y" where X and Y are hexadecimal numbers.
-    String[] wal1Parts = wal1.split("/", 2);
-    String[] wal2Parts = wal2.split("/", 2);
+    Optional<Long> wal1Combined = parseWalLsn(wal1);
+    Optional<Long> wal2Combined = parseWalLsn(wal2);
+    if (wal1Combined.isEmpty() || wal2Combined.isEmpty()) {
+      return 0;
+    }
+    return Long.compareUnsigned(wal1Combined.get(), wal2Combined.get());
+  }
 
-    int wal1High = Integer.parseUnsignedInt(wal1Parts[0], 16);
-    int wal2High = Integer.parseUnsignedInt(wal2Parts[0], 16);
-    int wal1Low = Integer.parseUnsignedInt(wal1Parts[1], 16);
-    int wal2Low = Integer.parseUnsignedInt(wal2Parts[1], 16);
+  private boolean isValidWalLsn(String walLsn) {
+    return parseWalLsn(walLsn).isPresent();
+  }
 
-    long wal1Combined = ((long) wal1High << 32) | (wal1Low & 0xFFFFFFFFL);
-    long wal2Combined = ((long) wal2High << 32) | (wal2Low & 0xFFFFFFFFL);
+  private Optional<Long> parseWalLsn(String walLsn) {
+    if (walLsn == null || walLsn.isBlank()) {
+      return Optional.empty();
+    }
 
-    return Long.compareUnsigned(wal1Combined, wal2Combined);
+    // Valid WAL LSN can only have one slash
+    if (StringUtils.countOccurrencesOf(walLsn, "/") != 1) {
+      return Optional.empty();
+    }
+
+    if (!walLsn.matches("[0-9A-Fa-f]+/[0-9A-Fa-f]+")) {
+      // Needs to be valid Hex
+      return Optional.empty();
+    }
+
+    String[] walParts = walLsn.split("/", 2);
+
+    long highValue;
+    long lowValue;
+    try {
+      highValue = Long.parseUnsignedLong(walParts[0], 16);
+      lowValue = Long.parseUnsignedLong(walParts[1], 16);
+    } catch (NumberFormatException e) {
+      return Optional.empty();
+    }
+
+    if (highValue > 0xFFFFFFFFL || lowValue > 0xFFFFFFFFL) {
+      return Optional.empty();
+    }
+
+    long walCombined = (highValue << 32) | (lowValue & 0xFFFFFFFFL);
+
+    return Optional.of(walCombined);
   }
 
   @SuppressFBWarnings(
