@@ -82,7 +82,7 @@ spec:
           annotations:
             message: Job has not been scheduled over 24 hour period
             dashboard_url: {{ .Values.alerting.grafanaDashboard }}
-          expr: ((time() - kube_cronjob_status_last_schedule_time{ namespace="laa-data-claims-reporting-service-uat" }) > bool (60 * 5)) == 1
+          expr: (time() - kube_cronjob_status_last_schedule_time{namespace="{{ .Release.Namespace }}") > (60 * 5)
           for: 5m
           labels:
             severity: {{ .Values.alerting.severity }}
@@ -91,7 +91,7 @@ spec:
             message: Kubernetes cronjob has been suspend over 1 hour
             dashboard_url: {{ .Values.alerting.grafanaDashboard }}
           expr: kube_cronjob_spec_suspend{namespace="{{ .Release.Namespace }}"} == 1
-          for: 5m # changed
+          for: 1h
           labels:
             severity: {{ .Values.alerting.severity }}
     - name: application-rules
