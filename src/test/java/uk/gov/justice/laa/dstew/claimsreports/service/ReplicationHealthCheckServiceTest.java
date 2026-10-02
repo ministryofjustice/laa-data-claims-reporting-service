@@ -35,24 +35,27 @@ class ReplicationHealthCheckServiceTest {
 
   // Mock WAL (Write Ahead Log) LSNs (Log Sequence Numbers) to mimic various replication test
   // scenarios
-  public static final String OLD_WAL_LSN = "0/16B6C40";
-  public static final String MID_WAL_LSN = "0/16B6C50";
-  public static final String RECENT_WAL_LSN = "0/16B6C60";
-  public static final String LATEST_WAL_LSN = "0/16B6C70";
+  static final String OLD_WAL_LSN = "0/16B6C40";
+  static final String MID_WAL_LSN = "0/16B6C50";
+  static final String RECENT_WAL_LSN = "0/16B6C60";
+  static final String LATEST_WAL_LSN = "0/16B6C70";
+  static final String INVALID_WAL_LSN = "invalid_lsn";
 
   // Other constants used in test scenarios
-  public static final long TABLE1_RECORD_COUNT = 10L;
-  public static final long TABLE2_RECORD_COUNT = 5L;
-  public static final long TABLE1_UPDATE_COUNT = 2L;
-  public static final long TABLE2_UPDATE_COUNT = 1L;
-  public static final long TABLE1_INCORRECT_RECORD_COUNT = 9L;
-  public static final long TABLE2_INCORRECT_RECORD_COUNT = 3L;
+  static final long TABLE1_RECORD_COUNT = 10L;
+  static final long TABLE2_RECORD_COUNT = 5L;
+  static final long TABLE1_UPDATE_COUNT = 2L;
+  static final long TABLE2_UPDATE_COUNT = 1L;
+  static final long TABLE1_INCORRECT_RECORD_COUNT = 9L;
+  static final long TABLE2_INCORRECT_RECORD_COUNT = 3L;
 
   @Mock private Clock clock;
 
   @Mock private JdbcTemplate jdbcTemplate;
 
   @Mock private ReplicationMetadataRepository metadataRepository;
+
+  @Mock private WalValidationService walValidationService;
 
   @InjectMocks private ReplicationHealthCheckService service;
 
@@ -72,6 +75,10 @@ class ReplicationHealthCheckServiceTest {
     // Mock get tables
     List<String> publicationTables = List.of("claims.table1", "claims.table2");
     when(metadataRepository.getPublishedTables()).thenReturn(publicationTables);
+
+    when(walValidationService.isValidWalLsn(RECENT_WAL_LSN)).thenReturn(true);
+    when(walValidationService.parseWalLsn(RECENT_WAL_LSN))
+        .thenReturn(java.util.Optional.of(23817312L));
 
     // Mock actual WAL LSN to be a recent one to indicate that the replication has caught up with
     // previous changes.
@@ -127,6 +134,10 @@ class ReplicationHealthCheckServiceTest {
 
   @Test
   void testMissingTableDetected() {
+    when(walValidationService.isValidWalLsn(RECENT_WAL_LSN)).thenReturn(true);
+    when(walValidationService.parseWalLsn(RECENT_WAL_LSN))
+        .thenReturn(java.util.Optional.of(23817312L));
+
     mockReplicationHealth(List.of("claims.table1", "claims.table2"), MID_WAL_LSN, MID_WAL_LSN, 30);
 
     Map<String, ReplicationSummary> partialSummary =
@@ -156,6 +167,13 @@ class ReplicationHealthCheckServiceTest {
 
   @Test
   void testWalProgressAheadTriggersFailure() {
+    when(walValidationService.isValidWalLsn(LATEST_WAL_LSN)).thenReturn(true);
+    when(walValidationService.isValidWalLsn(MID_WAL_LSN)).thenReturn(true);
+    when(walValidationService.parseWalLsn(LATEST_WAL_LSN))
+        .thenReturn(java.util.Optional.of(23817328L));
+    when(walValidationService.parseWalLsn(MID_WAL_LSN))
+        .thenReturn(java.util.Optional.of(23817296L));
+
     mockReplicationHealth(List.of("claims.table1"), LATEST_WAL_LSN, MID_WAL_LSN, 600);
 
     // Stub for count queries
@@ -198,6 +216,10 @@ class ReplicationHealthCheckServiceTest {
 
   @Test
   void testCountMismatchDetected() {
+    when(walValidationService.isValidWalLsn(RECENT_WAL_LSN)).thenReturn(true);
+    when(walValidationService.parseWalLsn(RECENT_WAL_LSN))
+        .thenReturn(java.util.Optional.of(23817312L));
+
     mockReplicationHealth(List.of("claims.table1"), MID_WAL_LSN, MID_WAL_LSN, 30);
     // Stub for replication summary query
     Map<String, ReplicationSummary> summaries =
@@ -231,7 +253,18 @@ class ReplicationHealthCheckServiceTest {
   @ParameterizedTest(name = "{0}")
   @MethodSource("walComparisonCases")
   void testWalOrderingDetectsReplicationLag(
-      String description, String receivedLsn, String latestEndLsn) {
+      String description,
+      String receivedLsn,
+      Long receivedAsDecimal,
+      String latestEndLsn,
+      Long latestEndAsDecimal) {
+
+    when(walValidationService.isValidWalLsn(any())).thenReturn(true);
+    when(walValidationService.parseWalLsn(receivedLsn))
+        .thenReturn(java.util.Optional.of(receivedAsDecimal));
+    when(walValidationService.parseWalLsn(latestEndLsn))
+        .thenReturn(java.util.Optional.of(latestEndAsDecimal));
+
     mockReplicationHealth(
         List.of("claims.table1", "claims.table2"), receivedLsn, latestEndLsn, 3000);
 
@@ -274,17 +307,24 @@ class ReplicationHealthCheckServiceTest {
 
   private static Stream<Arguments> walComparisonCases() {
     return Stream.of(
-        Arguments.of("ordering across the 32-bit low-half boundary", "1/0", "0/FFFFFFFF"),
+        Arguments.of(
+            "ordering across the 32-bit low-half boundary",
+            "1/0",
+            4294967296L,
+            "0/FFFFFFFF",
+            4294967295L),
         Arguments.of(
             "unsigned ordering when the high half crosses the signed int boundary",
             "80000000/00000000",
-            "7FFFFFFF/FFFFFFFF"));
+            -9223372036854775808L,
+            "7FFFFFFF/FFFFFFFF",
+            9223372036854775807L));
   }
 
-  @ParameterizedTest(name = "{0}")
-  @MethodSource("walInvalidCases")
-  void errorWhenInvalidLSNForReceivedLSN(String description, String receivedLsn) {
-    mockReplicationHealth(List.of("claims.table1"), receivedLsn, MID_WAL_LSN, 30);
+  @Test
+  void errorWhenInvalidLSNForReceivedLSN() {
+    when(walValidationService.isValidWalLsn(INVALID_WAL_LSN)).thenReturn(false);
+    mockReplicationHealth(List.of("claims.table1"), INVALID_WAL_LSN, MID_WAL_LSN, 30);
 
     when(metadataRepository.getReplicationSummaries(any()))
         .thenReturn(
@@ -307,13 +347,14 @@ class ReplicationHealthCheckServiceTest {
     ReplicationHealthReport report = service.checkReplicationHealth();
 
     assertFalse(report.isHealthy());
-    assertTrue(report.summary().contains("Malformed WAL LSN — received WAL " + receivedLsn));
+    assertTrue(report.summary().contains("Malformed WAL LSN — received WAL " + INVALID_WAL_LSN));
   }
 
-  @ParameterizedTest(name = "{0}")
-  @MethodSource("walInvalidCases")
-  void errorWhenInvalidLSNForLatestLSN(String description, String latestLsn) {
-    mockReplicationHealth(List.of("claims.table1"), MID_WAL_LSN, latestLsn, 30);
+  @Test
+  void errorWhenInvalidLSNForLatestLSN() {
+    when(walValidationService.isValidWalLsn(MID_WAL_LSN)).thenReturn(true);
+    when(walValidationService.isValidWalLsn(INVALID_WAL_LSN)).thenReturn(false);
+    mockReplicationHealth(List.of("claims.table1"), MID_WAL_LSN, INVALID_WAL_LSN, 30);
 
     when(metadataRepository.getReplicationSummaries(any()))
         .thenReturn(
@@ -336,23 +377,8 @@ class ReplicationHealthCheckServiceTest {
     ReplicationHealthReport report = service.checkReplicationHealth();
 
     assertFalse(report.isHealthy());
-    assertTrue(report.summary().contains("Malformed WAL LSN — last applied WAL " + latestLsn));
-  }
-
-  private static Stream<Arguments> walInvalidCases() {
-    return Stream.of(
-        Arguments.of("No slash", "1"),
-        Arguments.of("Too many slashes", "1/2/3"),
-        Arguments.of("Empty high half", "/00000000"),
-        Arguments.of("Empty low half", "00000000/"),
-        Arguments.of("Non-hex high half", "G/00000000"),
-        Arguments.of("Non-hex low half", "00000000/G"),
-        Arguments.of("Overlong high half", "100000000/00000000"),
-        Arguments.of("Overlong low half", "00000000/100000000"),
-        Arguments.of("16-digit unsigned high half", "FFFFFFFFFFFFFFFF/00000000"),
-        Arguments.of("16-digit unsigned low half", "00000000/FFFFFFFFFFFFFFFF"),
-        Arguments.of("null", null),
-        Arguments.of("empty string", ""));
+    assertTrue(
+        report.summary().contains("Malformed WAL LSN — last applied WAL " + INVALID_WAL_LSN));
   }
 
   @Test
@@ -421,6 +447,9 @@ class ReplicationHealthCheckServiceTest {
 
   @Test
   void testWalApplyStalledTriggersFailure() {
+    when(walValidationService.isValidWalLsn(MID_WAL_LSN)).thenReturn(true);
+    when(walValidationService.parseWalLsn(MID_WAL_LSN))
+        .thenReturn(java.util.Optional.of(23817296L));
     mockReplicationHealth(
         List.of("claims.table1"), MID_WAL_LSN, MID_WAL_LSN, 600 // > 5 minutes
         );
