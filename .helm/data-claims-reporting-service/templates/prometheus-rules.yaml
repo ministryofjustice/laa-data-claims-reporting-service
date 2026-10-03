@@ -98,7 +98,7 @@ spec:
           annotations:
             message: Job has not been created in over 24 hours
             dashboard_url: {{ .Values.alerting.grafanaDashboard }}
-          expr: (time() - kube_job_created{namespace="{{ .Release.Namespace }}") < (60 * 5) # changed
+          expr: (time() - kube_job_created{namespace="{{ .Release.Namespace }}"}) > (60 * 5) # changed
           for: 1m
           labels:
             severity: {{ .Values.alerting.severity }}
