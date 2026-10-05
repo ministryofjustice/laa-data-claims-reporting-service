@@ -13,7 +13,8 @@ import static org.apache.bcel.Const.INVOKEVIRTUAL;
  * ResultSets getters returning primitive types are guaranteed to return a value,
  * but getters returning objects may return null so they are excluded.
  * This detector currently covers DIRECT dereferences only.
- * This detector currently does not cover dereferences through local variables.
+ * This detector currently does not cover dereferences through local variables as these
+ * are already covered by the FindBugs NP_NULL_ON_SOME_PATH detector.
  */
 public class JdbcNullableDereferenceDetector extends BytecodeScanningDetector {
 
