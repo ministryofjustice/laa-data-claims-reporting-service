@@ -27,6 +27,6 @@
     </Match>
     <Match>
     <!-- This class intentionally contains unsafe JDBC calls. -->
-        <Class name="uk.gov.justice.laa.analysis.JdbcNullableDereferenceFixture"/>
+        <Class name="uk.gov.justice.laa.analysis.JdbcNullableDereferenceCases"/>
     </Match>
 </FindBugsFilter>

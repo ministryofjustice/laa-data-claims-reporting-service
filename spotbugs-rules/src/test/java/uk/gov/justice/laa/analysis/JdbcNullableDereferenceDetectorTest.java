@@ -21,19 +21,19 @@ import static org.junit.jupiter.api.Assertions.*;
 public class JdbcNullableDereferenceDetectorTest
 {
     private static final String RULE = "JDBC_NULL_DEREFERENCE";
-    private static final String FIXTURE = "uk/gov/justice/laa/analysis/JdbcNullableDereferenceFixture.class";
+    private static final String FIXTURE = "uk/gov/justice/laa/analysis/JdbcNullableDereferenceCases.class";
 
     @Test
     void shouldDetectDirectUnsafeJdbcCalls(SpotBugsRunner runner) throws URISyntaxException {
-       Set<String> detected = analyseFixture(runner);
+       Set<String> detected = analyseCases(runner);
 
        assertEquals(Set.of("unsafeTimestampColumnName", "unsafeTimestampColumnIndex", "unsafeStringTrim"), detected);
     }
 
-    private Set<String> analyseFixture(SpotBugsRunner runner) throws URISyntaxException {
+    private Set<String> analyseCases(SpotBugsRunner runner) throws URISyntaxException {
         URL resource = getClass().getClassLoader().getResource(FIXTURE);
 
-        assertNotNull(resource, "Cannot find compiled JdbcNullableDereferenceFixture.class .");
+        assertNotNull(resource, "Cannot find compiled JdbcNullableDereferenceCases.class .");
 
         Path classFile = Path.of(resource.toURI());
 
