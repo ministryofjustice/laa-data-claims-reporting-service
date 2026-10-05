@@ -94,6 +94,17 @@ spec:
           for: 1m
           labels:
             severity: {{ .Values.alerting.severity }}
+        - alert: AllCronjobsNotCreatedIn24HoursPeriod
+          annotations:
+            message: All cronjob has not been created in 24 hours period
+            dashboard_url: {{ .Values.alerting.grafanaDashboard }}
+          expr: |-
+            (count(kube_job_created{namespace="{{ .Release.Namespace }}"} and (time() - kube_job_created < 24 * 3600)) or vector(0)) == 0
+          # "or vector(0)" is basically saying there is a min 0. so this returns either the amount of jobs created or 0,
+          # it can't return Null, which is what it would default to if no jobs are created.
+          for: 1m
+          labels:
+            severity: {{ .Values.alerting.severity }}
     - name: application-rules
       rules:
         - alert: reportFailed
