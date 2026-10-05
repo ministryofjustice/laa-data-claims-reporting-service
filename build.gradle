@@ -63,7 +63,7 @@ jacocoTestCoverageVerification {
 }
 
 spotbugs {
-    ignoreFailures = true
+    ignoreFailures = false
     effort = 'max'
     reportLevel = 'low'
     excludeFilter = file('spotbugs-exclude.xml')
@@ -72,6 +72,13 @@ spotbugs {
 spotbugsMain {
     reports {
         sarif.required = true
+        html.required = true
+    }
+}
+
+spotbugsTest {
+    reports {
+        xml.required = true
         html.required = true
     }
 }
@@ -132,4 +139,5 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.14.0'
+    spotbugsPlugins project(':spotbugs-rules')
 }

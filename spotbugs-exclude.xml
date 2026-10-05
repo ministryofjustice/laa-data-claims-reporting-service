@@ -25,4 +25,8 @@
         <Method name="mergeInternal"/>
         <Bug pattern="DLS_DEAD_LOCAL_STORE"/>
     </Match>
+    <Match>
+    <!-- This class intentionally contains unsafe JDBC calls. -->
+        <Class name="uk.gov.justice.laa.analysis.JdbcNullableDereferenceFixture"/>
+    </Match>
 </FindBugsFilter>
