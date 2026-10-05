@@ -86,9 +86,9 @@ spec:
           for: 1h
           labels:
             severity: {{ .Values.alerting.severity }}
-        - alert: KubeJobNotScheduledInLast24Hours
+        - alert: CronjobNotScheduledInLast24Hours
           annotations:
-            message: Job has not been scheduled over 24 hour period
+            message: Cronjob has not been scheduled over 24 hour period
             dashboard_url: {{ .Values.alerting.grafanaDashboard }}
           expr: (time() - kube_cronjob_status_last_schedule_time{namespace="{{ .Release.Namespace }}"}) > (24 * 3600)
           for: 1m
