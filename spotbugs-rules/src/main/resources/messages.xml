@@ -13,7 +13,7 @@
         <Details>
             <![CDATA[
                 <p>
-                JDBC ResultSet getters that return reference values my return null when
+                JDBC ResultSet getters that return reference values may return null when
                 the database value is NULL.
                 </p>
                 <p>
@@ -24,7 +24,7 @@
                 Store the value and check for null before dereferencing it where SQL NULL is valid.
                 </p>
                 <p>
-                Primitive ResultsSet getters (getInt, getLong, getDouble, etc.) are not covered
+                Primitive ResultSet getters (getInt, getLong, getDouble, etc.) are not covered
                 by this rule because they return a default value (0) when the database value is NULL.
                 </p>
             ]]>

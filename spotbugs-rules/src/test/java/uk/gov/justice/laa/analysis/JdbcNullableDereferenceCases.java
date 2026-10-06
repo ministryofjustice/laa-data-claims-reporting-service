@@ -7,13 +7,15 @@ import java.time.Instant;
 
 public class JdbcNullableDereferenceCases {
 
+    private static final String LATEST_END_TIME_COLUMN = "latest_end_time";
+
     /**
      * UNSAFE
      * getTimestamp() may return null if the column value is SQL NULL,
      * and calling toInstant() on a null reference will throw a NullPointerException.
      */
     public Instant unsafeTimestampColumnName(ResultSet rs) throws SQLException {
-        return rs.getTimestamp("latest_end_time").toInstant();
+        return rs.getTimestamp(LATEST_END_TIME_COLUMN).toInstant();
     }
 
     /**
@@ -53,7 +55,7 @@ public class JdbcNullableDereferenceCases {
      * @throws SQLException - if a database access error occurs or this method is called on a closed result set
      */
     public Instant safeTimestampNullCheck(ResultSet rs) throws SQLException {
-        Timestamp timestamp =  rs.getTimestamp("latest_end_time");
+        Timestamp timestamp =  rs.getTimestamp(LATEST_END_TIME_COLUMN);
         return timestamp == null ? null : timestamp.toInstant();
     }
 
@@ -66,7 +68,7 @@ public class JdbcNullableDereferenceCases {
      * @throws SQLException - if a database access error occurs or this method is called on a closed result set
      */
     public Timestamp safeTimestampReturn(ResultSet rs) throws SQLException {
-        return rs.getTimestamp("latest_end_time");
+        return rs.getTimestamp(LATEST_END_TIME_COLUMN);
     }
 
     /**
