@@ -46,6 +46,19 @@ public class JdbcNullableDereferenceCases {
     }
 
     /**
+     * UNSAFE
+     * getObject() may return null if the column value is SQL NULL,
+     * Casting a null reference to String and calling trim() on it will throw a NullPointerException.
+     *
+     * @param rs - the ResultSet from which to retrieve the object
+     * @return String representation of the value, or null if the column value is SQL NULL
+     * @throws SQLException - if a database access error occurs or this method is called on a closed result set
+     */
+    public String unsafeObjectCast(ResultSet rs) throws SQLException {
+        return ((String) rs.getObject(1)).trim();
+    }
+
+    /**
      * SAFE
      * The getTimestamp() method is called and the result is returned before dereferencing.
      * Direct dereference detector should not report this.

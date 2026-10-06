@@ -27,7 +27,8 @@ public class JdbcNullableDereferenceDetectorTest
     void shouldDetectDirectUnsafeJdbcCalls(SpotBugsRunner runner) throws URISyntaxException {
        Set<String> detected = analyseCases(runner);
 
-       assertEquals(Set.of("unsafeTimestampColumnName", "unsafeTimestampColumnIndex", "unsafeStringTrim"), detected);
+       assertEquals(Set.of("unsafeTimestampColumnName", "unsafeTimestampColumnIndex",
+               "unsafeStringTrim", "unsafeObjectCast"), detected);
     }
 
     private Set<String> analyseCases(SpotBugsRunner runner) throws URISyntaxException {

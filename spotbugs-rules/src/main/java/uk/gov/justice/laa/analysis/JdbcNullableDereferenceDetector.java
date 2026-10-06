@@ -5,8 +5,7 @@ import edu.umd.cs.findbugs.BugReporter;
 import edu.umd.cs.findbugs.BytecodeScanningDetector;
 import org.apache.bcel.classfile.Code;
 
-import static org.apache.bcel.Const.INVOKEINTERFACE;
-import static org.apache.bcel.Const.INVOKEVIRTUAL;
+import static org.apache.bcel.Const.*;
 
 /**
  * Detects direct dereferences of nullable values returned by java.sql.ResultSet.
@@ -47,6 +46,9 @@ public class JdbcNullableDereferenceDetector extends BytecodeScanningDetector {
                     .addString(getDottedClassName() + "." + (getMethodName()));
 
             reporter.reportBug(bug);
+        }
+        if (seen == CHECKCAST && previousWasTimestampGetter) {
+            return;
         }
         previousWasTimestampGetter = nullableJdbcGetter;
     }
