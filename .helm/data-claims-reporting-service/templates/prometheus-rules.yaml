@@ -78,9 +78,25 @@ spec:
           for: 1m
           labels:
             severity: {{ .Values.alerting.severity }}
-        - alert: KubeJobNotCreated
+        - alert: CronjobIsSuspendedForOver1Hour
           annotations:
-            message: Job has failed to be created
+            message: Kubernetes cronjob has been suspend over 1 hour
+            dashboard_url: {{ .Values.alerting.grafanaDashboard }}
+          expr: kube_cronjob_spec_suspend{namespace="{{ .Release.Namespace }}"} == 1
+          for: 1h
+          labels:
+            severity: {{ .Values.alerting.severity }}
+        - alert: CronjobNotScheduledInLast24Hours
+          annotations:
+            message: Cronjob has not been scheduled over 24 hour period
+            dashboard_url: {{ .Values.alerting.grafanaDashboard }}
+          expr: (time() - kube_cronjob_status_last_schedule_time{namespace="{{ .Release.Namespace }}"}) > (24 * 3600)
+          for: 1m
+          labels:
+            severity: {{ .Values.alerting.severity }}
+        - alert: AllCronjobsNotCreatedIn24HoursPeriod
+          annotations:
+            message: All cronjob has not been created in 24 hours period
             dashboard_url: {{ .Values.alerting.grafanaDashboard }}
           expr: |-
             (count(kube_job_created{namespace="{{ .Release.Namespace }}"} and (time() - kube_job_created < 24 * 3600)) or vector(0)) == 0
