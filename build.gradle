@@ -1,5 +1,5 @@
 plugins {
-    id 'io.freefair.lombok' version '9.7.0'
+    id 'io.freefair.lombok' version '9.8.0'
     // plugin version set in settings.gradle
     id 'uk.gov.justice.service.laa.laa-spring-boot-gradle-plugin'
     id 'com.github.spotbugs' version '6.5.12'
@@ -80,7 +80,7 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     // Vulnerability introduced in spring-boot-starter-logging 4.1.1, overriding until fixed in spring:
-    implementation 'ch.qos.logback:logback-classic:1.6.4'
+    implementation 'ch.qos.logback:logback-classic:1.6.5'
 
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -91,7 +91,7 @@ dependencies {
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    implementation(platform 'software.amazon.awssdk:bom:2.55.6')
+    implementation(platform 'software.amazon.awssdk:bom:2.55.11')
     implementation 'software.amazon.awssdk:s3'
     //AWSSDK:s3 introduces high vuln in netty-codec-http, overriding until fixed in AWS SDK:
     implementation 'io.netty:netty-codec-http:4.2.18.Final'
