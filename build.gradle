@@ -8,7 +8,12 @@ plugins {
 
 // Temporarily overriding the managed Tomcat version for all modules,
 // not just tomcat-embed-core, until the vulnerability is fixed.
-ext['tomcat.version'] = '11.0.25'
+ext['tomcat.version'] = '11.0.26'
+
+checkstyle {
+    toolVersion = '13.11.0'
+    configFile = file("${rootProject.projectDir}/config/checkstyle/checkstyle.xml")
+}
 
 tasks.withType(Checkstyle).configureEach {
     setEnabled(false)
