@@ -5,7 +5,9 @@ import edu.umd.cs.findbugs.BugReporter;
 import edu.umd.cs.findbugs.BytecodeScanningDetector;
 import org.apache.bcel.classfile.Code;
 
-import static org.apache.bcel.Const.*;
+import static org.apache.bcel.Const.CHECKCAST;
+import static org.apache.bcel.Const.INVOKEINTERFACE;
+import static org.apache.bcel.Const.INVOKEVIRTUAL;
 
 /**
  * Detects direct dereferences of nullable values returned by java.sql.ResultSet.
