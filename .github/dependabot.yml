@@ -25,6 +25,20 @@ updates:
         update-types:
           - "minor"
           - "patch"
+  - package-ecosystem: "gradle"
+    directories:
+      - "/spotbugs-rules"
+    schedule:
+      interval: "weekly"
+    commit-message:
+      prefix: "fix(bot)"
+    cooldown:
+      default-days: 3
+    groups:
+      minor:
+        update-types:
+          - "minor"
+          - "patch"
   - package-ecosystem: "github-actions"
     directories:
       - "/"
