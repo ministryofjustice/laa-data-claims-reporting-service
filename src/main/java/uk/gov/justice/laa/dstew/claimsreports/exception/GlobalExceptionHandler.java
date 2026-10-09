@@ -84,6 +84,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
         .addKeyValue("event.action", "s3.upload.failure")
         .addKeyValue("event.type", "storage")
         .addKeyValue("event.outcome", "failure")
+        .setCause(e)
         .log(
             "SdkClientException ({}) Thrown: {}",
             sanitise(e.getClass().getSimpleName()),
