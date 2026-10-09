@@ -11,6 +11,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId;
+import uk.gov.justice.laa.dstew.claimsreports.config.S3Timeouts;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
 import uk.gov.justice.laa.dstew.claimsreports.service.CsvFileValidator;
 
@@ -31,14 +32,17 @@ public class S3ClientWrapper {
    * @param s3Bucket Bucket name
    * @param metricsHandler Prometheus metric handler
    * @param csvFileValidator CSV file validation service
+   * @param uploadUtf8FailuresToS3 debug flag for how to handle utf-8 validation failures
+   * @param s3Timeouts timeout config for S3 calls
    */
   public S3ClientWrapper(
       String awsRegion,
       String s3Bucket,
       MetricsHandler metricsHandler,
       CsvFileValidator csvFileValidator,
-      Boolean uploadUtf8FailuresToS3) {
-    this.s3Client = new S3ClientFactory().createS3Client(awsRegion);
+      Boolean uploadUtf8FailuresToS3,
+      S3Timeouts s3Timeouts) {
+    this.s3Client = new S3ClientFactory(s3Timeouts).createS3Client(awsRegion);
     this.s3Bucket = s3Bucket;
     this.metricsHandler = metricsHandler;
     this.csvFileValidator = csvFileValidator;

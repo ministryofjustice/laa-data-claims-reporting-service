@@ -2,6 +2,7 @@ package uk.gov.justice.laa.dstew.claimsreports.config;
 
 import java.net.URI;
 import java.time.Clock;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.ZoneId;
 import org.springframework.beans.factory.annotation.Value;
@@ -10,6 +11,8 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Primary;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
+import software.amazon.awssdk.http.apache5.Apache5HttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.BucketAlreadyOwnedByYouException;
@@ -25,12 +28,28 @@ public class TestConfig {
       @Value("${aws.s3.endpoint}") String endpoint,
       @Value("${aws.region}") String region,
       @Value("${aws.accessKeyId}") String accessKey,
-      @Value("${aws.secretAccessKey}") String secretKey) {
+      @Value("${aws.secretAccessKey}") String secretKey,
+      S3Timeouts s3Timeouts) {
     return S3Client.builder()
         .endpointOverride(URI.create(endpoint))
         .region(Region.of(region))
         .credentialsProvider(
             StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
+        .httpClientBuilder(localstackHttpClientBuilder(s3Timeouts))
+        .overrideConfiguration(localstackOverrideConfiguration(s3Timeouts))
+        .build();
+  }
+
+  Apache5HttpClient.Builder localstackHttpClientBuilder(S3Timeouts s3Timeouts) {
+    return Apache5HttpClient.builder()
+        .connectionTimeout(Duration.ofSeconds(s3Timeouts.connection()))
+        .socketTimeout(Duration.ofSeconds(s3Timeouts.socket()));
+  }
+
+  ClientOverrideConfiguration localstackOverrideConfiguration(S3Timeouts s3Timeouts) {
+    return ClientOverrideConfiguration.builder()
+        .apiCallAttemptTimeout(Duration.ofSeconds(s3Timeouts.apiCallAttempt()))
+        .apiCallTimeout(Duration.ofSeconds(s3Timeouts.totalApiCall()))
         .build();
   }
 

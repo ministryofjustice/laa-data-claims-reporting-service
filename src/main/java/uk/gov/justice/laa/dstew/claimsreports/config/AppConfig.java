@@ -5,6 +5,7 @@ import javax.sql.DataSource;
 import lombok.Getter;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.jdbc.core.JdbcTemplate;
@@ -20,6 +21,7 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
  */
 @Getter
 @Configuration
+@EnableConfigurationProperties(S3Timeouts.class)
 public class AppConfig {
   /**
    * Configures a {@link DataSource} in the application's configuration file.
@@ -72,9 +74,15 @@ public class AppConfig {
       @Value("${AWS_REGION}") String awsRegion,
       @Value("${S3_REPORT_STORE}") String bucketName,
       MetricsHandler metricsHandler,
-      CsvFileValidator csvFileValidator) {
+      CsvFileValidator csvFileValidator,
+      S3Timeouts s3Timeouts) {
     return new S3ClientWrapper(
-        awsRegion, bucketName, metricsHandler, csvFileValidator, uploadUtf8FailuresToS3);
+        awsRegion,
+        bucketName,
+        metricsHandler,
+        csvFileValidator,
+        uploadUtf8FailuresToS3,
+        s3Timeouts);
   }
 
   /**

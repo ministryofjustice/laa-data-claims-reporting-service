@@ -33,6 +33,11 @@ autoscaling:
 s3:
   #  This project's "uat" env maps to GLADs "dev" env
   bucketName: laa-get-payments-finance-data-dev-report-store
+  timeout:
+    connection: 10
+    socket: 60
+    apiCallAttempt: 60
+    totalApiCall: 180
 
 pushgatewayAddress: laa-data-claims-reporting-service-uat-pushgateway-prometheus-pu:9091
 

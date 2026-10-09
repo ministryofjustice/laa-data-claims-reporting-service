@@ -1,3 +1,5 @@
+import org.apache.tools.ant.filters.ReplaceTokens
+
 plugins {
     id 'io.freefair.lombok' version '9.8.0'
     // plugin version set in settings.gradle
@@ -45,7 +47,7 @@ bootRun {
 processResources {
     filteringCharset = 'UTF-8'
     filesMatching('**/application*.yml') {
-        filter(org.apache.tools.ant.filters.ReplaceTokens, tokens: [
+        filter(ReplaceTokens, tokens: [
             version: project.version.toString()
         ], beginToken: '@', endToken: '@')
     }
@@ -93,6 +95,7 @@ dependencies {
 
     // Vulnerability introduced in spring-boot-starter-logging 4.1.1, overriding until fixed in spring:
     implementation 'ch.qos.logback:logback-classic:1.6.5'
+    implementation 'ch.qos.logback:logback-core:1.6.5'
 
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
@@ -108,6 +111,7 @@ dependencies {
     //AWSSDK:s3 introduces high vuln in netty-codec-http, overriding until fixed in AWS SDK:
     implementation 'io.netty:netty-codec-http:4.2.18.Final'
     implementation 'software.amazon.awssdk:sts'
+    implementation 'software.amazon.awssdk:apache5-client'
 
     implementation 'io.micrometer:micrometer-registry-prometheus'
     implementation 'io.prometheus:prometheus-metrics-exporter-pushgateway'

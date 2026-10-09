@@ -56,3 +56,11 @@ feature:
   ignore-replication-rowcount-mismatch: ${FEATURE_IGNORE_REPLICATION_ROWCOUNT_MISMATCH:false}
   force-run-rep000: ${FORCE_RUN_REP000:false}
   force-run-rep002: ${FORCE_RUN_REP002:false}
+
+aws:
+  s3:
+    timeout:
+      connection: ${AWS_S3_TIMEOUT_CONNECTION:10}
+      socket: ${AWS_S3_TIMEOUT_SOCKET:60}
+      apiCallAttempt: ${AWS_S3_TIMEOUT_API_CALL_ATTEMPT:60}
+      totalApiCall: ${AWS_S3_TIMEOUT_TOTAL_API_CALL:180}
