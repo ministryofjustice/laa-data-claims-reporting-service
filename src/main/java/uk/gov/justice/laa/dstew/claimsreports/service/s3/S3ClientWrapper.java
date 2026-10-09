@@ -32,6 +32,8 @@ public class S3ClientWrapper {
    * @param s3Bucket Bucket name
    * @param metricsHandler Prometheus metric handler
    * @param csvFileValidator CSV file validation service
+   * @param uploadUtf8FailuresToS3 debug flag for how to handle utf-8 validation failures
+   * @param s3Timeouts timeout config for S3 calls
    */
   public S3ClientWrapper(
       String awsRegion,
