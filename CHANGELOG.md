@@ -1,5 +1,38 @@
 # Changelog
 
+## [1.9.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.8.0...v1.9.0) (2026-09-30)
+
+
+### Features
+
+* **LPF-1831:** new cols added for inquests ([#286](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/286)) ([fd7720d](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/fd7720d0d219f40589e16cf86c11986d191506d5))
+
+
+### Bug Fixes
+
+* **bot:** Bump the gradle-updates group with 8 updates ([#287](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/287)) ([27bb068](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/27bb068da60b5a2a3ef5db5eba4e4be180dd32b9))
+
+## [1.8.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.7.2...v1.8.0) (2026-09-25)
+
+
+### Features
+
+* **LPF-1555:** report014, add new column "Assessed by User ID" to the csv using created by user id column ([#275](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/275)) ([2ac12a0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/2ac12a039413a076c115e5363f6b969ca061464c))
+
+
+### Bug Fixes
+
+* **bot:** Bump amazoncorretto from `59ce8a2` to `efd4d3c` ([#283](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/283)) ([a318f11](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/a318f11e05a32b8c1fe6ffda73f30b8551d5890a))
+* **bot:** Bump the gradle-updates group across 1 directory with 4 updates ([#277](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/277)) ([90edd88](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/90edd88a506d0bb3ad12d4896e32a3b31b4d0a76))
+* **bot:** Bump the gradle-updates group with 2 updates ([#267](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/267)) ([fc88c1e](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/fc88c1e1754ae672ca4aed73c86178be0872952a))
+* **LPF-0000:** Snyk fixes Sept 2026 ([#276](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/276)) ([b50445c](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/b50445ce59f1a832543c58186dd3cd86a5779205))
+* **LPF-1689:** Handle nullable latest_end_time safely. ([#278](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/278)) ([0e4d004](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/0e4d0043541bb5e61ea654b790fa136710d98489))
+
+
+### Documentation
+
+* **LPF-1309:** Updated README guidance around personal access tokens ([#279](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/279)) ([f96d978](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/f96d9782161339054d7079ac227d0c2b28ba44c9))
+
 ## [1.7.2](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.7.1...v1.7.2) (2026-09-04)
 
 

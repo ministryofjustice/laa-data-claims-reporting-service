@@ -15,9 +15,14 @@ Includes the following subprojects:
 - `laa-data-claims-reporting-service/laa-data-claims-reporting-service` - Generates reports from replica of claims database
 
 ## Add GitHub Token
+**NOTE : Ensure that your GitHub token is kept secure and not shared or exposed in public repositories and is not committed to version control.
+It should be stored securely, such as in environment variables or a secure secrets management system.
+Please use the .pre-commit-config.yaml file to ensure that the token is not committed to version control.**
 
 1. Generate a GitHub PAT (Personal Access Token) to access the required plugin via <https://github.com/settings/tokens>.
 2. Specify the Note field, for example: "Token to allow access to LAA Gradle plugin".
+   - Select the appropriate scopes for the token.
+   - Set an expiration date for the token - 90 days is usually a good choice.
 3. If you don't already have a `gradle.properties` file, create one at `~/.gradle/gradle.properties`.
 4. Add the following properties to `~/.gradle/gradle.properties`, replacing the placeholder values:
 

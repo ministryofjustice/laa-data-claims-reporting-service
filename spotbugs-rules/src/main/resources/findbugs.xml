@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+
+<FindbugsPlugin pluginid="uk.gov.justice.laa.jdbc-rules">
+    <Detector class="uk.gov.justice.laa.analysis.JdbcNullableDereferenceDetector"
+              reports="JDBC_NULL_DEREFERENCE"
+              speed="fast"/>
+
+    <BugPattern type="JDBC_NULL_DEREFERENCE"
+                category="CORRECTNESS"
+                abbrev="JDBC_NPE"/>
+
+    <BugCode abbrev="JDBC_NPE" />
+</FindbugsPlugin>

@@ -85,7 +85,8 @@ class Report014ServiceTest {
                     "Assessment Reason",
                     "Submission ID",
                     "Claim ID",
-                    "Assessment ID")),
+                    "Assessment ID",
+                    "Assessed by User ID")),
             isNull());
   }
 }

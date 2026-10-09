@@ -1,5 +1,8 @@
 # Specify java runtime base image
-FROM amazoncorretto:26.0.2-alpine3.23@sha256:59ce8a227f50be919b59cdd49aecf93e446d49eeb2553f0dc38a3ed01ff3af27
+FROM amazoncorretto:26-alpine3.24@sha256:a83b778877923a2e64e958626cbe30bc6130acb4a0ebcac53fb168556a9a0444
+
+# Upgrade vulnerable zlib package
+RUN apk update && apk upgrade --no-cache zlib
 
 # Set up working directory in the container
 RUN mkdir -p /opt/laa-data-reporting-service/claims-reporting/

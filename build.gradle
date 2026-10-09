@@ -1,9 +1,18 @@
 plugins {
-    id 'io.freefair.lombok' version '9.5.0'
+    id 'io.freefair.lombok' version '9.7.0'
     // plugin version set in settings.gradle
     id 'uk.gov.justice.service.laa.laa-spring-boot-gradle-plugin'
-    id 'com.github.spotbugs' version '6.5.11'
-    id 'com.diffplug.spotless' version '8.10.2'
+    id 'com.github.spotbugs' version '6.5.12'
+    id 'com.diffplug.spotless' version '8.10.3'
+}
+
+// Temporarily overriding the managed Tomcat version for all modules,
+// not just tomcat-embed-core, until the vulnerability is fixed.
+ext['tomcat.version'] = '11.0.26'
+
+checkstyle {
+    toolVersion = '13.11.0'
+    configFile = file("${rootProject.projectDir}/config/checkstyle/checkstyle.xml")
 }
 
 tasks.withType(Checkstyle).configureEach {
@@ -59,7 +68,7 @@ jacocoTestCoverageVerification {
 }
 
 spotbugs {
-    ignoreFailures = true
+    ignoreFailures = false
     effort = 'max'
     reportLevel = 'low'
     excludeFilter = file('spotbugs-exclude.xml')
@@ -72,22 +81,29 @@ spotbugsMain {
     }
 }
 
+spotbugsTest {
+    reports {
+        xml.required = true
+        html.required = true
+    }
+}
+
 dependencies {
     implementation 'org.springframework.boot:spring-boot-starter-actuator'
 
     // Vulnerability introduced in spring-boot-starter-logging 4.1.1, overriding until fixed in spring:
-    implementation 'ch.qos.logback:logback-classic:1.6.3'
+    implementation 'ch.qos.logback:logback-classic:1.6.4'
 
     implementation 'org.springframework.boot:spring-boot-starter-jdbc'
     implementation 'org.springframework.boot:spring-boot-starter-validation'
     implementation 'org.springframework.boot:spring-boot-starter-webmvc'
 
-    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.0'
+    implementation 'org.springdoc:springdoc-openapi-starter-webmvc-ui:3.1.1'
 
     implementation 'org.mapstruct:mapstruct:1.6.3'
     annotationProcessor 'org.mapstruct:mapstruct-processor:1.6.3'
 
-    implementation(platform 'software.amazon.awssdk:bom:2.54.13')
+    implementation(platform 'software.amazon.awssdk:bom:2.55.6')
     implementation 'software.amazon.awssdk:s3'
     //AWSSDK:s3 introduces high vuln in netty-codec-http, overriding until fixed in AWS SDK:
     implementation 'io.netty:netty-codec-http:4.2.18.Final'
@@ -100,16 +116,16 @@ dependencies {
     implementation 'org.springframework.boot:spring-boot-micrometer-tracing-brave'
     implementation 'io.micrometer:micrometer-tracing-bridge-brave'
 
-    implementation 'tools.jackson.dataformat:jackson-dataformat-csv'
+    implementation 'tools.jackson.dataformat:jackson-dataformat-csv:3.2.3'
 
     // Hardcoding due to snyk issues raised in CI scan
-    implementation 'tools.jackson.core:jackson-databind:3.1.6'
-    implementation 'com.fasterxml.jackson.core:jackson-databind:2.21.6'
-
-    implementation 'org.apache.poi:poi-ooxml:5.4.1'
-
+    implementation 'tools.jackson.core:jackson-databind:3.2.3'
+    implementation 'com.fasterxml.jackson.core:jackson-databind:2.22.3'
+    implementation 'com.fasterxml.jackson.core:jackson-core:2.22.3'
+    implementation 'com.fasterxml.jackson.core:jackson-annotations:2.22'
+    implementation 'tools.jackson.core:jackson-core:3.2.3'
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
-    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'org.postgresql:postgresql:42.7.14'
     runtimeOnly "org.flywaydb:flyway-database-postgresql"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -128,4 +144,5 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.14.0'
+    spotbugsPlugins project(':spotbugs-rules')
 }

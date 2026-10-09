@@ -1,7 +1,6 @@
 package uk.gov.justice.laa.dstew.claimsreports.service;
 
 import edu.umd.cs.findbugs.annotations.SuppressFBWarnings;
-import java.math.BigInteger;
 import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.Duration;
@@ -10,6 +9,7 @@ import java.time.LocalDate;
 import java.util.List;
 import java.util.Map;
 import java.util.Objects;
+import java.util.Optional;
 import java.util.regex.Pattern;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -41,6 +41,7 @@ public class ReplicationHealthCheckService {
   private final ReplicationMetadataRepository metadataRepository;
   private final Clock
       clock; // This is the system clock for normal prod use, overridden by a static one for tests.
+  private final WalValidationService walValidationService;
   private static final String SUBSCRIPTION_NAME = "claims_reporting_service_sub";
   private static final Pattern SAFE_SQL_IDENTIFIER =
       Pattern.compile("[A-Za-z_][A-Za-z0-9_]{0,127}+(?:\\.[A-Za-z_][A-Za-z0-9_]{0,127}+)?+");
@@ -116,7 +117,7 @@ public class ReplicationHealthCheckService {
     Instant now = clock.instant();
     SubscriptionWalStatus wal = metadataRepository.getSubscriptionWalStatus(SUBSCRIPTION_NAME);
 
-    if (wal == null || wal.latestEndLsn() == null) {
+    if (wal == null) {
       report.setWalLsnOk(false);
       report.addFailure(
           REPLICATION,
@@ -127,6 +128,15 @@ public class ReplicationHealthCheckService {
       if (lastApplied == null) {
         report.setWalLsnOk(false);
         report.addFailure(REPLICATION, "WAL latest end time is null");
+      } else if (!walValidationService.isValidWalLsn(wal.receivedLsn())) {
+        report.setWalLsnOk(false);
+        report.addFailure(
+            REPLICATION, String.format("Malformed WAL LSN — received WAL %s", wal.receivedLsn()));
+      } else if (!walValidationService.isValidWalLsn(wal.latestEndLsn())) {
+        report.setWalLsnOk(false);
+        report.addFailure(
+            REPLICATION,
+            String.format("Malformed WAL LSN — last applied WAL %s", wal.latestEndLsn()));
       } else if (lastApplied.isBefore(now.minusSeconds(TOLERABLE_REPLICATION_DELAY_SECONDS))) {
         long lagMinutes = Duration.between(lastApplied, now).toMinutes();
         report.setWalLsnOk(false);
@@ -148,8 +158,12 @@ public class ReplicationHealthCheckService {
   }
 
   private int compareWal(String wal1, String wal2) {
-    return new BigInteger(wal1.replace("/", ""), 16)
-        .compareTo(new BigInteger(wal2.replace("/", ""), 16));
+    Optional<Long> wal1Combined = walValidationService.parseWalLsn(wal1);
+    Optional<Long> wal2Combined = walValidationService.parseWalLsn(wal2);
+    if (wal1Combined.isEmpty() || wal2Combined.isEmpty()) {
+      return 0;
+    }
+    return Long.compareUnsigned(wal1Combined.get(), wal2Combined.get());
   }
 
   @SuppressFBWarnings(
