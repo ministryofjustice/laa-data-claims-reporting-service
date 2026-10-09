@@ -5,8 +5,9 @@ pluginManagement {
     }
 
     plugins {
-        id 'uk.gov.justice.service.laa.laa-spring-boot-gradle-plugin' version '3.0.3'
+        id 'uk.gov.justice.service.laa.laa-spring-boot-gradle-plugin' version '3.1.2'
     }
 }
 
 rootProject.name = 'laa-data-claims-reporting-service'
+include 'spotbugs-rules'

@@ -1,0 +1,36 @@
+<MessageCollection>
+    <Detector class="uk.gov.justice.laa.analysis.JdbcNullableDereferenceDetector">
+        <Details>
+            Detected direct dereference of a JDBC object without a null check.
+            This can lead to a NullPointerException if the Timestamp is null.
+            Ensure that you check for null before dereferencing the object.
+        </Details>
+    </Detector>
+
+    <BugPattern type="JDBC_NULL_DEREFERENCE">
+        <ShortDescription>Possible null pointer dereference of JDBC results</ShortDescription>
+        <LongDescription>Possible JDBC null dereference: {0}</LongDescription>
+        <Details>
+            <![CDATA[
+                <p>
+                JDBC ResultSet getters that return reference values may return null when
+                the database value is NULL.
+                </p>
+                <p>
+                Directly invoking a method on the return value can therefore result in a
+                NullPointerException.
+                </p>
+                <p>
+                Store the value and check for null before dereferencing it where SQL NULL is valid.
+                </p>
+                <p>
+                Primitive ResultSet getters (getInt, getLong, getDouble, etc.) are not covered
+                by this rule because they return a default value (0) when the database value is NULL.
+                </p>
+            ]]>
+        </Details>
+    </BugPattern>
+    <BugCode abbrev="JDBC_NPE">
+        Unsafe dereference of JDBC nullable results check.
+    </BugCode>
+</MessageCollection>
