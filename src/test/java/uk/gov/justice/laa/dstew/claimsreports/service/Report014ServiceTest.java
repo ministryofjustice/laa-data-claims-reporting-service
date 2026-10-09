@@ -87,6 +87,7 @@ class Report014ServiceTest {
                     "Claim ID",
                     "Assessment ID",
                     "Assessed by User ID")),
-            isNull());
+            isNull(),
+            eq("REPORT014"));
   }
 }

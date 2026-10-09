@@ -93,7 +93,8 @@ class Report002ServiceTest {
                     "Schedule reference",
                     "Mediation type",
                     "New cases count")),
-            isNull());
+            isNull(),
+            eq("REPORT002"));
   }
 
   @Test

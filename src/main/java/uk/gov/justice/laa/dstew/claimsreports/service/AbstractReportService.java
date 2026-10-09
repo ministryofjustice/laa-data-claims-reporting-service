@@ -170,7 +170,11 @@ public abstract class AbstractReportService {
       metricsHandler.setCustomMetric(CustomMetricId.GENERATED_TIME_MS, durationMilliseconds);
       var expectedHeaders = getExpectedCsvHeaders();
       s3ClientWrapper.uploadFile(
-          tempFile, generateS3FileKey(), expectedHeaders, getAdditionalCsvHeaderPattern());
+          tempFile,
+          generateS3FileKey(),
+          expectedHeaders,
+          getAdditionalCsvHeaderPattern(),
+          getReportName());
       metricsHandler.setCustomMetric(CustomMetricId.REPORT_SUCCESSFUL, REPORT_SUCCESSFUL);
 
     } catch (IOException | RuntimeException e) {
