@@ -16,11 +16,6 @@ aws:
   secretAccessKey: test
   s3:
     endpoint: http://${LOCALSTACK_HOST:localhost}:4566
-    timeout:
-      connection: 10
-      socket: 60
-      apiCallAttempt: 60
-      totalApiCall: 180
 # Normally these come from Kubernetes hence the formatting difference
 S3_REPORT_STORE: "test-bucket"
 AWS_REGION: eu-west-1
