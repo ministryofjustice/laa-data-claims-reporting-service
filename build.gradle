@@ -68,7 +68,7 @@ jacocoTestCoverageVerification {
 }
 
 spotbugs {
-    ignoreFailures = true
+    ignoreFailures = false
     effort = 'max'
     reportLevel = 'low'
     excludeFilter = file('spotbugs-exclude.xml')
@@ -77,6 +77,13 @@ spotbugs {
 spotbugsMain {
     reports {
         sarif.required = true
+        html.required = true
+    }
+}
+
+spotbugsTest {
+    reports {
+        xml.required = true
         html.required = true
     }
 }
@@ -118,7 +125,7 @@ dependencies {
     implementation 'com.fasterxml.jackson.core:jackson-annotations:2.22'
     implementation 'tools.jackson.core:jackson-core:3.2.3'
     runtimeOnly 'org.springframework.boot:spring-boot-starter-flyway'
-    runtimeOnly 'org.postgresql:postgresql'
+    runtimeOnly 'org.postgresql:postgresql:42.7.14'
     runtimeOnly "org.flywaydb:flyway-database-postgresql"
 
     testImplementation 'org.springframework.boot:spring-boot-starter-test'
@@ -137,4 +144,5 @@ dependencies {
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 
     spotbugsPlugins 'com.h3xstream.findsecbugs:findsecbugs-plugin:1.14.0'
+    spotbugsPlugins project(':spotbugs-rules')
 }
