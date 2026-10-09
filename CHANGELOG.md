@@ -1,5 +1,12 @@
 # Changelog
 
+## [1.10.1](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.10.0...v1.10.1) (2026-10-09)
+
+
+### Bug Fixes
+
+* **LPF-1734:** increase the time for `for` ([#301](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/301)) ([132e740](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/132e740ab5503d008f9cbc18647dd98d90a69299))
+
 ## [1.10.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.9.0...v1.10.0) (2026-10-09)
 
 
