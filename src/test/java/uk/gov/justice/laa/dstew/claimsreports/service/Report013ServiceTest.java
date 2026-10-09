@@ -71,6 +71,7 @@ class Report013ServiceTest {
             any(File.class),
             eq("reports/daily/report_013_2025-12-22.csv"),
             eq(List.of("Provider Office Account Number", "Area of Law")),
-            any(Pattern.class));
+            any(Pattern.class),
+            eq("REPORT013"));
   }
 }

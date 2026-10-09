@@ -94,7 +94,8 @@ class AbstractReportServiceTest {
             any(File.class),
             eq("reports/daily/test_report_2025-12-21.csv"),
             eq(List.of()),
-            isNull());
+            isNull(),
+            eq("testReport"));
   }
 
   @SneakyThrows

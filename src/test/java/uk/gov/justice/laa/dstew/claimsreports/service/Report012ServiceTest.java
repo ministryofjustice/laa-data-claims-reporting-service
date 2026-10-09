@@ -79,6 +79,7 @@ class Report012ServiceTest {
                     "Area of law",
                     "Original submission value",
                     "Date submission was uploaded")),
-            isNull());
+            isNull(),
+            eq("REPORT012"));
   }
 }

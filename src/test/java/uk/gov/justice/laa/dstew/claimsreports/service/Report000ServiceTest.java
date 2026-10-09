@@ -83,7 +83,8 @@ class Report000ServiceTest {
             any(File.class),
             eq("reports/monthly/report_000_2025-12-21.csv"),
             headers.capture(),
-            isNull());
+            isNull(),
+            eq("REPORT000"));
     Assertions.assertEquals(174, headers.getValue().size());
   }
 
