@@ -6,6 +6,7 @@ import static org.mockito.Mockito.*;
 import java.io.BufferedWriter;
 import java.io.File;
 import java.io.IOException;
+import java.io.UncheckedIOException;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.time.Clock;
@@ -135,7 +136,7 @@ class AbstractReportServiceTest {
                 try {
                   Files.deleteIfExists(file);
                 } catch (IOException e) {
-                  throw new RuntimeException("Failed to delete temp report file: " + file, e);
+                  throw new UncheckedIOException("Failed to delete temp report file: " + file, e);
                 }
               });
     }
