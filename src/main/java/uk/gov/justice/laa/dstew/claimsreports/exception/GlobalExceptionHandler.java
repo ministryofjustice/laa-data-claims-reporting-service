@@ -79,7 +79,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
   public ResponseEntity<String> handleAwsClientErrors(SdkClientException e) {
     var message = "Failed to upload report.";
 
-    // Ensure log has specific AWS exception class name in, such as NoSuchKeyException.
+    // Ensure the log includes the specific client exception class, such as ApiCallTimeoutException.
     log.atError()
         .addKeyValue("event.action", "s3.upload.failure")
         .addKeyValue("event.type", "storage")
