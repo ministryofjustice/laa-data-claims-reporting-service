@@ -1,5 +1,22 @@
 # Changelog
 
+## [1.10.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.9.0...v1.10.0) (2026-10-09)
+
+
+### Features
+
+* **LPF-1824:** spot bugs rules ([#292](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/292)) ([60916b3](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/60916b32dfeda8062cb6fb9022c43ceb21849530))
+* **LPF-1854:** snyk-vulnerabilities ([#298](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/298)) ([f9154f4](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/f9154f49f1d437cf9d139f72aab2a15fa3bafac8))
+
+
+### Bug Fixes
+
+* **bot:** Bump org.junit.platform:junit-platform-launcher from 1.11.0 to 6.1.3 in /spotbugs-rules ([#304](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/304)) ([eb6f28b](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/eb6f28bd58e7fbebb3bc21af9e0b7199bcfcc268))
+* **bot:** Bump the gradle-updates group across 1 directory with 7 updates ([#305](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/305)) ([8c3c16f](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/8c3c16f7cf483468c5d9496d95281ad5b4bf5937))
+* **LPF-1690:** wal check handle edge cases ([#291](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/291)) ([fd662aa](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/fd662aa4fadc0f8a418a940a1deb2d98bd51eb25))
+* **LPF-1734:** new alerting rules ([#290](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/290)) ([0cfbff1](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/0cfbff16ab757d916fdb736102d9a3e71e2b2453))
+* **LPF-1858:** Docker image update ([#300](https://github.com/ministryofjustice/laa-data-claims-reporting-service/issues/300)) ([d9a13f2](https://github.com/ministryofjustice/laa-data-claims-reporting-service/commit/d9a13f2bb7b09023bb0701df9e7f05fb03a462ad))
+
 ## [1.9.0](https://github.com/ministryofjustice/laa-data-claims-reporting-service/compare/v1.8.0...v1.9.0) (2026-09-30)
 
 
