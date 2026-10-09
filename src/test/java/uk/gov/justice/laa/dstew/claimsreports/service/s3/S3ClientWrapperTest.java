@@ -23,6 +23,7 @@ import org.junit.jupiter.api.extension.ExtendWith;
 import org.mockito.ArgumentCaptor;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import software.amazon.awssdk.core.exception.ApiCallTimeoutException;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
@@ -90,7 +91,7 @@ class S3ClientWrapperTest {
   }
 
   @Test
-  void uploadFile_shouldLetAwsExceptionBeCaughtByExceptionHandler() {
+  void uploadFile_shouldLetAwsServiceExceptionBeCaughtByExceptionHandler() {
     when(csvFileValidator.checkFileExtension("testReport.csv", "filename.csv")).thenReturn(true);
     when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(true);
     when(csvFileValidator.checkUtf8Encoded(testReport)).thenReturn(true);
@@ -100,6 +101,20 @@ class S3ClientWrapperTest {
 
     assertThrows(
         NoSuchBucketException.class, () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
+  }
+
+  @Test
+  void uploadFile_shouldLetAwsClientExceptionBeCaughtByExceptionHandler() {
+    when(csvFileValidator.checkFileExtension("testReport.csv", "filename.csv")).thenReturn(true);
+    when(csvFileValidator.checkMimeTypeIsCsv(testReport)).thenReturn(true);
+    when(csvFileValidator.checkUtf8Encoded(testReport)).thenReturn(true);
+
+    when(s3Client.putObject(any(PutObjectRequest.class), any(RequestBody.class)))
+        .thenThrow(ApiCallTimeoutException.builder().build());
+
+    assertThrows(
+        ApiCallTimeoutException.class,
+        () -> s3ClientWrapper.uploadFile(testReport, "filename.csv"));
   }
 
   @Test

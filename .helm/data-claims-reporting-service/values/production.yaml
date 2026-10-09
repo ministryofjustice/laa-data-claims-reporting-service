@@ -32,6 +32,11 @@ autoscaling:
 
 s3:
   bucketName: laa-get-payments-finance-data-prod-report-store
+  timeout:
+    connection: 10
+    socket: 60
+    apiCallAttempt: 60
+    totalApiCall: 180
 
 pushgatewayAddress: laa-data-claims-reporting-service-prod-pushgateway-prometheus-p:9091
 

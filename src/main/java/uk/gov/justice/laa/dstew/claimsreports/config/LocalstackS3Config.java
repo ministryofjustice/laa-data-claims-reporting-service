@@ -1,12 +1,16 @@
 package uk.gov.justice.laa.dstew.claimsreports.config;
 
 import java.net.URI;
+import java.time.Duration;
 import org.springframework.beans.factory.annotation.Value;
+import org.springframework.boot.context.properties.EnableConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.annotation.Profile;
 import software.amazon.awssdk.auth.credentials.AwsBasicCredentials;
 import software.amazon.awssdk.auth.credentials.StaticCredentialsProvider;
+import software.amazon.awssdk.core.client.config.ClientOverrideConfiguration;
+import software.amazon.awssdk.http.apache5.Apache5HttpClient;
 import software.amazon.awssdk.regions.Region;
 import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.S3Configuration;
@@ -25,6 +29,7 @@ import uk.gov.justice.laa.dstew.claimsreports.service.s3.S3ClientWrapper;
  */
 @Configuration
 @Profile("local") // Only active for the 'local' profile
+@EnableConfigurationProperties(S3Timeouts.class)
 public class LocalstackS3Config {
 
   /**
@@ -43,7 +48,8 @@ public class LocalstackS3Config {
       @Value("${aws.s3.endpoint}") String endpoint,
       @Value("${AWS_REGION}") String region,
       @Value("${aws.accessKeyId}") String accessKey,
-      @Value("${aws.secretAccessKey}") String secretKey) {
+      @Value("${aws.secretAccessKey}") String secretKey,
+      S3Timeouts s3Timeouts) {
 
     return S3Client.builder()
         .endpointOverride(URI.create(endpoint))
@@ -51,6 +57,23 @@ public class LocalstackS3Config {
         .credentialsProvider(
             StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
         .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build())
+        .httpClient(localstackHttpClient(s3Timeouts))
+        .overrideConfiguration(localstackOverrideConfiguration(s3Timeouts))
+        .build();
+  }
+
+  Apache5HttpClient localstackHttpClient(S3Timeouts s3Timeouts) {
+    return (Apache5HttpClient)
+        Apache5HttpClient.builder()
+            .connectionTimeout(Duration.ofSeconds(s3Timeouts.connection()))
+            .socketTimeout(Duration.ofSeconds(s3Timeouts.socket()))
+            .build();
+  }
+
+  ClientOverrideConfiguration localstackOverrideConfiguration(S3Timeouts s3Timeouts) {
+    return ClientOverrideConfiguration.builder()
+        .apiCallAttemptTimeout(Duration.ofSeconds(s3Timeouts.apiCallAttempt()))
+        .apiCallTimeout(Duration.ofSeconds(s3Timeouts.totalApiCall()))
         .build();
   }
 

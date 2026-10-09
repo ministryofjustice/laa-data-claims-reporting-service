@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.servlet.mvc.method.annotation.ResponseEntityExceptionHandler;
 import software.amazon.awssdk.awscore.exception.AwsServiceException;
+import software.amazon.awssdk.core.exception.SdkClientException;
 
 /** The global exception handler for all exceptions. */
 @RestControllerAdvice
@@ -50,7 +51,7 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
    */
   @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
   @ExceptionHandler(AwsServiceException.class)
-  public ResponseEntity<String> handleAwsErrors(AwsServiceException e) {
+  public ResponseEntity<String> handleAwsServiceErrors(AwsServiceException e) {
     var message = "Failed to upload report.";
 
     // Ensure log has specific AWS exception class name in, such as NoSuchKeyException.
@@ -62,6 +63,31 @@ public class GlobalExceptionHandler extends ResponseEntityExceptionHandler {
             "AwsServiceException ({}) Thrown: {}",
             sanitise(e.getClass().getSimpleName()),
             sanitise(e.awsErrorDetails().toString()));
+
+    return ResponseEntity.internalServerError().body(message);
+  }
+
+  /**
+   * Handles {@link SdkClientException} and its subtypes, and responds with an HTTP 500 Internal
+   * Server Error.
+   *
+   * @param e the exception thrown when there is an issue connecting to S3.
+   * @return a {@link ResponseEntity} with error message.
+   */
+  @ResponseStatus(HttpStatus.INTERNAL_SERVER_ERROR)
+  @ExceptionHandler(SdkClientException.class)
+  public ResponseEntity<String> handleAwsClientErrors(SdkClientException e) {
+    var message = "Failed to upload report.";
+
+    // Ensure log has specific AWS exception class name in, such as NoSuchKeyException.
+    log.atError()
+        .addKeyValue("event.action", "s3.upload.failure")
+        .addKeyValue("event.type", "storage")
+        .addKeyValue("event.outcome", "failure")
+        .log(
+            "SdkClientException ({}) Thrown: {}",
+            sanitise(e.getClass().getSimpleName()),
+            sanitise(e.getMessage()));
 
     return ResponseEntity.internalServerError().body(message);
   }

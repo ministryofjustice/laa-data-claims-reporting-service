@@ -9,6 +9,7 @@ import org.junit.jupiter.api.Test;
 import org.slf4j.MDC;
 import org.springframework.http.ResponseEntity;
 import software.amazon.awssdk.awscore.exception.AwsErrorDetails;
+import software.amazon.awssdk.core.exception.ApiCallTimeoutException;
 import software.amazon.awssdk.services.s3.model.NoSuchBucketException;
 
 class GlobalExceptionHandlerTest {
@@ -51,7 +52,19 @@ class GlobalExceptionHandlerTest {
                 AwsErrorDetails.builder().errorCode("312").errorMessage("uh oh").build())
             .build();
 
-    ResponseEntity<String> result = globalExceptionHandler.handleAwsErrors(exception);
+    ResponseEntity<String> result = globalExceptionHandler.handleAwsServiceErrors(exception);
+
+    assertThat(result).isNotNull();
+    assertThat(result.getStatusCode()).isEqualTo(INTERNAL_SERVER_ERROR);
+    assertThat(result.getBody()).isNotNull();
+    assertThat(result.getBody()).isEqualTo("Failed to upload report.");
+  }
+
+  @Test
+  void handleAwsClientException_returnsInternalServerErrorStatusAndErrorMessage() {
+    var exception = ApiCallTimeoutException.builder().message("Timed out during upload :(").build();
+
+    ResponseEntity<String> result = globalExceptionHandler.handleAwsClientErrors(exception);
 
     assertThat(result).isNotNull();
     assertThat(result.getStatusCode()).isEqualTo(INTERNAL_SERVER_ERROR);

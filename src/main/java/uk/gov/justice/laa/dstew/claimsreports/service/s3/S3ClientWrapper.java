@@ -11,6 +11,7 @@ import software.amazon.awssdk.services.s3.S3Client;
 import software.amazon.awssdk.services.s3.model.PutObjectRequest;
 import uk.gov.justice.laa.dstew.claimsreports.config.MetricsHandler;
 import uk.gov.justice.laa.dstew.claimsreports.config.PrometheusConfiguration.CustomMetricId;
+import uk.gov.justice.laa.dstew.claimsreports.config.S3Timeouts;
 import uk.gov.justice.laa.dstew.claimsreports.exception.CsvUploadException;
 import uk.gov.justice.laa.dstew.claimsreports.service.CsvFileValidator;
 
@@ -37,8 +38,9 @@ public class S3ClientWrapper {
       String s3Bucket,
       MetricsHandler metricsHandler,
       CsvFileValidator csvFileValidator,
-      Boolean uploadUtf8FailuresToS3) {
-    this.s3Client = new S3ClientFactory().createS3Client(awsRegion);
+      Boolean uploadUtf8FailuresToS3,
+      S3Timeouts s3Timeouts) {
+    this.s3Client = new S3ClientFactory(s3Timeouts).createS3Client(awsRegion);
     this.s3Bucket = s3Bucket;
     this.metricsHandler = metricsHandler;
     this.csvFileValidator = csvFileValidator;
