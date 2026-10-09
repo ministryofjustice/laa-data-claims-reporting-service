@@ -24,12 +24,6 @@ public class S3ClientFactory {
    */
   public S3Client createS3Client(String awsRegion) {
     // By default, AWS does not time out API calls. Set some to avoid any risk of calls hanging
-    var httpClient =
-        Apache5HttpClient.builder()
-            .connectionTimeout(Duration.ofSeconds(s3Timeouts.connection()))
-            .socketTimeout(Duration.ofSeconds(s3Timeouts.socket()))
-            .build();
-
     var config =
         ClientOverrideConfiguration.builder()
             .apiCallAttemptTimeout(Duration.ofSeconds(s3Timeouts.apiCallAttempt()))
@@ -37,7 +31,10 @@ public class S3ClientFactory {
             .build();
 
     return S3Client.builder()
-        .httpClient(httpClient)
+        .httpClientBuilder(
+            Apache5HttpClient.builder()
+                .connectionTimeout(Duration.ofSeconds(s3Timeouts.connection()))
+                .socketTimeout(Duration.ofSeconds(s3Timeouts.socket())))
         .region(Region.of(awsRegion))
         .overrideConfiguration(config)
         .build();

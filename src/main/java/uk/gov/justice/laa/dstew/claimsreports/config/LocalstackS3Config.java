@@ -57,17 +57,15 @@ public class LocalstackS3Config {
         .credentialsProvider(
             StaticCredentialsProvider.create(AwsBasicCredentials.create(accessKey, secretKey)))
         .serviceConfiguration(S3Configuration.builder().pathStyleAccessEnabled(true).build())
-        .httpClient(localstackHttpClient(s3Timeouts))
+        .httpClientBuilder(localstackHttpClientBuilder(s3Timeouts))
         .overrideConfiguration(localstackOverrideConfiguration(s3Timeouts))
         .build();
   }
 
-  Apache5HttpClient localstackHttpClient(S3Timeouts s3Timeouts) {
-    return (Apache5HttpClient)
-        Apache5HttpClient.builder()
-            .connectionTimeout(Duration.ofSeconds(s3Timeouts.connection()))
-            .socketTimeout(Duration.ofSeconds(s3Timeouts.socket()))
-            .build();
+  Apache5HttpClient.Builder localstackHttpClientBuilder(S3Timeouts s3Timeouts) {
+    return Apache5HttpClient.builder()
+        .connectionTimeout(Duration.ofSeconds(s3Timeouts.connection()))
+        .socketTimeout(Duration.ofSeconds(s3Timeouts.socket()));
   }
 
   ClientOverrideConfiguration localstackOverrideConfiguration(S3Timeouts s3Timeouts) {

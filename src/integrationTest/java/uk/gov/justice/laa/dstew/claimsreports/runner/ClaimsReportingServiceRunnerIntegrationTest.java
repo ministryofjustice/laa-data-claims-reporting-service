@@ -8,6 +8,7 @@ import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.nio.file.StandardCopyOption;
+import java.time.Duration;
 import java.time.LocalDate;
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -94,6 +95,15 @@ class ClaimsReportingServiceRunnerIntegrationTest extends IntegrationTestBase {
               .delete(d -> d.objects(objects))
               .build());
     }
+  }
+
+  @Test
+  void shouldConfigureS3ClientWithTimeouts() {
+    assertThat(
+            s3Client.serviceClientConfiguration().overrideConfiguration().apiCallAttemptTimeout())
+        .contains(Duration.ofSeconds(60));
+    assertThat(s3Client.serviceClientConfiguration().overrideConfiguration().apiCallTimeout())
+        .contains(Duration.ofSeconds(180));
   }
 
   @Test
